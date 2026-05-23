@@ -130,7 +130,7 @@ void sendDataWS() {
 void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
   switch (type) {
     case WStype_CONNECTED:
-      ledFlash(); ledFlash();  // FIX 1: non-blocking, aman di event handler
+      ledFlash();  // FIX 1: non-blocking, aman di event handler
       break;
     case WStype_DISCONNECTED:
       break;
@@ -151,7 +151,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   ledOff();
 
-  Serial.begin(115200)  // Fix#52: match UNO baud rate;
+  Serial.begin(115200); // Fix#52: match UNO baud rate
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
