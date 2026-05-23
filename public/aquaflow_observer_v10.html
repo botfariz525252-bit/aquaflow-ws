@@ -12,9 +12,11 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;}
+
+/* ===== HEADER ===== */
 .header{background:linear-gradient(135deg,#070c1a,#0c1528);border-bottom:2px solid var(--cyan);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 .header-left{display:flex;align-items:center;gap:12px;}
-.header h1{font-size:15px;font-weight:bold;letter-spacing:2px;color:var(--cyan);}
+.header h1{font-size:15px;font-weight:bold;letter-spacing:2px;color:var(--cyan);text-shadow:0 0 12px rgba(0,212,180,0.4);}
 .header p{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:1px;}
 .badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;letter-spacing:1px;margin-left:5px;}
 .badge-green{background:#052e1c;color:var(--green);border:1px solid #10b981;}
@@ -22,163 +24,111 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .badge-blue{background:#0a1a35;color:var(--blue);border:1px solid var(--blue);}
 .badge-red{background:#2a0a0a;color:var(--red);border:1px solid var(--red);}
 .badge-purple{background:#1a0f35;color:var(--purple);border:1px solid var(--purple);}
+.badge-hw{background:#0d1f10;color:#4ade80;border:1px solid #22c55e;animation:pulse-glow 2s infinite;}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 4px rgba(74,222,128,0.3)}50%{box-shadow:0 0 10px rgba(74,222,128,0.7)}}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-nav-btn{padding:5px 13px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:monospace;font-size:9px;letter-spacing:1px;text-decoration:none;cursor:pointer;transition:all 0.2s;}
+.header-nav-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 
-/* === CONNECTION BAR === */
+/* ===== CONNECTION BAR ===== */
 .conn-bar{background:#0a0f1e;border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.conn-dot{width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;}
+.conn-dot{width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;transition:background 0.3s;}
 .conn-dot.online{background:var(--green);box-shadow:0 0 8px var(--green);}
 .conn-dot.connecting{background:var(--yellow);animation:blink 0.8s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.conn-label{font-size:10px;letter-spacing:1px;}
+.conn-label{font-size:10px;letter-spacing:1px;transition:color 0.3s;}
 .conn-label.online{color:var(--green);}
 .conn-label.offline{color:var(--red);}
 .conn-label.connecting{color:var(--yellow);}
-.conn-url-input{background:#0d1520;border:1px solid var(--border);border-radius:4px;padding:4px 10px;color:var(--cyan);font-family:monospace;font-size:11px;width:260px;outline:none;}
+.conn-url-input{background:#0d1520;border:1px solid var(--border);border-radius:4px;padding:4px 10px;color:var(--cyan);font-family:monospace;font-size:11px;width:260px;outline:none;transition:border-color 0.2s;}
 .conn-url-input:focus{border-color:var(--cyan);}
-.btn-conn{padding:4px 14px;border-radius:4px;cursor:pointer;font-size:10px;letter-spacing:1px;font-family:monospace;border:1px solid var(--cyan);background:transparent;color:var(--cyan);}
+.btn-conn{padding:4px 14px;border-radius:4px;cursor:pointer;font-size:10px;letter-spacing:1px;font-family:monospace;border:1px solid var(--cyan);background:transparent;color:var(--cyan);transition:all 0.2s;}
 .btn-conn:hover{background:var(--cyan);color:#000;}
 .btn-conn.active{background:var(--red);border-color:var(--red);color:#fff;}
 .conn-esp{font-size:10px;color:var(--muted);}
 .conn-esp.online{color:var(--green);}
+.conn-rate{font-size:9px;color:var(--muted);margin-left:auto;}
 
-/* === LAYOUT === */
+/* ===== LAYOUT ===== */
 .main{padding:14px 16px;}
 .row{display:grid;gap:12px;margin-bottom:12px;}
 .row-stats{grid-template-columns:repeat(6,1fr);}
 .row-charts{grid-template-columns:1fr 340px;}
 .row-bottom{grid-template-columns:1fr 1fr 1fr;}
-.row-full{grid-template-columns:1fr;}
-@media(max-width:1100px){.row-stats{grid-template-columns:repeat(3,1fr);}.row-charts{grid-template-columns:1fr;}.row-bottom{grid-template-columns:1fr;}}
+.row-at{grid-template-columns:1fr;}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;}
-.card-title{font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
-.card-title span{display:flex;align-items:center;gap:5px;}
-.stat-val{font-size:32px;font-weight:bold;margin-bottom:6px;}
-.stat-unit{font-size:10px;color:var(--muted);}
-.prog-bar{height:3px;background:#1a2a3a;border-radius:2px;overflow:hidden;margin-top:6px;}
-.prog-fill{height:100%;border-radius:2px;transition:width 0.3s ease;}
-.fill-cyan{background:var(--cyan);}
-.fill-yellow{background:var(--yellow);}
-.fill-green{background:var(--green);}
-.fill-red{background:var(--red);}
-.fill-purple{background:var(--purple);}
-.fill-blue{background:var(--blue);}
+/* ===== STAT BOXES ===== */
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;position:relative;overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s;}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--cyan));opacity:0.6;}
+.stat-box:hover{border-color:var(--accent,var(--cyan));box-shadow:0 0 12px rgba(0,212,180,0.08);}
+.stat-label{font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:bold;transition:color 0.3s;}
+.stat-unit{font-size:9px;color:var(--muted);}
+.stat-sub{font-size:8px;color:var(--muted);margin-top:3px;}
 
-/* === CHART === */
-.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;}
-.chart-title{font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;}
-.legend{display:flex;gap:10px;font-size:9px;flex-wrap:wrap;}
-.leg{display:flex;align-items:center;gap:4px;}
-.dot{width:12px;height:3px;border-radius:2px;}
-
-/* === OBSERVER PANEL === */
-.observer-panel{background:#070d1a;border:1px solid #1a3a6a;border-radius:10px;padding:14px;}
-.obs-title{font-size:9px;letter-spacing:3px;color:var(--blue);margin-bottom:12px;}
-.obs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.obs-item{background:#0a1525;border-radius:6px;padding:8px 10px;}
-.obs-label{font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;}
-.obs-val{font-size:15px;font-weight:bold;color:var(--blue);}
-.obs-val.good{color:var(--green);}
-.obs-val.warn{color:var(--yellow);}
-.obs-val.bad{color:var(--red);}
-.conf-bar-wrap{background:#0a1525;border-radius:6px;padding:8px 10px;margin-bottom:8px;}
-.conf-bar-bg{height:6px;background:#1a2a3a;border-radius:3px;margin-top:5px;}
-.conf-bar-fg{height:100%;border-radius:3px;background:var(--blue);transition:width 0.5s ease;}
-
-/* === PREDICTION PANEL === */
-.pred-panel{background:#070d1a;border:1px solid #1a3a6a;border-radius:10px;padding:14px;}
-.pred-title{font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:10px;}
-.pred-horizons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
-.pred-hz{background:#0a1525;border-radius:6px;padding:8px;text-align:center;}
-.pred-hz-label{font-size:8px;color:var(--muted);letter-spacing:1px;}
-.pred-hz-val{font-size:16px;font-weight:bold;color:var(--cyan);margin-top:3px;}
-.pred-hz-unit{font-size:8px;color:var(--muted);}
-.pred-accuracy{background:#0a1525;border-radius:6px;padding:8px 10px;}
-.pred-acc-label{font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;}
-.pred-acc-val{font-size:13px;font-weight:bold;color:var(--green);}
-
-/* === ANOMALY LOG === */
-.anomaly-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;}
-.anomaly-list{max-height:180px;overflow-y:auto;margin-top:8px;}
-.anomaly-row{display:flex;gap:8px;padding:5px 8px;border-radius:4px;margin-bottom:3px;font-size:10px;align-items:flex-start;}
-.anomaly-hi{background:#1a0505;border-left:3px solid var(--red);}
-.anomaly-med{background:#1a1005;border-left:3px solid var(--yellow);}
-.anomaly-lo{background:#05101a;border-left:3px solid var(--blue);}
-.anomaly-time{color:var(--muted);min-width:55px;font-size:9px;}
-.anomaly-msg{color:var(--text);flex:1;line-height:1.5;}
-
-/* === DATA LOG TABLE === */
-.data-log-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;}
-.data-log-table{width:100%;border-collapse:collapse;font-size:10px;margin-top:8px;}
-.data-log-table th{background:#0a1220;color:var(--muted);padding:5px 8px;text-align:left;letter-spacing:1px;font-size:9px;border-bottom:1px solid var(--border);}
-.data-log-table td{padding:4px 8px;border-bottom:1px solid #0d1520;color:var(--text);}
-.data-log-table tr:hover td{background:#0f1a2a;}
-.data-log-wrap{max-height:200px;overflow-y:auto;}
-.btn-export{padding:5px 14px;border-radius:5px;cursor:pointer;font-size:10px;letter-spacing:1px;font-family:monospace;border:1px solid var(--green);background:transparent;color:var(--green);}
-.btn-export:hover{background:var(--green);color:#000;}
-.btn-clear{padding:5px 14px;border-radius:5px;cursor:pointer;font-size:10px;letter-spacing:1px;font-family:monospace;border:1px solid var(--border);background:transparent;color:var(--muted);}
-.btn-clear:hover{border-color:var(--red);color:var(--red);}
-
-/* === SIM SHADOW PANEL === */
-.sim-shadow-panel{background:#0a0714;border:1px solid #2a1a5a;border-radius:10px;padding:14px;}
-.sim-shadow-title{font-size:9px;letter-spacing:3px;color:var(--purple);margin-bottom:10px;}
-.shadow-status{font-size:10px;color:var(--muted);margin-bottom:8px;padding:6px 10px;background:#130a24;border-radius:6px;}
-.shadow-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
-.shadow-item{background:#130a24;border-radius:6px;padding:8px 10px;}
-.shadow-label{font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;}
-.shadow-val{font-size:14px;font-weight:bold;color:var(--purple);}
-
-/* === RECORD COUNT === */
-.rec-count{font-size:9px;color:var(--muted);background:#0d1520;padding:2px 8px;border-radius:3px;}
-
-/* === SCROLLBAR === */
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-thumb{background:#1a2a3a;border-radius:2px;}
-::-webkit-scrollbar-track{background:transparent;}
-
-/* === KV ROW === */
-.kv{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0d1520;font-size:11px;}
+/* ===== CARDS ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color 0.3s;}
+.card-title{font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;justify-content:space-between;}
+.kv{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0f1825;font-size:11px;}
+.kv:last-child{border-bottom:none;}
 .kv-label{color:var(--muted);}
-.kv-val{font-weight:bold;color:var(--text);}
+canvas{width:100%;display:block;}
+.chart-wrap{background:#080c14;border:1px solid var(--border);border-radius:8px;padding:12px;transition:border-color 0.3s;}
+.chart-wrap:hover{border-color:#1e3a4a;}
+.chart-title{font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+.legend{display:flex;gap:12px;font-size:9px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:4px;}
+.dot{width:8px;height:8px;border-radius:50%;}
 
-/* === LCD === */
-.lcd{background:#0d1a0d;border:1px solid #1a3a1a;border-radius:5px;padding:8px 12px;font-family:'Courier New',monospace;font-size:12px;color:#80ff80;letter-spacing:1px;line-height:1.9;}
-.lcd-row{min-height:18px;white-space:pre;}
+/* ===== LCD ===== */
+.lcd{background:#0a1a0a;border:2px solid #0d3a0d;border-radius:8px;padding:10px 14px;font-size:12px;color:#33ff33;text-shadow:0 0 6px rgba(51,255,51,0.5);font-family:'Courier New',monospace;letter-spacing:1px;line-height:1.9;box-shadow:inset 0 0 20px rgba(0,0,0,0.5),0 0 10px rgba(51,255,51,0.05);}
+.lcd-row{white-space:pre;}
 
-/* === PHASE BADGE === */
-.phase-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;letter-spacing:1px;}
-.ph-observe{background:#0a1a35;color:var(--blue);}
-.ph-learning{background:#1a1a05;color:var(--yellow);}
-.ph-predicting{background:#052e1c;color:var(--green);}
-.ph-alarm{background:#2a0a0a;color:var(--red);}
-.ph-wait{background:#1a1a1a;color:var(--muted);}
-
-/* === TABS MINI === */
-.mini-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:10px;}
-.mini-tab{padding:6px 12px;font-size:9px;letter-spacing:1px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
-.mini-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
-.mini-page{display:none;}
-.mini-page.active{display:block;}
-
-/* === AUTOTUNE RECOMMENDATION PANEL === */
-.autotune-panel{background:#070d1a;border:2px solid var(--cyan);border-radius:10px;padding:14px;margin-bottom:12px;}
-.autotune-title{font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
-.at-methods{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
-.at-method{background:#0a1525;border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all 0.2s;}
-.at-method:hover{border-color:var(--cyan);}
-.at-method.selected{border-color:var(--cyan);background:#0d1e35;}
-.at-method-name{font-size:9px;letter-spacing:1px;color:var(--cyan);margin-bottom:6px;}
+/* ===== AT METHODS ===== */
+.at-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.at-method{background:#0a1525;border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all 0.2s;position:relative;}
+.at-method:hover{border-color:var(--cyan);background:#0d1b2e;}
+.at-method.selected{border-color:var(--cyan);background:#071a28;box-shadow:0 0 12px rgba(0,212,180,0.15);}
+.at-method.selected::after{content:'✓';position:absolute;top:6px;right:8px;color:var(--cyan);font-size:11px;font-weight:bold;}
+.at-method-name{font-size:10px;letter-spacing:1px;color:var(--text);margin-bottom:3px;font-weight:bold;}
 .at-method-desc{font-size:8px;color:var(--muted);line-height:1.5;}
+.at-mode-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:7px;letter-spacing:1px;margin-top:4px;font-weight:bold;}
+.at-mode-pi{background:#0a1a35;color:var(--blue);border:1px solid var(--blue);}
+.at-mode-pid{background:#0d1a0d;color:var(--green);border:1px solid var(--green);}
+.at-mode-hw{background:#0d1a0a;color:#4ade80;border:1px solid #22c55e;}
+
 .at-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
 .at-result-box{background:#0a1525;border-radius:8px;padding:10px;}
 .at-result-title{font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
 .at-kv{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid #0d1520;}
 .at-kv-label{color:var(--muted);}
 .at-kv-val{font-weight:bold;}
-.at-sim-result{background:#051a0a;border:1px solid #0a3a1a;border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:10px;}
+.at-sim-result{background:#051a0a;border:1px solid #0a3a1a;border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:10px;transition:all 0.3s;}
 .at-sim-ok{color:var(--green);}
 .at-sim-warn{color:var(--yellow);}
 .at-sim-bad{color:var(--red);}
+
+/* ===== PUSH SECTION ===== */
+.push-mode-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+.push-tab{flex:1;padding:7px;text-align:center;font-size:9px;letter-spacing:1px;cursor:pointer;background:#0a1020;color:var(--muted);transition:all 0.2s;border:none;font-family:monospace;}
+.push-tab.active{background:var(--cyan);color:#000;font-weight:bold;}
+.push-tab:hover:not(.active){background:#0f1a30;color:var(--text);}
+
+.push-online-panel,.push-offline-panel{display:none;}
+.push-online-panel.active,.push-offline-panel.active{display:block;}
+
+.offline-cmd-box{background:#0d1520;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:10px;}
+.offline-cmd-title{font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+.offline-cmd-line{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #0f1825;}
+.offline-cmd-line:last-child{border-bottom:none;}
+.offline-cmd-key{color:var(--muted);font-size:9px;}
+.offline-cmd-val{color:var(--cyan);font-size:11px;font-weight:bold;font-family:'Courier New',monospace;letter-spacing:1px;}
+.offline-cmd-full{background:#050d18;border:1px dashed #1a3a4a;border-radius:4px;padding:8px 10px;font-size:10px;color:var(--cyan);font-family:'Courier New',monospace;word-break:break-all;cursor:pointer;transition:background 0.2s;}
+.offline-cmd-full:hover{background:#071525;}
+.offline-copy-btn{width:100%;padding:7px;border-radius:5px;border:1px solid var(--muted);background:transparent;color:var(--muted);font-family:monospace;font-size:9px;letter-spacing:1px;cursor:pointer;margin-top:6px;transition:all 0.2s;}
+.offline-copy-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.offline-copy-btn.copied{border-color:var(--green);color:var(--green);}
+
 .btn-autotune{padding:7px 16px;border-radius:6px;cursor:pointer;font-size:10px;letter-spacing:1px;font-family:monospace;border:1px solid var(--cyan);background:transparent;color:var(--cyan);transition:all 0.2s;}
 .btn-autotune:hover{background:var(--cyan);color:#000;}
 .btn-autotune:disabled{opacity:0.3;cursor:not-allowed;}
@@ -189,13 +139,58 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .btn-push.danger:hover{background:var(--red);color:#fff;}
 .push-confirm{background:#051a0a;border:1px solid var(--green);border-radius:6px;padding:8px 12px;margin-top:8px;font-size:10px;display:none;}
 .push-log{background:#050d05;border-radius:5px;padding:6px 10px;max-height:80px;overflow-y:auto;font-size:9px;color:var(--green);margin-top:6px;line-height:1.8;}
-.conf-required{font-size:9px;color:var(--muted);padding:10px;text-align:center;}
+.conf-required{font-size:9px;color:var(--muted);padding:16px;text-align:center;background:#080c14;border-radius:8px;}
 .at-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:8px;letter-spacing:1px;margin-left:4px;}
 .at-badge-new{background:#052e1c;color:var(--green);border:1px solid var(--green);}
 .at-badge-cur{background:#1a1a05;color:var(--yellow);border:1px solid var(--yellow);}
 .improvement-bar{height:4px;background:#1a2a3a;border-radius:2px;margin-top:4px;}
 .improvement-fill{height:100%;border-radius:2px;background:var(--green);transition:width 0.5s;}
 
+/* ===== ANOMALY ===== */
+.anomaly-log{max-height:120px;overflow-y:auto;font-size:10px;line-height:1.8;}
+.anom-entry{padding:3px 8px;border-radius:4px;margin-bottom:3px;}
+.anom-warn{background:#1a1200;color:var(--yellow);border-left:3px solid var(--yellow);}
+.anom-error{background:#1a0505;color:var(--red);border-left:3px solid var(--red);}
+
+/* ===== LOG TABLE ===== */
+.log-table{width:100%;border-collapse:collapse;font-size:9px;}
+.log-table th{color:var(--muted);padding:4px 6px;text-align:left;border-bottom:1px solid var(--border);letter-spacing:1px;position:sticky;top:0;background:var(--card);}
+.log-table td{padding:3px 6px;border-bottom:1px solid #0a1020;color:var(--text);}
+.log-table tr:hover td{background:#0d1525;}
+.log-wrap{max-height:200px;overflow-y:auto;}
+
+/* ===== MISC ===== */
+.btn-sm{padding:4px 10px;border-radius:4px;cursor:pointer;font-size:9px;letter-spacing:1px;font-family:monospace;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;}
+.btn-sm:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn-export{padding:5px 12px;border-radius:4px;cursor:pointer;font-size:9px;letter-spacing:1px;font-family:monospace;border:1px solid var(--green);background:transparent;color:var(--green);transition:all 0.2s;}
+.btn-export:hover{background:var(--green);color:#000;}
+.btn-clear{padding:5px 10px;border-radius:4px;cursor:pointer;font-size:9px;letter-spacing:1px;font-family:monospace;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;}
+.btn-clear:hover{border-color:var(--red);color:var(--red);}
+.rec-count{font-size:9px;color:var(--muted);padding:2px 8px;background:#0a1020;border-radius:4px;}
+.section-title{font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.divider{border:none;border-top:1px solid var(--border);margin:12px 0;}
+
+/* ===== WINDOW CONTROL ===== */
+.window-btns{display:flex;gap:4px;}
+.w-btn{padding:3px 8px;border-radius:3px;cursor:pointer;font-size:8px;letter-spacing:1px;font-family:monospace;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;}
+.w-btn.active{background:var(--cyan);border-color:var(--cyan);color:#000;}
+.w-btn:hover:not(.active){border-color:var(--cyan);color:var(--cyan);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:#2a3a4a;}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn 0.3s ease;}
+
+@media(max-width:900px){
+  .row-stats{grid-template-columns:repeat(3,1fr);}
+  .row-charts{grid-template-columns:1fr;}
+  .row-bottom{grid-template-columns:1fr;}
+  .at-methods{grid-template-columns:1fr;}
+  .at-results{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -204,14 +199,17 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 <div class="header">
   <div class="header-left">
     <div>
-      <h1>AQUAFLOW v10 <span class="badge badge-blue">OBSERVER</span> <span class="badge badge-green">REAL-TIME</span> <span class="badge badge-purple">PREDICTOR</span></h1>
-      <p>Nikuma 4949 · Tangki 10L · Real-Time Plant Observer + Shadow Simulator + Predictive Engine</p>
+      <h1>AQUAFLOW <span style="color:var(--text)">v10</span>
+        <span class="badge badge-blue">OBSERVER</span>
+        <span class="badge badge-green">REAL-TIME</span>
+      </h1>
+      <p>Real-Time Observer · Plant Identifier · Predictor · Auto-Tuner · Digital Twin</p>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-    <a href="/index.html" style="font-size:9px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:3px 10px;border-radius:4px;">← DASHBOARD</a>
-    <span id="recCountBadge" class="rec-count">0 records</span>
-    <span id="clockEl" style="font-size:10px;color:var(--muted);"></span>
+  <div class="header-right">
+    <a href="/index.html" class="header-nav-btn">🏠 DASHBOARD</a>
+    <div id="espBadge" class="badge badge-red">ESP OFFLINE</div>
+    <span id="dataRateBadge" style="font-size:9px;color:var(--muted);padding:2px 8px;background:#0a1020;border-radius:4px;">0.0 Hz</span>
   </div>
 </div>
 
@@ -219,98 +217,204 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 <div class="conn-bar">
   <div class="conn-dot" id="connDot"></div>
   <span class="conn-label offline" id="connLabel">DISCONNECTED</span>
-  <input class="conn-url-input" id="wsUrlInput" type="text" placeholder="ws://localhost:3000 atau URL Railway" value="">
+  <input class="conn-url-input" id="wsUrlInput" placeholder="ws://192.168.x.x  (kosong = auto)" />
   <button class="btn-conn" id="btnConn" onclick="toggleConnect()">CONNECT</button>
-  <span class="conn-esp" id="espStatus">ESP: —</span>
-  <span style="font-size:9px;color:var(--muted);margin-left:8px;" id="lastDataTime"></span>
+  <span class="conn-esp" id="connEsp">· ESP: <span id="espOnlineBadge" style="color:var(--red)">OFFLINE</span></span>
+  <span class="conn-rate" id="connRate">Data: 0 pts · 0.0 Hz</span>
 </div>
 
 <!-- ===== MAIN ===== -->
 <div class="main">
 
-  <!-- Row 1: Stats -->
-  <div class="row row-stats">
-    <!-- PV -->
-    <div class="card">
-      <div class="card-title"><span>📊 PV LEVEL</span><span style="color:var(--cyan)" id="pvTrend">—</span></div>
-      <div class="stat-val" id="pvVal" style="color:var(--cyan)">—.—</div>
+  <!-- ROW 1: STAT BOXES -->
+  <div class="row row-stats" style="margin-bottom:12px;">
+    <div class="stat-box" style="--accent:var(--cyan)">
+      <div class="stat-label">PV LEVEL</div>
+      <div class="stat-val" id="sPV" style="color:var(--cyan)">—</div>
       <div class="stat-unit">%</div>
-      <div class="prog-bar"><div class="prog-fill fill-cyan" id="pvBar" style="width:0%"></div></div>
+      <div class="stat-sub" id="sPVTrend">—</div>
     </div>
-    <!-- SP -->
-    <div class="card">
-      <div class="card-title"><span>🎯 SETPOINT</span></div>
-      <div class="stat-val" id="spVal" style="color:var(--yellow)">—.—</div>
+    <div class="stat-box" style="--accent:var(--yellow)">
+      <div class="stat-label">SETPOINT</div>
+      <div class="stat-val" id="sSP" style="color:var(--yellow)">—</div>
       <div class="stat-unit">%</div>
-      <div class="prog-bar"><div class="prog-fill fill-yellow" id="spBar" style="width:0%"></div></div>
     </div>
-    <!-- OUT -->
-    <div class="card">
-      <div class="card-title"><span>⚡ PUMP OUT</span></div>
-      <div class="stat-val" id="outVal" style="color:var(--green)">—</div>
+    <div class="stat-box" style="--accent:var(--green)">
+      <div class="stat-label">PUMP OUT</div>
+      <div class="stat-val" id="sOUT" style="color:var(--green)">—</div>
       <div class="stat-unit">%</div>
-      <div class="prog-bar"><div class="prog-fill fill-green" id="outBar" style="width:0%"></div></div>
     </div>
-    <!-- MODE -->
-    <div class="card">
-      <div class="card-title"><span>🔧 MODE</span></div>
-      <div class="stat-val" style="font-size:22px;" id="modeVal" style="color:var(--text)">—</div>
-      <div style="margin-top:6px;" id="phaseEl"><span class="phase-badge ph-wait">WAITING</span></div>
-    </div>
-    <!-- Error -->
-    <div class="card">
-      <div class="card-title"><span>📉 ERROR (SP-PV)</span></div>
-      <div class="stat-val" id="errVal" style="color:var(--orange)">—.—</div>
+    <div class="stat-box" style="--accent:var(--red)">
+      <div class="stat-label">ERROR (SP-PV)</div>
+      <div class="stat-val" id="sERR" style="color:var(--red)">—</div>
       <div class="stat-unit">%</div>
-      <div class="prog-bar"><div class="prog-fill fill-red" id="errBar" style="width:0%"></div></div>
     </div>
-    <!-- Kp/Ki -->
+    <div class="stat-box" style="--accent:var(--blue)">
+      <div class="stat-label">MODE</div>
+      <div class="stat-val" id="sMODE" style="color:var(--blue);font-size:14px">—</div>
+      <div class="stat-sub" id="sRUNNING">—</div>
+    </div>
+    <div class="stat-box" style="--accent:var(--purple)">
+      <div class="stat-label">OBSERVE TIME</div>
+      <div class="stat-val" id="sOBST" style="color:var(--purple);font-size:16px">—</div>
+      <div class="stat-sub" id="sDataCount">0 pts</div>
+    </div>
+  </div>
+
+  <!-- ROW 2: CHARTS -->
+  <div class="row row-charts">
+
+    <!-- Main chart -->
+    <div class="chart-wrap">
+      <div class="chart-title">
+        <span>📈 REAL-TIME PV / SP / OUT + PREDIKSI</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="window-btns">
+            <button class="w-btn active" onclick="changeWindow(60)" id="w60">1m</button>
+            <button class="w-btn" onclick="changeWindow(120)" id="w120">2m</button>
+            <button class="w-btn" onclick="changeWindow(300)" id="w300">5m</button>
+          </div>
+          <div class="legend">
+            <div class="leg"><div class="dot" style="background:var(--cyan)"></div><span>PV</span></div>
+            <div class="leg"><div class="dot" style="background:var(--yellow)"></div><span>SP</span></div>
+            <div class="leg"><div class="dot" style="background:var(--green)"></div><span>OUT</span></div>
+            <div class="leg"><div class="dot" style="background:rgba(167,139,250,0.8)"></div><span>Pred</span></div>
+          </div>
+        </div>
+      </div>
+      <canvas id="mainChart" height="180"></canvas>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- Plant Observer -->
+      <div class="card">
+        <div class="card-title">🔬 PLANT OBSERVER</div>
+        <div class="kv"><span class="kv-label">Confidence</span><span id="obsConf" style="color:var(--cyan);font-weight:bold">0%</span></div>
+        <div class="kv"><span class="kv-label">Plant Gain (K)</span><span id="obsK" style="color:var(--text)">—</span></div>
+        <div class="kv"><span class="kv-label">Dead Time (L)</span><span id="obsL" style="color:var(--text)">—</span></div>
+        <div class="kv"><span class="kv-label">Outflow Est.</span><span id="obsOf" style="color:var(--text)">—</span></div>
+        <div class="kv"><span class="kv-label">PV Rate</span><span id="obsPVRate" style="color:var(--text)">—</span></div>
+      </div>
+
+      <!-- Predictor -->
+      <div class="card">
+        <div class="card-title">🔮 PREDIKSI +30s</div>
+        <div class="kv"><span class="kv-label">PV Pred</span><span id="predPV" style="color:var(--purple);font-weight:bold">—</span></div>
+        <div class="kv"><span class="kv-label">Band</span><span id="predBand" style="color:var(--muted)">—</span></div>
+        <div class="kv"><span class="kv-label">MAPE</span><span id="predMAPE" style="color:var(--text)">—</span></div>
+        <div class="kv"><span class="kv-label">Trend</span><span id="predTrend" style="color:var(--text)">—</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ROW 3: SHADOW + ANOMALY + LCD + METRICS -->
+  <div class="row row-bottom">
+
+    <!-- Shadow Simulator -->
     <div class="card">
-      <div class="card-title"><span>⚙ PID PARAMS</span></div>
-      <div style="font-size:10px;line-height:2;">
-        <div>Kp <span id="kpVal" style="color:var(--cyan);font-weight:bold">—</span></div>
-        <div>Ki <span id="kiVal" style="color:var(--cyan);font-weight:bold">—</span></div>
-        <div>Kd <span id="kdVal" style="color:var(--cyan);font-weight:bold">—</span></div>
+      <div class="card-title">👻 SHADOW SIMULATOR (DIGITAL TWIN)
+        <span id="shadowSyncBadge" class="badge badge-yellow">BOOTSTRAPPING</span>
+      </div>
+      <div class="chart-wrap" style="padding:8px;margin-bottom:8px;">
+        <div class="chart-title"><span>SHADOW SIM vs REAL PV</span></div>
+        <canvas id="shadowChart" height="100"></canvas>
+      </div>
+      <div class="kv"><span class="kv-label">Real PV</span><span id="shadowRealPV" style="color:var(--cyan)">—</span></div>
+      <div class="kv"><span class="kv-label">Shadow PV</span><span id="shadowSimPV" style="color:var(--purple)">—</span></div>
+      <div class="kv"><span class="kv-label">Divergence</span><span id="shadowDiverg" style="color:var(--text)">—</span></div>
+    </div>
+
+    <!-- Anomaly -->
+    <div class="card">
+      <div class="card-title">🚨 ANOMALY DETECTOR
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span id="anomCountBadge" style="font-size:8px;color:var(--muted);padding:2px 7px;background:#0a1020;border-radius:4px;">0 events</span>
+          <button class="btn-clear" onclick="clearAnomalies()">CLEAR</button>
+        </div>
+      </div>
+      <div class="anomaly-log" id="anomalyLog">
+        <div style="color:var(--muted);font-size:10px;text-align:center;padding:10px;">No anomalies detected</div>
+      </div>
+      <hr class="divider"/>
+      <!-- Metrics -->
+      <div class="section-title">📊 METRICS</div>
+      <div class="kv"><span class="kv-label">Pred Accuracy (MAPE)</span><span id="metMAPE" style="color:var(--text)">—</span></div>
+      <div class="kv"><span class="kv-label">Avg |Error|</span><span id="metAvgErr" style="color:var(--text)">—</span></div>
+      <div class="kv"><span class="kv-label">Anomaly Rate</span><span id="metAnomRate" style="color:var(--text)">—</span></div>
+      <div class="kv"><span class="kv-label">Uptime</span><span id="metUptime" style="color:var(--text)">—</span></div>
+    </div>
+
+    <!-- LCD + PID Params -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card">
+        <div class="card-title">🖥 LCD DISPLAY</div>
+        <div class="lcd">
+          <div class="lcd-row" id="lcd0">AQUAFLOW v10        </div>
+          <div class="lcd-row" id="lcd1">Waiting for ESP...  </div>
+          <div class="lcd-row" id="lcd2">                    </div>
+          <div class="lcd-row" id="lcd3">                    </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚙ PID PARAMS (AKTIF DI ESP)</div>
+        <div class="kv"><span class="kv-label">Kp</span><span id="kpVal" style="color:var(--cyan);font-weight:bold">—</span></div>
+        <div class="kv"><span class="kv-label">Ki</span><span id="kiVal" style="color:var(--cyan)">—</span></div>
+        <div class="kv"><span class="kv-label">Kd</span><span id="kdVal" style="color:var(--cyan)">—</span></div>
       </div>
     </div>
   </div>
 
-
-  <!-- ===== AUTOTUNE RECOMMENDATION PANEL ===== -->
-  <div class="row row-full">
-    <div class="autotune-panel" id="atPanel">
-      <div class="autotune-title">
-        <span>🧠 AUTO-TUNE ENGINE — PID RECOMMENDATION FROM PLANT CHARACTERISTICS</span>
+  <!-- ROW 4: AUTO-TUNE ENGINE -->
+  <div class="row row-at">
+    <div class="card" id="atPanel" style="border-color:#1a3a4a;transition:border-color 0.5s;">
+      <div class="card-title" style="margin-bottom:12px;">
+        <span>🧠 AUTO-TUNE ENGINE — REKOMENDASI PID DARI KARAKTERISTIK LOOP</span>
         <span id="atConfBadge" style="font-size:9px;color:var(--muted);">Menunggu confidence ≥ 40%...</span>
       </div>
-      
+
       <!-- Confidence gate -->
       <div id="atGate" class="conf-required">
-        ⏳ Plant observer perlu mengumpulkan data dulu... Confidence saat ini: <span id="atConfGate" style="color:var(--yellow)">0%</span><br>
-        <span style="color:var(--muted);font-size:8px;">Auto-tune aktif saat confidence ≥ 40%</span>
+        ⏳ Plant observer perlu mengumpulkan data dulu...<br>
+        Confidence saat ini: <span id="atConfGate" style="color:var(--yellow)">0%</span><br>
+        <span style="font-size:8px;color:var(--muted);">Auto-tune aktif saat confidence ≥ 40%</span>
       </div>
-      
-      <!-- Main content (hidden until conf >= 40) -->
+
+      <!-- Main AT content -->
       <div id="atContent" style="display:none;">
-        
+
+        <!-- Plant info -->
+        <div style="font-size:9px;color:var(--muted);margin-bottom:10px;padding:6px 10px;background:#080c14;border-radius:5px;border:1px solid var(--border);">
+          <span id="atPlantInfo">Plant: K=? | T≈?s | L=?s</span>
+        </div>
+
         <!-- Method selector -->
-        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">PILIH METODE TUNING:</div>
+        <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">PILIH METODE TUNING:</div>
         <div class="at-methods">
           <div class="at-method selected" id="atM_zn" onclick="selectATMethod('zn')">
-            <div class="at-method-name">📐 ZIEGLER-NICHOLS</div>
+            <div class="at-method-name">📐 ZIEGLER-NICHOLS OL</div>
             <div class="at-method-desc">Dari Kplant + deadtime. Agresif, cocok untuk respons cepat. Overshoot lebih tinggi.</div>
+            <div><span class="at-mode-badge at-mode-pid">PID — Kp+Ki+Kd</span></div>
           </div>
           <div class="at-method" id="atM_imc" onclick="selectATMethod('imc')">
-            <div class="at-method-name">⚗️ IMC (Lambda)</div>
+            <div class="at-method-name">⚗️ IMC LAMBDA</div>
             <div class="at-method-desc">Internal Model Control. Smooth, minim overshoot. Ideal untuk level control.</div>
+            <div><span class="at-mode-badge at-mode-pid">PID — Kp+Ki+Kd</span></div>
           </div>
           <div class="at-method" id="atM_chien" onclick="selectATMethod('chien')">
             <div class="at-method-name">📊 CHIEN-HRONES-RESWICK</div>
-            <div class="at-method-desc">Optimized untuk 0% overshoot. Lebih konservatif dari ZN.</div>
+            <div class="at-method-desc">Optimized untuk 0% overshoot. Lebih konservatif dari ZN. Kd tidak dipakai.</div>
+            <div><span class="at-mode-badge at-mode-pi">PI only — Kd=0</span></div>
           </div>
           <div class="at-method" id="atM_znrelay" onclick="selectATMethod('znrelay')">
             <div class="at-method-name">⚡ ZN RELAY (SHADOW SIM)</div>
-            <div class="at-method-desc">Jalankan relay test di shadow sim menggunakan plant teridentifikasi. Paling akurat — hasil Ku/Pu dari osilasi nyata.</div>
+            <div class="at-method-desc">Relay test di shadow sim pakai plant teridentifikasi. Hasil Ku/Pu dari osilasi nyata.</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+              <span class="at-mode-badge at-mode-pi">PI only — sama seperti ESP</span>
+              <span class="at-mode-badge at-mode-hw">⚡ SAME AS HARDWARE</span>
+            </div>
           </div>
         </div>
 
@@ -321,23 +425,23 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
             <div class="at-kv"><span class="at-kv-label">Kp</span><span class="at-kv-val" id="atCurKp" style="color:var(--yellow)">—</span></div>
             <div class="at-kv"><span class="at-kv-label">Ki</span><span class="at-kv-val" id="atCurKi" style="color:var(--yellow)">—</span></div>
             <div class="at-kv"><span class="at-kv-label">Kd</span><span class="at-kv-val" id="atCurKd" style="color:var(--yellow)">—</span></div>
-            <div class="at-kv"><span class="at-kv-label">Est. Settle Time</span><span class="at-kv-val" id="atCurSettle" style="color:var(--muted)">—</span></div>
+            <div class="at-kv"><span class="at-kv-label">Est. Settle</span><span class="at-kv-val" id="atCurSettle" style="color:var(--muted)">—</span></div>
             <div class="at-kv"><span class="at-kv-label">Est. Overshoot</span><span class="at-kv-val" id="atCurOs" style="color:var(--muted)">—</span></div>
           </div>
-          <div class="at-result-box" style="border-color:var(--cyan);">
+          <div class="at-result-box" style="border:1px solid #1a3a2a;">
             <div class="at-result-title">✨ RECOMMENDED PID <span class="at-badge at-badge-new" id="atMethodLabel">ZN</span></div>
             <div class="at-kv"><span class="at-kv-label">Kp</span><span class="at-kv-val" id="atNewKp" style="color:var(--cyan)">—</span></div>
             <div class="at-kv"><span class="at-kv-label">Ki</span><span class="at-kv-val" id="atNewKi" style="color:var(--cyan)">—</span></div>
-            <div class="at-kv"><span class="at-kv-label">Kd</span><span class="at-kv-val" id="atNewKd" style="color:var(--cyan)">—</span></div>
-            <div class="at-kv"><span class="at-kv-label">Est. Settle Time</span><span class="at-kv-val" id="atNewSettle" style="color:var(--muted)">—</span></div>
+            <div class="at-kv"><span class="at-kv-label">Kd <span id="kdNote" style="color:var(--muted);font-size:7px;"></span></span><span class="at-kv-val" id="atNewKd" style="color:var(--cyan)">—</span></div>
+            <div class="at-kv"><span class="at-kv-label">Est. Settle</span><span class="at-kv-val" id="atNewSettle" style="color:var(--muted)">—</span></div>
             <div class="at-kv"><span class="at-kv-label">Est. Overshoot</span><span class="at-kv-val" id="atNewOs" style="color:var(--muted)">—</span></div>
           </div>
         </div>
 
-        <!-- Scoring & Improvement indicator -->
+        <!-- Scoring & Improvement -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
           <div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px;">ESTIMATED IMPROVEMENT:</div>
+            <div style="font-size:8px;color:var(--muted);margin-bottom:4px;">ESTIMATED IMPROVEMENT:</div>
             <div style="display:flex;gap:12px;font-size:10px;flex-wrap:wrap;" id="atImprovementRow">
               <span>Settle: <span id="atImpSettle" style="color:var(--green)">—</span></span>
               <span>Overshoot: <span id="atImpOs" style="color:var(--green)">—</span></span>
@@ -345,12 +449,12 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
             </div>
           </div>
           <div>
-            <div style="font-size:9px;color:var(--muted);margin-bottom:4px;">RELIABILITY SCORE:</div>
-            <div style="display:flex;gap:8px;font-size:10px;flex-wrap:wrap;">
-              <span id="scoreZN" style="padding:2px 7px;border-radius:4px;background:#0a1525;font-size:9px;color:var(--muted)">ZN OL: —</span>
-              <span id="scoreIMC" style="padding:2px 7px;border-radius:4px;background:#0a1525;font-size:9px;color:var(--muted)">IMC: —</span>
-              <span id="scoreCHR" style="padding:2px 7px;border-radius:4px;background:#0a1525;font-size:9px;color:var(--muted)">CHR: —</span>
-              <span id="scoreZNR" style="padding:2px 7px;border-radius:4px;background:#0a1525;font-size:9px;color:var(--muted)">ZN RELAY: —</span>
+            <div style="font-size:8px;color:var(--muted);margin-bottom:4px;">RELIABILITY SCORE:</div>
+            <div style="display:flex;gap:6px;font-size:9px;flex-wrap:wrap;">
+              <span id="scoreZN" style="padding:2px 7px;border-radius:4px;background:#0a1525;color:var(--muted)">ZN: —</span>
+              <span id="scoreIMC" style="padding:2px 7px;border-radius:4px;background:#0a1525;color:var(--muted)">IMC: —</span>
+              <span id="scoreCHR" style="padding:2px 7px;border-radius:4px;background:#0a1525;color:var(--muted)">CHR: —</span>
+              <span id="scoreZNR" style="padding:2px 7px;border-radius:4px;background:#0a1525;color:var(--muted)">ZN-Relay: —</span>
             </div>
             <div style="font-size:8px;color:var(--muted);margin-top:4px;" id="scoreBestLabel"></div>
           </div>
@@ -362,220 +466,101 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
         </div>
 
         <!-- Action buttons -->
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
           <button class="btn-autotune" id="btnSimCompare" onclick="runATSimCompare()">▶ SIMULATE COMPARISON</button>
-          <button class="btn-push" id="btnPushPID" onclick="showPushConfirm()" disabled>📡 PUSH KE ESP</button>
+          <button class="btn-push" id="btnPushPID" onclick="openPushPanel()" disabled>📡 APPLY KE ESP / MANUAL</button>
           <button class="btn-push danger" id="btnRevertPID" onclick="revertPID()" disabled style="display:none;">↩ REVERT KE PID LAMA</button>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+
+        <!-- Safety toggle -->
+        <div style="margin-bottom:10px;">
           <label style="font-size:9px;color:var(--muted);letter-spacing:1px;display:flex;align-items:center;gap:6px;cursor:pointer;">
             <input type="checkbox" id="safetyToggle" checked style="accent-color:var(--cyan);">
             <span id="safetyLabel" style="color:var(--cyan)">🔒 SAFETY MODE: Konfirmasi sebelum push</span>
           </label>
-          <span style="font-size:9px;color:var(--muted);" id="atPlantInfo"></span>
         </div>
 
-        <!-- Push confirmation -->
-        <div class="push-confirm" id="pushConfirm">
-          <div style="margin-bottom:6px;">⚠️ Konfirmasi: Ini akan mengirim command <code id="pushCmdPreview" style="color:var(--cyan);background:#0d1520;padding:1px 5px;border-radius:3px;"></code> ke ESP via WebSocket.</div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn-push" onclick="confirmPush()">✅ YA, PUSH SEKARANG</button>
-            <button class="btn-autotune" onclick="cancelPush()">BATAL</button>
+        <!-- PUSH PANEL -->
+        <div id="pushPanel" style="display:none;animation:fadeIn 0.3s ease;">
+          <hr class="divider"/>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">📡 APPLY PID — PILIH MODE:</div>
+
+          <!-- Mode tabs -->
+          <div class="push-mode-tabs">
+            <button class="push-tab active" id="tabOnline" onclick="switchPushTab('online')">🌐 ONLINE (Push via WS)</button>
+            <button class="push-tab" id="tabOffline" onclick="switchPushTab('offline')">📋 OFFLINE (Manual Command)</button>
+          </div>
+
+          <!-- Online panel -->
+          <div class="push-online-panel active" id="pushOnlinePanel">
+            <div class="push-confirm" id="pushConfirm">
+              <div style="margin-bottom:6px;">⚠️ Konfirmasi: Kirim <code id="pushCmdPreview" style="color:var(--cyan);background:#0d1520;padding:1px 5px;border-radius:3px;"></code> ke ESP via WebSocket.</div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn-push" onclick="confirmPush()">✅ YA, PUSH SEKARANG</button>
+                <button class="btn-autotune" onclick="cancelPush()">BATAL</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn-push" onclick="showPushConfirm()" id="btnDoPush">📡 PUSH KE ESP</button>
+            </div>
+          </div>
+
+          <!-- Offline panel -->
+          <div class="push-offline-panel" id="pushOfflinePanel">
+            <div class="offline-cmd-box">
+              <div class="offline-cmd-title">NILAI PID YANG AKAN DI-SET:</div>
+              <div class="offline-cmd-line">
+                <span class="offline-cmd-key">Kp</span>
+                <span class="offline-cmd-val" id="offKp">—</span>
+              </div>
+              <div class="offline-cmd-line">
+                <span class="offline-cmd-key">Ki</span>
+                <span class="offline-cmd-val" id="offKi">—</span>
+              </div>
+              <div class="offline-cmd-line">
+                <span class="offline-cmd-key">Kd</span>
+                <span class="offline-cmd-val" id="offKd">—</span>
+              </div>
+            </div>
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">COMMAND STRING (klik untuk copy):</div>
+            <div class="offline-cmd-full" id="offCmdFull" onclick="copyOfflineCmd()">—</div>
+            <button class="offline-copy-btn" id="offCopyBtn" onclick="copyOfflineCmd()">📋 COPY COMMAND</button>
+            <div style="font-size:8px;color:var(--muted);margin-top:8px;padding:6px 8px;background:#080c14;border-radius:4px;line-height:1.7;">
+              💡 Paste command ini ke Serial Monitor Arduino IDE, atau kirim via LCD menu manual.
+            </div>
+          </div>
+
+          <!-- Push log -->
+          <div id="pushLogWrap" style="display:none;margin-top:8px;">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">PUSH LOG:</div>
+            <div class="push-log" id="pushLog"></div>
           </div>
         </div>
 
-        <!-- Push log -->
-        <div id="pushLogWrap" style="display:none;">
-          <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:8px;">PUSH LOG:</div>
-          <div class="push-log" id="pushLog"></div>
-        </div>
-      </div>
+      </div><!-- /atContent -->
     </div>
   </div>
 
-  <!-- Row 2: Main Chart + Observer -->
-  <div class="row row-charts">
-    <!-- Main realtime chart -->
-    <div class="chart-wrap">
-      <div class="chart-title">
-        <span>📈 REAL-TIME PV / SP / OUT + PREDIKSI</span>
-        <div class="legend">
-          <div class="leg"><div class="dot" style="background:var(--cyan)"></div>PV Real</div>
-          <div class="leg"><div class="dot" style="background:var(--yellow)"></div>SP</div>
-          <div class="leg"><div class="dot" style="background:var(--green)"></div>OUT%</div>
-          <div class="leg"><div class="dot" style="background:rgba(167,139,250,0.8);border:1px dashed var(--purple);height:1px"></div>Prediksi</div>
-          <div class="leg"><div class="dot" style="background:rgba(167,139,250,0.2)"></div>Band</div>
-        </div>
-      </div>
-      <canvas id="mainChart" height="220"></canvas>
-      <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:9px;color:var(--muted)">WINDOW:</span>
-        <select id="windowSel" onchange="changeWindow()" style="background:#0d1520;border:1px solid var(--border);color:var(--text);padding:2px 6px;border-radius:3px;font-size:10px;font-family:monospace;">
-          <option value="60">60s</option>
-          <option value="120" selected>2 menit</option>
-          <option value="300">5 menit</option>
-          <option value="600">10 menit</option>
-          <option value="0">Semua</option>
-        </select>
-        <span style="font-size:9px;color:var(--muted);margin-left:8px;">PREDIKSI:</span>
-        <select id="predHorizonSel" style="background:#0d1520;border:1px solid var(--border);color:var(--text);padding:2px 6px;border-radius:3px;font-size:10px;font-family:monospace;">
-          <option value="15">15s</option>
-          <option value="30" selected>30s</option>
-          <option value="60">1 menit</option>
-        </select>
-        <span id="pvRateDisplay" style="font-size:9px;color:var(--muted);margin-left:8px;"></span>
-      </div>
-    </div>
-
-    <!-- Observer + Prediction side panel -->
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <!-- Plant Observer -->
-      <div class="observer-panel">
-        <div class="obs-title">🔬 PLANT OBSERVER</div>
-        <div class="conf-bar-wrap">
-          <div style="display:flex;justify-content:space-between;font-size:9px;">
-            <span style="color:var(--muted)">CONFIDENCE</span>
-            <span id="confVal" style="color:var(--blue);font-weight:bold">0%</span>
-          </div>
-          <div class="conf-bar-bg"><div class="conf-bar-fg" id="confBar" style="width:0%"></div></div>
-        </div>
-        <div class="obs-grid">
-          <div class="obs-item">
-            <div class="obs-label">OUTFLOW EST.</div>
-            <div class="obs-val" id="ofEstVal">— %/s</div>
-          </div>
-          <div class="obs-item">
-            <div class="obs-label">KPLANT (GAIN)</div>
-            <div class="obs-val" id="kplantVal">—</div>
-          </div>
-          <div class="obs-item">
-            <div class="obs-label">DEAD TIME</div>
-            <div class="obs-val" id="dtVal">— s</div>
-          </div>
-          <div class="obs-item">
-            <div class="obs-label">RISE RATE</div>
-            <div class="obs-val" id="riseRateVal">— %/s</div>
-          </div>
-        </div>
-        <div style="font-size:9px;color:var(--muted);text-align:center;padding:4px;" id="obsStatus">Menunggu data dari ESP...</div>
-      </div>
-
-      <!-- Prediction Panel -->
-      <div class="pred-panel">
-        <div class="pred-title">🔮 PREDIKSI</div>
-        <div class="pred-horizons">
-          <div class="pred-hz">
-            <div class="pred-hz-label">+10s</div>
-            <div class="pred-hz-val" id="pred10Val">—</div>
-            <div class="pred-hz-unit">%</div>
-          </div>
-          <div class="pred-hz">
-            <div class="pred-hz-label">+30s</div>
-            <div class="pred-hz-val" id="pred30Val">—</div>
-            <div class="pred-hz-unit">%</div>
-          </div>
-          <div class="pred-hz">
-            <div class="pred-hz-label">+60s</div>
-            <div class="pred-hz-val" id="pred60Val">—</div>
-            <div class="pred-hz-unit">%</div>
-          </div>
-        </div>
-        <div class="pred-accuracy">
-          <div class="pred-acc-label">AKURASI PREDIKSI (MAPE)</div>
-          <div class="pred-acc-val" id="predAccVal">— %</div>
-        </div>
-        <div style="margin-top:8px;font-size:9px;color:var(--muted);" id="predStatus">Confidence < 25% — learning...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Row 3: Shadow Simulator + Anomaly + LCD -->
-  <div class="row row-bottom">
-
-    <!-- Shadow Simulator -->
-    <div class="sim-shadow-panel">
-      <div class="sim-shadow-title">👻 SHADOW SIMULATOR</div>
-      <div class="shadow-status" id="shadowStatus">Menunggu data plant untuk bootstrap simulasi...</div>
-      <div class="shadow-grid">
-        <div class="shadow-item">
-          <div class="shadow-label">SIM PV</div>
-          <div class="shadow-val" id="simPvVal">—</div>
-        </div>
-        <div class="shadow-item">
-          <div class="shadow-label">SIM → REAL DRIFT</div>
-          <div class="shadow-val" id="simDriftVal">—</div>
-        </div>
-        <div class="shadow-item">
-          <div class="shadow-label">SIM SETTLE T</div>
-          <div class="shadow-val" id="simSettleVal">—</div>
-        </div>
-        <div class="shadow-item">
-          <div class="shadow-label">SIM OVERSHOOT</div>
-          <div class="shadow-val" id="simOsVal">—</div>
-        </div>
-        <div class="shadow-item">
-          <div class="shadow-label">SIM PHASE</div>
-          <div class="shadow-val" id="simPhaseEl">—</div>
-        </div>
-        <div class="shadow-item">
-          <div class="shadow-label">SIM OUT %</div>
-          <div class="shadow-val" id="simOutVal">—</div>
-        </div>
-      </div>
-      <!-- Shadow sim chart -->
-      <div class="chart-title" style="margin-top:4px;"><span>SHADOW SIM vs REAL PV</span></div>
-      <canvas id="shadowChart" height="120"></canvas>
-    </div>
-
-    <!-- Anomaly Log -->
-    <div class="anomaly-panel">
-      <div class="card-title">
-        <span>🚨 ANOMALY DETECTOR</span>
-        <button class="btn-clear" onclick="clearAnomalies()">CLEAR</button>
-      </div>
-      <div id="anomalyStatus" style="font-size:10px;color:var(--green);padding:5px 8px;background:#051a0a;border-radius:4px;margin-bottom:4px;">✅ Sistem normal</div>
-      <div class="anomaly-list" id="anomalyLog"></div>
-    </div>
-
-    <!-- LCD + Metrics -->
+  <!-- ROW 5: DATA LOG -->
+  <div class="row">
     <div class="card">
-      <div class="card-title"><span>🖥 LCD DISPLAY</span></div>
-      <div class="lcd" style="margin-bottom:12px;">
-        <div class="lcd-row" id="lcd0">AquaFlow v10 OBSV   </div>
-        <div class="lcd-row" id="lcd1">Waiting for ESP...  </div>
-        <div class="lcd-row" id="lcd2">Connect WebSocket   </div>
-        <div class="lcd-row" id="lcd3">                    </div>
-      </div>
-      <div class="card-title" style="margin-top:8px;"><span>📊 METRICS</span></div>
-      <div class="kv"><span class="kv-label">Records logged</span><span class="kv-val" id="mRecords">0</span></div>
-      <div class="kv"><span class="kv-label">Data rate</span><span class="kv-val" id="mDataRate">— Hz</span></div>
-      <div class="kv"><span class="kv-label">Uptime observing</span><span class="kv-val" id="mUptime">0s</span></div>
-      <div class="kv"><span class="kv-label">Alarm Hi/Lo</span><span class="kv-val" id="mAlarms">—/—</span></div>
-      <div class="kv"><span class="kv-label">Anomalies detected</span><span class="kv-val" id="mAnomalies">0</span></div>
-    </div>
-  </div>
-
-  <!-- Row 4: Data Log Table -->
-  <div class="row row-full">
-    <div class="data-log-panel">
-      <div class="card-title">
-        <span>💾 DATA LOG REAL-TIME (tersimpan di browser)</span>
+      <div class="section-title">
+        <span>💾 DATA LOG REAL-TIME</span>
         <div style="display:flex;gap:8px;align-items:center;">
           <span id="logCountBadge" class="rec-count">0 records</span>
           <button class="btn-export" onclick="exportCSV()">⬇ EXPORT CSV</button>
-          <button class="btn-clear" onclick="clearLog()">🗑 CLEAR LOG</button>
+          <button class="btn-clear" onclick="clearLog()">🗑 CLEAR</button>
         </div>
       </div>
-      <div class="data-log-wrap">
-        <table class="data-log-table">
+      <div class="log-wrap">
+        <table class="log-table">
           <thead>
             <tr>
-              <th>#</th><th>TIMESTAMP</th><th>PV%</th><th>SP%</th><th>OUT%</th>
-              <th>MODE</th><th>Kp</th><th>Ki</th><th>Kd</th>
-              <th>PV RATE</th><th>OF EST</th><th>PRED+30</th><th>CONF%</th><th>ANOMALY</th>
+              <th>#</th><th>TIME</th><th>T(s)</th><th>PV</th><th>SP</th><th>OUT%</th>
+              <th>MODE</th><th>Kp</th><th>Ki</th><th>Rate</th><th>OF%</th><th>PRED+30</th><th>CONF</th><th>ANOM</th>
             </tr>
           </thead>
-          <tbody id="logTableBody"></tbody>
+          <tbody id="logBody"></tbody>
         </table>
       </div>
     </div>
@@ -583,23 +568,15 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 
 </div><!-- /main -->
 
-<script>
-// ================================================================
-// REUSED FROM v9.9: HW Constants + Helpers + Sensor + AquaFlowSim
-// PlantIdentifier + Predictor + AnomalyDetector + drawChart
-// ================================================================
-</script>
 <script id="v99CoreScript">
 // ================================================================
 // HARDWARE CONSTANTS — NIKUMA 4949 (5 LPM, Tangki 10L)
-// Rise +1%/2s = 0.5 %/s gross pada full throttle
 // ================================================================
 const HW = {
-  // Nikuma 4949: 5 LPM / 10L tangki = 0.5 %/s GROSS fill rate
-  PUMP_GROSS_PPS: 0.500,    // %/s fill rate max (5LPM / 10L = 0.5%/s = 1%/2s ✓)
+  PUMP_GROSS_PPS: 0.500,
   PWM_MIN: 80,
   PWM_MAX: 250,
-  Ts: 0.1,                  // 100ms timestep
+  Ts: 0.1,
   KICKSTART_PWM: 160,
   KICKSTART_MS: 0.7,
   KICKSTART_ERR_MIN: 20,
@@ -609,7 +586,7 @@ const HW = {
   INTEG_SP_RESET_THR: 15,
   RATE_FILTER: 0.3,
   RELAY_BAND: 2.0,
-  TUN_NEED: 4,  // FIX: kode asli sudah tunNeed=4 (v9.7 FIX#60)
+  TUN_NEED: 4,
   TUN_FILL_TMO: 300,
   TUN_DRAIN_TMO: 600,
   TUN_FIRST_CROSS_TMO: 600,
@@ -621,25 +598,12 @@ const HW = {
   DT_MAX: 2.0,
 };
 
-// ---- Helpers ----
 function cf(x,a,b){return x<a?a:x>b?b:x;}
 function ci(x,a,b){return Math.round(x<a?a:x>b?b:x);}
+function pwmToDisplay(pwm){if(pwm===0)return 0;return Math.round(cf(((pwm-HW.PWM_MIN)/(HW.PWM_MAX-HW.PWM_MIN))*100,0,100));}
+function pctToPWM(pct){if(pct<=0)return 0;return Math.round(cf(HW.PWM_MIN+(pct/100)*(HW.PWM_MAX-HW.PWM_MIN),HW.PWM_MIN,HW.PWM_MAX));}
+function pwmToFillRate(pwm, outflow){if(pwm===0)return -outflow;const pumpPct=cf((pwm-HW.PWM_MIN)/(HW.PWM_MAX-HW.PWM_MIN)*100,0,100);return HW.PUMP_GROSS_PPS*(pumpPct/100)-outflow;}
 
-function pwmToDisplay(pwm){
-  if(pwm===0)return 0;
-  return Math.round(cf(((pwm-HW.PWM_MIN)/(HW.PWM_MAX-HW.PWM_MIN))*100,0,100));
-}
-function pctToPWM(pct){
-  if(pct<=0)return 0;
-  return Math.round(cf(HW.PWM_MIN+(pct/100)*(HW.PWM_MAX-HW.PWM_MIN),HW.PWM_MIN,HW.PWM_MAX));
-}
-function pwmToFillRate(pwm, outflow){
-  if(pwm===0)return -outflow;
-  const pumpPct=cf((pwm-HW.PWM_MIN)/(HW.PWM_MAX-HW.PWM_MIN)*100,0,100);
-  return HW.PUMP_GROSS_PPS*(pumpPct/100)-outflow;
-}
-
-// ---- Sensor Model ----
 function makeSensor(noise_std, seed=42){
   let mbuf=[0,0,0],midx=0,mfill=false;
   let emaVal=0,emaInit=false,pvS=0;
@@ -663,15 +627,11 @@ function makeSensor(noise_std, seed=42){
   };
 }
 
-
-// ================================================================
-// MAIN SIMULATOR CLASS — AquaFlow v9.7 Nikuma 4949
-// ================================================================
 class AquaFlowSim {
   constructor(cfg){
-    this.Kp=cfg.Kp||4; this.Ki=cfg.Ki||0.05; this.Kd=cfg.Kd||0;
+    this.Kp=cfg.Kp||4;this.Ki=cfg.Ki||0.05;this.Kd=cfg.Kd||0;
     this.Kff=cfg.Kff!=null?cfg.Kff:0.5;
-    this.SP=cfg.SP||50; this.pvStart=cfg.pvStart||0;
+    this.SP=cfg.SP||50;this.pvStart=cfg.pvStart||0;
     this.outflow=cfg.outflow!=null?cfg.outflow:0.25;
     this.mode=cfg.mode||'autotune_pi';
     this.noise=cfg.noise!=null?cfg.noise:0.3;
@@ -683,1826 +643,980 @@ class AquaFlowSim {
     this.sensor=makeSensor(this.noise,cfg.seed||42);
     this.reset();
   }
-
   reset(){
-    this.t=0; this.pv=this.pvStart;
+    this.pv=this.pvStart;this.pvTrue=this.pvStart;
     this.sensor.reset(this.pvStart);
-    this.integ=0; this.dFiltered=0; this.pidPrevPV=this.pvStart;
-    this.pvRate=0; this.pvPrev=this.pvStart; this.prevSP=this.SP;
-    this.lastPWM=0; this.kickActive=false; this.kickStartT=0;
-    this.lastPVraw=this.pvStart;
-    // Autotune state
-    this.tunActive=(this.mode==='autotune_pi'||this.mode==='autotune_pid');
-    this.tunDone=false; this.tunCancel=false; this.tunReasonIdx=0;
-    // FIX#60 mirror: direct relay jika |PV-SP| <= 22%
-    const pvDist=Math.abs(this.pvStart-this.SP);
-    this.tunDirectRelay=this.tunActive&&(pvDist<=22);
-    this.tunFilling=this.tunActive&&!this.tunDirectRelay&&(this.pvStart<this.SP);
-    this.tunDraining=this.tunActive&&!this.tunDirectRelay&&(this.pvStart>=this.SP);
-    this.tunFillStartT=0; this.tunDrainStartT=0;
-    this.tunXcount=0; this.tunPVhi=-1e9; this.tunPVlo=1e9;
-    this.tunPrevT=0; this.tunLastT=0; this.tunSign=0;
-    // Alarms
-    this.alarmHiAct=false; this.alarmLoAct=false;
-    // Recording
-    this.history=[]; this.events=[];
-    // Metrics
-    this.peakPV=this.pvStart; this.settleT=null; this.huntCount=0;
-    this.lastInDB=false;
-    this.tunedKp=null; this.tunedKi=null; this.tunedKd=null;
-    this.tunedKu=null; this.tunedPu=null; this.tunedA=null;
-    this.relayStartT=null; this.relayEndT=null;
-    this.pidOn=true;
-    // SS error tracking (post-settle)
-    this.ssErrorSum=0; this.ssErrorN=0;
-    // Rise time tracking
-    this.riseStartT=null; this.riseEndT=null;
-    // FIX63-mirror: pvPrev+pvRate init di atas (mirror v9.8 startTune fix)
-    this.pvPrevInited=true;
-    this.tuneTotalTime=null;
-    this.tuneStartT=0;
+    this.t=0;this.pwm=0;this.out=0;
+    this.integ=0;this.prevErr=0;this.dFilt=0;
+    this.pvRateEma=0;
+    this.running=true;
+    this.tunPhase='fill';this.tunT0=0;this.tunPeaks=[];this.tunValleys=[];
+    this.tunLastCross=null;this.tunLastCrossT=0;this.tunHalfCycles=[];
+    this.tunBias=HW.TUN_BIAS;this.tunAmp=HW.TUN_AMP;
+    this.tunCancel=false;
+    this.tunedKp=null;this.tunedKi=null;this.tunedKd=null;
+    this.tunedKu=null;this.tunedPu=null;
+    this.settleT=null;this.overshoot=0;this.ssErr=0;
+    this._settleCheckT=null;this._peakPV=this.pvStart;
+    this.alarmHiTrip=false;this.alarmLoTrip=false;
   }
-
-  stopPump(){this.lastPWM=0;this.kickActive=false;}
-
-  setPWM(pw){
-    if(pw<1){this.stopPump();return;}
-    if(this.lastPWM===0&&!this.kickActive){
-      if(Math.abs(this.SP-this.lastPVraw)>=HW.KICKSTART_ERR_MIN){
-        this.kickActive=true;this.kickStartT=this.t;
-        this.lastPWM=HW.KICKSTART_PWM;
-        return;
-      }
-      this.kickActive=false;
-    }
-    if(this.kickActive){
-      if(this.t-this.kickStartT<HW.KICKSTART_MS){
-        this.lastPWM=HW.KICKSTART_PWM;return;
-      }
-      this.kickActive=false;
-      this.lastPWM=HW.PWM_MIN;
-      this.integ=0;this.dFiltered=0;
-    }
-    this.lastPWM=pctToPWM(pw);
-  }
-
-  pidStep(pv,dt){
-    const e_raw=this.SP-pv;
-    const inDB=Math.abs(e_raw)<HW.DEADBAND;
-    let e=inDB?0:cf(e_raw,-25,25);
-
-    let ff=this.Kff*(this.SP-this.prevSP);this.prevSP=this.SP;
-    if(ff<0)ff=0;
-
-    let dRaw=0;
-    if(dt>0.001)dRaw=-this.Kp*this.Kd*(pv-this.pidPrevPV)/dt;
-    this.dFiltered+=HW.D_FILTER_A*(dRaw-this.dFiltered);
-    this.dFiltered=cf(this.dFiltered,-10,10);
-
-    const P=this.Kp*e;
-    const uUnsat=P+this.integ+this.dFiltered+ff;
-    const uSat=cf(uUnsat,0,100);
-    const wErr=uSat-uUnsat;
-
-    if(!inDB){
-      this.integ+=(this.Ki*e*dt)+(HW.ANTIWINDUP_KC*wErr*dt);
-      this.integ=cf(this.integ,-100,100);
-    } else {
-      this.integ+=(this.Ki*e_raw*dt*0.05);
-      this.integ=cf(this.integ,-100,100);
-    }
-
-    const oRaw=cf(P+this.integ+this.dFiltered+ff,0,100);
-    const rr=(pv-this.pvPrev)/dt;
-    this.pvRate+=HW.RATE_FILTER*(rr-this.pvRate);
-    this.pvPrev=pv;
-    let o=Math.floor(oRaw);
-    if(this.lastPWM>60&&this.pvRate<-0.03&&Math.abs(this.SP-pv)>5)
-      o=ci(o+Math.round(-this.pvRate*20),0,100);
-    this.setPWM(o);
-    this.pidPrevPV=pv;
-
-    if(this.settleT!==null){
-      if(!inDB&&this.lastInDB)this.huntCount++;
-    }
-    this.lastInDB=inDB;
-  }
-
-  tuneStep(pv){
-    const t=this.t;
-
-    // FIX#60 mirror: direct relay skip fill/drain
-    if(this.tunFilling){
-      this.lastPWM=pctToPWM(100);
-      if(t-this.tunFillStartT>HW.TUN_FILL_TMO){
-        // Timeout → langsung relay (tidak cancel, sesuai FIX#60)
-        this.events.push({t,msg:'FILL timeout → langsung RELAY',type:'fill'});
-        this.tunFilling=false;this.tunDirectRelay=true;
-        this.tunSign=(pv<this.SP)?1:-1;
-        this.tunLastT=t;this.tunFillStartT=t;
-        if(this.relayStartT===null)this.relayStartT=t;
-        return;
-      }
-      if(pv>=this.SP-HW.RELAY_BAND-2){
-        this.events.push({t,msg:'FILL done → RELAY start',type:'fill'});
-        this.tunFilling=false;this.tunDirectRelay=true;
-        this.tunSign=(pv<this.SP)?1:-1;
-        this.tunLastT=t;this.tunFillStartT=t;
-        if(this.relayStartT===null)this.relayStartT=t;
-      }
-      return;
-    }
-
-    if(this.tunDraining){
-      this.stopPump();
-      if(t-this.tunDrainStartT>HW.TUN_DRAIN_TMO){
-        // Timeout → langsung relay
-        this.events.push({t,msg:'DRAIN timeout → langsung RELAY',type:'drain'});
-        this.tunDraining=false;this.tunDirectRelay=true;
-        this.tunSign=(pv<this.SP)?1:-1;
-        this.tunLastT=t;this.tunFillStartT=t;
-        if(this.relayStartT===null)this.relayStartT=t;
-        return;
-      }
-      const drainExit=this.SP+HW.RELAY_BAND+2;
-      if(pv<=drainExit){
-        this.events.push({t,msg:`DRAIN done → RELAY start (PV=${pv.toFixed(1)}%)`,type:'drain'});
-        this.tunDraining=false;this.tunDirectRelay=true;
-        this.tunSign=(pv<this.SP)?1:-1;
-        this.tunLastT=t;this.tunFillStartT=t;
-        if(this.relayStartT===null)this.relayStartT=t;
-      }
-      return;
-    }
-
-    // RELAY TEST
-    const mid=(this.tunXcount>0)?((this.tunPVhi+this.tunPVlo)/2):this.SP;
-    if(Math.abs(pv-mid)<2*HW.TUN_AMP||this.tunXcount===0){
-      if(pv>this.tunPVhi)this.tunPVhi=pv;
-      if(pv<this.tunPVlo)this.tunPVlo=pv;
-    }
-
-    let relayOn=(this.tunSign>0);
-    if(pv>=this.SP+HW.RELAY_BAND)relayOn=false;
-    if(pv<=this.SP-HW.RELAY_BAND)relayOn=true;
-    const newSign=relayOn?1:-1;
-
-    if(relayOn){this.lastPWM=pctToPWM(cf(HW.TUN_BIAS+HW.TUN_AMP,0,100));}
-    else{this.stopPump();}
-
-    if(this.tunPrevT===0){this.tunPrevT=t;this.tunSign=newSign;return;}
-    if(this.tunLastT===0)this.tunLastT=t;
-
-    const tmo=(this.tunXcount===0)?HW.TUN_FIRST_CROSS_TMO:HW.TUN_HALF_CYCLE_TMO;
-    if(t-this.tunLastT>tmo){this._cancelTune(2);return;}
-
-    if(newSign!==this.tunSign){
-      this.tunXcount++;
-      this.tunSign=newSign;
-      this.tunLastT=t;
-      this.events.push({t,msg:`Crossing #${this.tunXcount} at PV=${pv.toFixed(2)}%`,type:'cross'});
-      if(this.tunXcount===1){this.tunPVhi=-1e9;this.tunPVlo=1e9;this.tunPrevT=t;}
-      if(this.tunXcount>=this.tunNeed){
-        const a=(this.tunPVhi-this.tunPVlo)/2;
-        if(a<0.1){this._cancelTune(0);return;}
-        const Pu_raw=2*(t-this.tunPrevT)/(this.tunXcount-1);
-        const Pu=Pu_raw*0.75;
-        const relayD=cf(HW.TUN_BIAS+HW.TUN_AMP,0,100)*0.5;
-        const Ku=(4*relayD)/(Math.PI*a);
-        let newKp,newKi,newKd=0;
-        const isPID=(this.mode==='autotune_pid');
-        if(!isPID){newKp=0.45*Ku;newKi=newKp/(0.83*Pu);}
-        else{newKp=0.6*Ku;newKi=newKp/(0.5*Pu);newKd=newKp*0.125*Pu;}
-        const kdMax=cf(Pu*0.125,0,50);
-        this.Kp=cf(newKp,0,500);this.Ki=cf(newKi,0,500);this.Kd=cf(newKd,0,kdMax);
-        this.tunedKp=this.Kp;this.tunedKi=this.Ki;this.tunedKd=this.Kd;
-        this.tunedKu=Ku;this.tunedPu=Pu;this.tunedA=a;
-        this.integ=0;this.dFiltered=0;this.pidPrevPV=pv;this.prevSP=this.SP;
-        this.tunActive=false;this.tunDone=true;this.tunCancel=false;
-        this.tunFilling=false;this.tunDraining=false;this.tunSign=0;
-        this.relayEndT=t;
-        this.tuneTotalTime=t-this.tuneStartT;
-        this.events.push({t,msg:`✓ AUTOTUNE DONE! Kp=${this.Kp.toFixed(3)},Ki=${this.Ki.toFixed(4)},Ku=${Ku.toFixed(3)},a=${a.toFixed(3)},Pu=${Pu.toFixed(2)}s`,type:'done'});
-      }
-    }
-  }
-
-  _cancelTune(reason){
-    this.tunActive=false;this.tunCancel=true;this.tunDone=false;
-    this.tunReasonIdx=reason;this.tunFilling=false;this.tunDraining=false;
-    this.integ=0;this.tunSign=0;this.dFiltered=0;
-    const r=['AMP_SMALL','USER','TIMEOUT'];
-    this.events.push({t:this.t,msg:`✗ AUTOTUNE CANCELLED: ${r[reason]}`,type:'cancel'});
-  }
-
-  _getPhase(){
-    if(this.alarmHiAct&&this.alarmHiEn)return'alarm_hi';
-    if(this.alarmLoAct&&this.alarmLoEn)return'alarm_lo';
-    if(this.tunFilling)return'fill';
-    if(this.tunDraining)return'drain';
-    if(this.tunActive)return'relay'; // direct relay atau setelah fill/drain
-    if(this.tunDone)return'pid_tuned';
-    if(this.tunCancel)return'cancelled';
-    return'pid';
-  }
-
   step(){
     const Ts=HW.Ts;
-    const pvSensed=this.sensor.read(this.pv);
-    this.lastPVraw=pvSensed;
-
-    this.alarmHiAct=(pvSensed>this.alarmHi);
-    this.alarmLoAct=(pvSensed<this.alarmLo);
-
-    if(this.alarmHiAct&&this.alarmHiEn){
-      this.stopPump();this.integ=0;this.dFiltered=0;
-    } else if(this.alarmLoAct&&this.alarmLoEn){
-      this.stopPump();this.integ=0;this.dFiltered=0;
-    } else if(this.pidOn){
-      if(this.tunActive)this.tuneStep(pvSensed);
-      else{const dt=cf(Ts,0.02,HW.DT_MAX);this.pidStep(pvSensed,dt);}
-    } else {
-      this.stopPump();
-    }
-
-    const netRate=pwmToFillRate(this.lastPWM,this.outflow);
-    this.pv=cf(this.pv+netRate*Ts,0,100);
     this.t+=Ts;
-
-    // Metrics
-    if(this.pv>this.SP&&this.pv>this.peakPV)this.peakPV=this.pv;
-    if(this.settleT===null&&!this.tunActive&&!this.tunFilling&&Math.abs(this.pv-this.SP)<HW.DEADBAND)
-      this.settleT=this.t;
-
-    // Rise time: 10% → 90% of SP
-    const r10=this.pvStart+(this.SP-this.pvStart)*0.10;
-    const r90=this.pvStart+(this.SP-this.pvStart)*0.90;
-    if(this.riseStartT===null&&!this.tunActive&&!this.tunFilling&&this.pv>=r10)
-      this.riseStartT=this.t;
-    if(this.riseEndT===null&&!this.tunActive&&!this.tunFilling&&this.pv>=r90)
-      this.riseEndT=this.t;
-
-    // SS error (post settle, last 60s average)
-    if(this.settleT!==null&&this.t>this.settleT+5){
-      this.ssErrorSum+=Math.abs(this.pv-this.SP);
-      this.ssErrorN++;
+    if(!this.running)return;
+    const pvMeas=this.sensor.read(this.pvTrue);
+    this.pv=pvMeas;
+    const pvRateRaw=(pvMeas-this.sensor.getDisplay())/Ts;
+    this.pvRateEma+=HW.RATE_FILTER*(pvRateRaw-this.pvRateEma);
+    if(this.alarmHiEn&&pvMeas>=this.alarmHi){this.alarmHiTrip=true;this.pwm=0;this.out=0;}
+    else if(this.alarmLoEn&&pvMeas<=this.alarmLo&&this.mode==='autotune_pi'&&this.tunPhase!=='fill'){this.alarmLoTrip=true;}
+    else{
+      if(this.mode==='autotune_pi'){this._doAutotune(pvMeas,Ts);}
+      else if(this.mode==='manual_pid'){this._doPID(pvMeas,Ts);}
+      else if(this.mode==='manual_pi'){this.Kd=0;this._doPID(pvMeas,Ts);}
+      else{this.pwm=0;this.out=0;}
     }
-
-    const rec={
-      t:this.t,pv:this.pv,pvS:this.sensor.getDisplay(),
-      sp:this.SP,pwm:this.lastPWM,
-      pumpPct:pwmToDisplay(this.lastPWM),
-      integ:this.integ,pvRate:this.pvRate,
-      kick:this.kickActive,
-      phase:this._getPhase(),
-      alarmHi:this.alarmHiAct,alarmLo:this.alarmLoAct
-    };
-    this.history.push(rec);
-    return rec;
+    const fr=pwmToFillRate(this.pwm,this.outflow);
+    this.pvTrue=cf(this.pvTrue+fr*Ts,0,100);
+    if(this.mode!=='autotune_pi'&&this.running){
+      if(pvMeas>this._peakPV)this._peakPV=pvMeas;
+      const ov=this._peakPV-this.SP;
+      if(ov>0)this.overshoot=ov;
+      const settled=Math.abs(pvMeas-this.SP)<this.SP*0.02;
+      if(settled){
+        if(this._settleCheckT===null)this._settleCheckT=this.t;
+        else if(this.t-this._settleCheckT>10&&this.settleT===null)this.settleT=this._settleCheckT;
+      }else{this._settleCheckT=null;}
+      if(this.t>350){
+        const recent=[];
+        this.ssErr=Math.abs(pvMeas-this.SP);
+      }
+    }
   }
-
-  get ssErrorAvg(){
-    return this.ssErrorN>0?(this.ssErrorSum/this.ssErrorN):null;
+  _doPID(pv,Ts){
+    const err=this.SP-pv;
+    const kffOut=this.outflow>0?cf(this.Kff*(this.outflow/HW.PUMP_GROSS_PPS)*100,0,100):0;
+    if(Math.abs(err)<HW.DEADBAND&&Math.abs(this.integ)<5){
+      this.pwm=pctToPWM(kffOut+(err>0?HW.DEADBAND:-HW.DEADBAND)*this.Kp);
+      this.out=pwmToDisplay(this.pwm);return;
+    }
+    this.integ+=err*Ts;
+    const dRaw=(err-this.prevErr)/Ts;
+    this.dFilt+=HW.D_FILTER_A*(dRaw-this.dFilt);
+    this.prevErr=err;
+    let u=this.Kp*err+this.Ki*this.integ+this.Kd*this.dFilt+kffOut;
+    if(u>100){this.integ-=(u-100)/Math.max(this.Ki*Ts,1e-6)*HW.ANTIWINDUP_KC*Ts;}
+    if(u<0){this.integ-=u/Math.max(this.Ki*Ts,1e-6)*HW.ANTIWINDUP_KC*Ts;}
+    if(Math.abs(this.SP-pv)>HW.INTEG_SP_RESET_THR)this.integ=0;
+    u=cf(this.Kp*err+this.Ki*this.integ+this.Kd*this.dFilt+kffOut,0,100);
+    if(u>0&&pctToPWM(u)<HW.KICKSTART_PWM&&err>HW.KICKSTART_ERR_MIN&&this.t<HW.KICKSTART_MS){u=pwmToDisplay(HW.KICKSTART_PWM);}
+    this.out=u;
+    this.pwm=pctToPWM(u);
   }
-  get riseTime(){
-    if(this.riseStartT!==null&&this.riseEndT!==null)return this.riseEndT-this.riseStartT;
-    return null;
+  _doAutotune(pv,Ts){
+    const bias=HW.TUN_BIAS,amp=HW.TUN_AMP;
+    if(this.tunPhase==='fill'){
+      this.pwm=HW.PWM_MAX;this.out=100;
+      if(pv>=this.SP*0.5){this.tunPhase='relay';this.tunT0=this.t;this.tunLastCross=pv>=this.SP?'above':'below';this.tunLastCrossT=this.t;}
+      if(this.t>HW.TUN_FILL_TMO){this.tunCancel=true;this.running=false;}
+      return;
+    }
+    if(this.tunPhase==='relay'){
+      const above=pv>=(this.SP+HW.RELAY_BAND/2);
+      const below=pv<=(this.SP-HW.RELAY_BAND/2);
+      if(above){this.pwm=pctToPWM(bias-amp);this.out=pwmToDisplay(this.pwm);}
+      else if(below){this.pwm=pctToPWM(bias+amp);this.out=pwmToDisplay(this.pwm);}
+      const crossDir=above?'above':below?'below':null;
+      if(crossDir&&crossDir!==this.tunLastCross){
+        const halfT=this.t-this.tunLastCrossT;
+        this.tunHalfCycles.push(halfT);
+        if(crossDir==='above'){this.tunPeaks.push(pv);}
+        else{this.tunValleys.push(pv);}
+        this.tunLastCross=crossDir;this.tunLastCrossT=this.t;
+        if(this.tunHalfCycles.length>=this.tunNeed*2){
+          const Pu=2*(this.tunHalfCycles.slice(-4).reduce((a,b)=>a+b,0)/4);
+          const amps=this.tunPeaks.slice(-2).map((p,i)=>p-(this.tunValleys[this.tunValleys.length-2+i]||this.SP)).filter(a=>a>0);
+          const avgAmp=amps.length>0?amps.reduce((a,b)=>a+b,0)/amps.length:amp*2;
+          const d=pctToPWM(amp)/255*5;
+          const Ku=(4*d)/(Math.PI*avgAmp/100);
+          this.tunedKu=Ku;this.tunedPu=Pu;
+          this.tunedKp=0.45*Ku;this.tunedKi=this.tunedKp/(Pu/1.2);this.tunedKd=0;
+          this.running=false;
+        }
+      }
+      if(this.t-this.tunT0>HW.TUN_HALF_CYCLE_TMO&&this.tunHalfCycles.length<2){this.tunCancel=true;this.running=false;}
+    }
   }
-  get overshoot(){return Math.max(0,this.peakPV-this.SP);}
-
-  runFull(maxT=700){
-    this.reset();
-    this.tuneStartT=0;
-    while(this.t<maxT){
+  runFull(maxT=400){
+    const hist=[];
+    while(this.t<maxT&&(this.running||this.tunedKp!==null)){
       this.step();
-      if(this.tunCancel&&this.t>5)break;
-      if(this.settleT!==null&&this.t>this.settleT+180&&!this.tunActive&&!this.tunFilling)break;
+      if(Math.round(this.t*10)%10===0)hist.push({t:this.t,pv:this.pv,sp:this.SP,out:this.out,pwm:this.pwm});
     }
-    return this.history;
+    const last=hist.slice(-30);
+    if(last.length>0){this.ssErr=Math.abs(last.reduce((s,r)=>s+r.pv,0)/last.length-this.SP);}
+    return hist;
   }
 }
 
-
 // ================================================================
-// CANVAS CHART ENGINE
+// DRAW CHART
 // ================================================================
 function drawChart(canvasId, datasets, opts={}){
   const canvas=document.getElementById(canvasId);
   if(!canvas)return;
-  const dpr=window.devicePixelRatio||1;
-  const dispW=canvas.offsetWidth||800;
-  const dispH=parseInt(canvas.getAttribute('height'))||180;
-  canvas.width=dispW*dpr;canvas.height=dispH*dpr;
-  canvas.style.width=dispW+'px';canvas.style.height=dispH+'px';
   const ctx=canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  const W=dispW,H=dispH;
-  ctx.fillStyle='#080c14';ctx.fillRect(0,0,W,H);
-
-  const pad={l:42,r:12,t:12,b:26};
-  const dW=W-pad.l-pad.r,dH=H-pad.t-pad.b;
-
-  const allY=[];
-  datasets.forEach(d=>{d.data.forEach(p=>allY.push(p.y));});
-  const xMin=opts.xMin!=null?opts.xMin:0;
-  const xMax=opts.xMax!=null?opts.xMax:Math.max(...datasets.flatMap(d=>d.data.map(p=>p.x)),60);
-  const yMin=opts.yMin!=null?opts.yMin:Math.min(...allY,0);
-  const yMax=opts.yMax!=null?opts.yMax:Math.max(...allY,1);
-
-  const toX=x=>pad.l+(x-xMin)/(xMax-xMin)*dW;
-  const toY=y=>pad.t+dH-(y-yMin)/(yMax-yMin)*dH;
-
-  // Phase backgrounds
-  if(opts.phases){
-    opts.phases.forEach(ph=>{
-      const x0=toX(ph.t0),x1=toX(ph.t1);
-      ctx.fillStyle=ph.color;
-      ctx.fillRect(x0,pad.t,Math.max(1,x1-x0),dH);
-    });
-  }
-
+  const W=canvas.offsetWidth||canvas.width;
+  const H=canvas.offsetHeight||canvas.height;
+  canvas.width=W;canvas.height=H;
+  ctx.clearRect(0,0,W,H);
+  if(!datasets||datasets.length===0)return;
+  const allY=datasets.flatMap(d=>d.data.filter(p=>p!=null&&isFinite(p.y)).map(p=>p.y));
+  if(allY.length===0)return;
+  const allX=datasets.flatMap(d=>d.data.filter(p=>p!=null&&isFinite(p.x)).map(p=>p.x));
+  const minX=opts.minX!=null?opts.minX:Math.min(...allX);
+  const maxX=opts.maxX!=null?opts.maxX:Math.max(...allX);
+  const minY=opts.minY!=null?opts.minY:Math.floor(Math.min(...allY)-5);
+  const maxY=opts.maxY!=null?opts.maxY:Math.ceil(Math.max(...allY)+5);
+  const pad={l:30,r:8,t:8,b:20};
+  const xScale=(x)=>pad.l+(x-minX)/(maxX-minX||1)*(W-pad.l-pad.r);
+  const yScale=(y)=>H-pad.b-(y-minY)/(maxY-minY||1)*(H-pad.t-pad.b);
   // Grid
-  ctx.strokeStyle='#1a2a3a';ctx.lineWidth=0.5;
-  for(let i=0;i<=5;i++){
-    const y=pad.t+i*dH/5;
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+dW,y);ctx.stroke();
-    const val=yMax-i*(yMax-yMin)/5;
-    ctx.fillStyle='#6b7280';ctx.font=`9px monospace`;
-    ctx.fillText(val.toFixed(0),2,y+3);
+  ctx.strokeStyle='#0f1825';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=minY+i*(maxY-minY)/4;
+    ctx.beginPath();ctx.moveTo(pad.l,yScale(y));ctx.lineTo(W-pad.r,yScale(y));ctx.stroke();
+    ctx.fillStyle='#374151';ctx.font='8px monospace';ctx.textAlign='right';
+    ctx.fillText(y.toFixed(0),pad.l-2,yScale(y)+3);
   }
-  for(let i=0;i<=6;i++){
-    const x=pad.l+i*dW/6;
-    ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+dH);ctx.stroke();
-    const val=xMin+i*(xMax-xMin)/6;
-    ctx.fillStyle='#6b7280';ctx.font='9px monospace';
-    ctx.fillText(val.toFixed(0),x-8,H-5);
+  // X axis labels
+  ctx.fillStyle='#374151';ctx.font='8px monospace';ctx.textAlign='center';
+  for(let i=0;i<=4;i++){
+    const x=minX+i*(maxX-minX)/4;
+    ctx.fillText(x.toFixed(0)+'s',xScale(x),H-4);
   }
-
-  // Zero line
-  if(yMin<0&&yMax>0){
-    ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(pad.l,toY(0));ctx.lineTo(pad.l+dW,toY(0));ctx.stroke();
-  }
-
-  // Events (vertical lines)
-  if(opts.events){
-    opts.events.forEach(ev=>{
-      const x=toX(ev.t);
-      ctx.strokeStyle=ev.color||'rgba(167,139,250,0.6)';ctx.lineWidth=1.5;
-      ctx.setLineDash([3,3]);
-      ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+dH);ctx.stroke();
-      ctx.setLineDash([]);
-    });
-  }
-
-  // Settle time line
-  if(opts.settleT!=null){
-    const x=toX(opts.settleT);
-    ctx.strokeStyle='rgba(16,185,129,0.7)';ctx.lineWidth=1.5;
-    ctx.setLineDash([5,3]);
-    ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+dH);ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle='#10b981';ctx.font='9px monospace';
-    ctx.fillText('settle',x+2,pad.t+12);
-  }
-
   // Datasets
   datasets.forEach(ds=>{
-    if(!ds.data.length)return;
-    if(ds.fill){
-      ctx.beginPath();
-      ctx.fillStyle=ds.color;
-      let fi=true;
-      ds.data.forEach(p=>{const x=toX(p.x),y=toY(p.y);fi?(ctx.moveTo(x,y),fi=false):ctx.lineTo(x,y);});
-      ctx.fill();
-      return;
-    }
-    ctx.strokeStyle=ds.color||'#fff';
+    if(!ds.data||ds.data.length===0)return;
+    ctx.beginPath();ctx.strokeStyle=ds.color||'#fff';
     ctx.lineWidth=ds.width||1.5;
     if(ds.dash)ctx.setLineDash(ds.dash);else ctx.setLineDash([]);
-    ctx.beginPath();
+    if(ds.fill){ctx.globalAlpha=0.15;ctx.fillStyle=ds.color;}
     let first=true;
     ds.data.forEach(p=>{
-      const x=toX(p.x),y=toY(p.y);
-      if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);
+      if(!p||!isFinite(p.x)||!isFinite(p.y))return;
+      const px=xScale(p.x),py=yScale(p.y);
+      if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);
     });
     ctx.stroke();
+    if(ds.fill){ctx.globalAlpha=1;}
     ctx.setLineDash([]);
   });
+  // Band fill (for prediction)
+  if(opts.bandDataset){
+    const bd=opts.bandDataset;
+    ctx.globalAlpha=0.08;ctx.fillStyle=bd.color||'#a78bfa';
+    ctx.beginPath();
+    bd.data.forEach((p,i)=>{if(!p||!isFinite(p.x))return;if(i===0)ctx.moveTo(xScale(p.x),yScale(p.hi));else ctx.lineTo(xScale(p.x),yScale(p.hi));});
+    [...bd.data].reverse().forEach(p=>{if(!p||!isFinite(p.x))return;ctx.lineTo(xScale(p.x),yScale(p.lo));});
+    ctx.closePath();ctx.fill();ctx.globalAlpha=1;
+  }
 }
 
 // ================================================================
-
-
-// ================================================================
-// PLANT IDENTIFIER — Sliding window, hitung Kplant, outflow_est, deadTime
+// PLANT IDENTIFIER
 // ================================================================
 class PlantIdentifier {
   constructor(){
-    this.window=[];       // {t, pv, pwmPct} — last 10s
-    this.windowSec=10;
-    this.Kplant=null;
-    this.outflowEst=HW.PUMP_GROSS_PPS*0.25; // default saat belum tahu
-    this.deadTime=0.5;
-    this.confidence=0;
-    this.pvRateBuf=[];    // rolling pvRate buffer
-    this.lastPWMChange={t:null,pwm:null};
-    this.pvChangeAfterPWM=null;
-    this._prevPWM=null;
-    this._ofBuf=[];       // outflow rolling avg
-    this._kpBuf=[];
+    this.samples=[];this.maxSamples=500;
+    this.Kplant=null;this.deadTime=0.5;this.outflowEst=0.25;
+    this.confidence=0;this._lastOut=-1;this._stepT=null;this._stepPV=null;this._stepOut=null;
+    this._riseHistory=[];this._outflowHistory=[];
   }
-
-  update(t, pv, pwmPct, pvRate){
-    // Sliding window
-    this.window.push({t,pv,pwmPct,pvRate});
-    while(this.window.length>0 && t-this.window[0].t > this.windowSec)
-      this.window.shift();
-
-    // Track PWM changes untuk dead time estimation
-    if(this._prevPWM!==null && Math.abs(pwmPct-this._prevPWM)>10){
-      this.lastPWMChange={t,pwm:pwmPct,pvAtChange:pv,pvRateAtChange:pvRate};
-      this.pvChangeAfterPWM=null;
+  update(t,pv,out,pvRate){
+    this.samples.push({t,pv,out,pvRate});
+    if(this.samples.length>this.maxSamples)this.samples.shift();
+    // Outflow estimation: when pump is 0, pvRate ≈ -outflow
+    if(out<2&&pvRate<-0.01){
+      this._outflowHistory.push(-pvRate);
+      if(this._outflowHistory.length>30)this._outflowHistory.shift();
     }
-    if(this.lastPWMChange.t!==null && this.pvChangeAfterPWM===null){
-      const dt=t-this.lastPWMChange.t;
-      if(dt>0.3 && Math.abs(pvRate)>0.08){
-        this.pvChangeAfterPWM=t;
-        const rawDt=Math.max(0,dt-0.3);
-        this.deadTime=0.7*this.deadTime+0.3*rawDt; // EMA
-      }
+    if(this._outflowHistory.length>5){
+      const sorted=[...this._outflowHistory].sort((a,b)=>a-b);
+      this.outflowEst=sorted[Math.floor(sorted.length/2)];
     }
-    this._prevPWM=pwmPct;
-
-    // Need at least 5s of data
-    if(this.window.length<50){ this.confidence=Math.min(30,this.window.length*0.6); return; }
-
-    // Estimate outflow: during pump-on steady segments
-    const steadyW=this.window.filter(p=>p.pwmPct>20&&p.pwmPct<95);
-    if(steadyW.length>20){
-      const avgPump=steadyW.reduce((s,p)=>s+p.pwmPct,0)/steadyW.length;
-      const avgPvRate=steadyW.reduce((s,p)=>s+p.pvRate,0)/steadyW.length;
-      const grossRate=HW.PUMP_GROSS_PPS*(avgPump/100);
-      const ofEst=grossRate-avgPvRate;
-      if(ofEst>-0.1&&ofEst<HW.PUMP_GROSS_PPS+0.1){
-        this._ofBuf.push(ofEst);
-        if(this._ofBuf.length>30)this._ofBuf.shift();
-        this.outflowEst=this._ofBuf.reduce((s,v)=>s+v,0)/this._ofBuf.length;
-      }
+    // Step response: detect output steps for Kplant estimation
+    if(Math.abs(out-this._lastOut)>10&&this._lastOut>=0){
+      this._stepT=t;this._stepPV=pv;this._stepOut=this._lastOut;
+      this._stepOutNew=out;
     }
-
-    // Estimate Kplant: gain = pvRate / (grossRate - outflow)
-    const pumpOnW=this.window.filter(p=>p.pwmPct>30);
-    if(pumpOnW.length>15){
-      const recentPvRate=pumpOnW.slice(-15).reduce((s,p)=>s+Math.abs(p.pvRate),0)/15;
-      const expectedRate=HW.PUMP_GROSS_PPS*(pumpOnW.slice(-1)[0].pwmPct/100)-this.outflowEst;
-      if(Math.abs(expectedRate)>0.01){
-        const kp=recentPvRate/Math.max(Math.abs(expectedRate),0.01);
-        if(kp>0.1&&kp<10){
-          this._kpBuf.push(kp);
-          if(this._kpBuf.length>20)this._kpBuf.shift();
-          this.Kplant=this._kpBuf.reduce((s,v)=>s+v,0)/this._kpBuf.length;
+    if(this._stepT!==null&&t-this._stepT>5&&t-this._stepT<60){
+      const dt=t-this._stepT;
+      const dpv=pv-this._stepPV;
+      const dout=(this._stepOutNew-this._stepOut)/100;
+      if(Math.abs(dout)>0.05&&this.outflowEst>0){
+        const kEst=Math.abs(dpv/100)/(Math.abs(dout)*HW.PUMP_GROSS_PPS*dt);
+        if(kEst>0.1&&kEst<50){
+          this._riseHistory.push(kEst);
+          if(this._riseHistory.length>20)this._riseHistory.shift();
         }
       }
     }
-
-    // Confidence calculation
-    const dataScore=Math.min(50, (this.window.length/100)*50);
-    const ofConsistency=this._ofBuf.length>5 ? Math.min(30,30*(1-this._ofStd()/Math.max(0.01,Math.abs(this.outflowEst)))) : 0;
-    const predResidual=this._lastResidual||0;
-    const residScore=Math.max(0,20-predResidual*5);
-    this.confidence=Math.min(99,dataScore+ofConsistency+residScore);
+    this._lastOut=out;
+    if(this._riseHistory.length>3){
+      const sorted=[...this._riseHistory].sort((a,b)=>a-b);
+      this.Kplant=sorted[Math.floor(sorted.length/2)];
+    }
+    // Confidence
+    const hasOutflow=this._outflowHistory.length>=5;
+    const hasKplant=this._riseHistory.length>=3;
+    const hasHistory=this.samples.length>=50;
+    this.confidence=Math.min(99,
+      (hasOutflow?30:this._outflowHistory.length*6)+
+      (hasKplant?40:this._riseHistory.length*10)+
+      (hasHistory?30:this.samples.length*0.6)
+    );
   }
-
-  _ofStd(){
-    if(this._ofBuf.length<2)return 1;
-    const m=this._ofBuf.reduce((s,v)=>s+v,0)/this._ofBuf.length;
-    return Math.sqrt(this._ofBuf.reduce((s,v)=>s+(v-m)**2,0)/this._ofBuf.length);
-  }
-
-  setResidual(r){ this._lastResidual=r; }
-
   getParams(){
-    return {
-      Kplant: this.Kplant||1.0,
-      outflowEst: this.outflowEst,
-      deadTime: this.deadTime,
-      confidence: this.confidence
-    };
+    return{Kplant:this.Kplant||1,deadTime:this.deadTime,outflowEst:this.outflowEst,confidence:this.confidence};
   }
 }
 
-
 // ================================================================
-// PREDICTOR — Forward-sim 30s, garis putus-putus di grafik
+// PREDICTOR
 // ================================================================
 class Predictor {
-  constructor(plantId){
-    this.pid=plantId;
-    this.lastPrediction=[];       // [{t,pv,bandLo,bandHi}]
-    this.lastPredT=null;
-    this.checkpoints={};          // {t_sim: pv_predicted} untuk residual check
-  }
-
-  predict(sim, horizonS=30, stepS=0.5){
-    const params=this.pid.getParams();
-    if(params.confidence<25) return [];
-
-    const now=sim.t;
-    const pvNow=sim.pv;
-    const phase=sim._getPhase();
-
-    // Tidak predict saat autotune
-    if(phase==='fill'||phase==='drain'||phase==='relay') return [];
-
-    const SP=sim.SP;
-    const Kp=sim.Kp;
-    const Ki=sim.Ki;
-    const integNow=sim.integ;
+  constructor(plantId){this.plantId=plantId;}
+  predict(tNow,pvNow,SP,Kp,Ki,Kd,horizonS){
+    const params=this.plantId.getParams();
     const outflow=params.outflowEst;
-    const uncertainty=Math.max(0.05, (100-params.confidence)/100 * 0.3);
-
-    let pvP=pvNow;
-    let integP=integNow;
-    const result=[{t:now,pv:pvP,bandLo:pvP,bandHi:pvP}];
-    const Ts=stepS;
-    const nSteps=Math.round(horizonS/Ts);
-
+    const uncertainty=Math.max(0.05,(100-params.confidence)/100*0.3);
+    let pvP=pvNow,integP=0;
+    const Ts=0.5,nSteps=Math.round(horizonS/Ts);
+    const result=[{t:tNow,pv:pvP,bandLo:pvP,bandHi:pvP}];
     for(let i=1;i<=nSteps;i++){
-      const tP=now+i*Ts;
+      const tP=tNow+i*Ts;
       const e=SP-pvP;
-      const inDB=Math.abs(e)<HW.DEADBAND;
-      const eC=inDB?0:cf(e,-25,25);
-
-      // Simplified PID (P+I only for prediction, no D noise)
-      const uUnsat=Kp*eC+integP;
-      const uSat=cf(uUnsat,0,100);
-      const wErr=uSat-uUnsat;
-      if(!inDB){
-        integP+=Ki*eC*Ts+HW.ANTIWINDUP_KC*wErr*Ts;
-        integP=cf(integP,-100,100);
-      }
-
-      const pumpPct=uSat;
-      const netRate=HW.PUMP_GROSS_PPS*(pumpPct/100)-outflow;
-      pvP=cf(pvP+netRate*Ts,0,100);
-
-      // Uncertainty band grows with horizon
-      const bandW=uncertainty*i*Ts*0.15;
-      result.push({
-        t:tP,
-        pv:pvP,
-        bandLo:cf(pvP-bandW,0,100),
-        bandHi:cf(pvP+bandW,0,100)
-      });
+      integP+=e*Ts;
+      const u=cf(Kp*e+Ki*integP,0,100);
+      const pwmP=pctToPWM(u);
+      const fr=pwmToFillRate(pwmP,outflow);
+      pvP=cf(pvP+fr*Ts,0,100);
+      const spread=uncertainty*Math.sqrt(i)*2;
+      result.push({t:tP,pv:pvP,bandLo:cf(pvP-spread,0,100),bandHi:cf(pvP+spread,0,100)});
     }
-
-    // Store checkpoints for residual check (every 5s)
-    if(this.lastPredT===null||now-this.lastPredT>=5){
-      result.forEach(p=>{
-        const key=Math.round(p.t*10)/10;
-        this.checkpoints[key]=p.pv;
-      });
-      this.lastPredT=now;
-    }
-
-    this.lastPrediction=result;
     return result;
   }
+}
 
-  checkResidual(t, pvActual){
-    const key=Math.round(t*10)/10;
-    if(this.checkpoints[key]!==undefined){
-      const residual=Math.abs(pvActual-this.checkpoints[key]);
-      this.pid.setResidual(residual);
-      // Cleanup old checkpoints
-      Object.keys(this.checkpoints).forEach(k=>{
-        if(parseFloat(k)<t-60) delete this.checkpoints[k];
-      });
-      return residual;
+// ================================================================
+// ANOMALY DETECTOR
+// ================================================================
+class AnomalyDetector {
+  constructor(plantId,predictor){
+    this.plantId=plantId;this.predictor=predictor;
+    this._predBuf=[];this._pvBuf=[];this._lastAnom=0;
+  }
+  check(t,simProxy){
+    if(!simProxy||!simProxy.pv)return null;
+    const pv=simProxy.pv;
+    const out=simProxy.out||0;
+    this._pvBuf.push({t,pv,out});
+    if(this._pvBuf.length>100)this._pvBuf.shift();
+    if(this._pvBuf.length<20)return null;
+    if(t-this._lastAnom<10)return null;
+    const params=this.plantId.getParams();
+    const conf=params.confidence;
+    if(conf<30)return null;
+    // Check: is PV moving when pump is high?
+    const recentHigh=this._pvBuf.slice(-10).filter(r=>r.out>60);
+    if(recentHigh.length>=8){
+      const pvChange=recentHigh[recentHigh.length-1].pv-recentHigh[0].pv;
+      const expectedChange=HW.PUMP_GROSS_PPS*(recentHigh.length*0.1)*50;
+      if(Math.abs(pvChange)<0.5&&expectedChange>1){
+        this._lastAnom=t;
+        return{id:'PUMP_STUCK',msg:`Pump >60% tapi PV tidak naik (Δ${pvChange.toFixed(2)}%)`,sev:'error'};
+      }
+    }
+    // Check: PV drifting with no control action
+    const recent10=this._pvBuf.slice(-10);
+    const allLowOut=recent10.every(r=>r.out<5);
+    if(allLowOut){
+      const drift=recent10[recent10.length-1].pv-recent10[0].pv;
+      if(drift>3){
+        this._lastAnom=t;
+        return{id:'UNEXPECT_RISE',msg:`PV naik ${drift.toFixed(1)}% tanpa pompa aktif`,sev:'warn'};
+      }
     }
     return null;
   }
 }
-
-
-// ================================================================
-// ANOMALY DETECTOR — 6 tipe anomali, cek tiap 5 detik
-// ================================================================
-class AnomalyDetector {
-  constructor(plantId, predictor){
-    this.pid=plantId;
-    this.pred=predictor;
-    this.lastCheckT=0;
-    this.checkInterval=5;
-    this.anomalyLog=[];    // [{t, id, msg, severity, detail}]
-    this.ofBaseline=null;
-    this.ofBaselineT=0;
-    this.huntBuf=[];
-    this.residualBuf=[];
-  }
-
-  check(t, sim){
-    if(t-this.lastCheckT < this.checkInterval) return null;
-    this.lastCheckT=t;
-
-    const params=this.pid.getParams();
-    if(params.confidence<30) return null;
-
-    const h=sim.history;
-    if(h.length<50) return null;
-
-    const phase=sim._getPhase();
-    if(phase==='fill'||phase==='drain'||phase==='relay') return null;
-
-    const recent=h.slice(-50);
-    const pv=sim.pv;
-    const SP=sim.SP;
-
-    // === A1: OUTFLOW_SPIKE ===
-    if(this.ofBaseline===null && params.confidence>50){
-      this.ofBaseline=params.outflowEst;
-      this.ofBaselineT=t;
-    }
-    if(this.ofBaseline!==null && t>this.ofBaselineT+10){
-      const ratio=params.outflowEst/Math.max(0.001,this.ofBaseline);
-      if(ratio>1.6){
-        this._addAnomaly(t,'A1','OUTFLOW_SPIKE',
-          `Outflow naik drastis: ${(params.outflowEst*100).toFixed(1)}%/s vs baseline ${(this.ofBaseline*100).toFixed(1)}%/s (+${((ratio-1)*100).toFixed(0)}%). Kemungkinan keran dibuka lebih.`,
-          'high');
-        this.ofBaseline=params.outflowEst; // reset baseline
-      }
-    }
-
-    // === A2: PUMP_WEAK ===
-    const highPumpRecs=recent.filter(r=>r.pumpPct>80&&r.t>sim.kickStartT+2);
-    if(highPumpRecs.length>20){
-      const avgPvRate=highPumpRecs.reduce((s,r)=>s+r.pvRate,0)/highPumpRecs.length;
-      const expectedPvRate=HW.PUMP_GROSS_PPS*(0.9)-params.outflowEst; // pump@90%
-      if(avgPvRate<expectedPvRate*0.45 && expectedPvRate>0){
-        this._addAnomaly(t,'A2','PUMP_WEAK',
-          `Rise rate aktual ${(avgPvRate*100).toFixed(2)}%/s vs expected ${(expectedPvRate*100).toFixed(2)}%/s saat pump>80%. Pompa mungkin lemah atau tersumbat.`,
-          'high');
-      }
-    }
-
-    // === A3: PRED_MISS ===
-    const residual=this.pred.checkResidual(t, pv);
-    if(residual!==null){
-      this.residualBuf.push(residual);
-      if(this.residualBuf.length>6)this.residualBuf.shift();
-      const avgRes=this.residualBuf.reduce((s,v)=>s+v,0)/this.residualBuf.length;
-      if(avgRes>3.5 && params.confidence>50){
-        this._addAnomaly(t,'A3','PRED_MISS',
-          `Prediksi vs aktual mismatch rata-rata ${avgRes.toFixed(2)}%. Plant karakteristik berubah atau ada gangguan eksternal.`,
-          'medium');
-      }
-    }
-
-    // === A4: INTEG_RUNAWAY ===
-    if(Math.abs(sim.integ)>80 && Math.abs(pv-SP)>5 && phase==='pid_tuned'){
-      this._addAnomaly(t,'A4','INTEG_RUNAWAY',
-        `Integrator ${sim.integ.toFixed(1)} (>80) tapi error masih ${(pv-SP).toFixed(1)}%. Anti-windup KC tidak cukup.`,
-        'medium');
-    }
-
-    // === A5: SETTLE_SLOW ===
-    if(sim.settleT===null && t>120 && phase==='pid_tuned' && Math.abs(pv-SP)>HW.DEADBAND*2){
-      const expectedSettle=sim.tunedPu ? sim.tunedPu*8 : 120;
-      if(t>expectedSettle*1.5){
-        this._addAnomaly(t,'A5','SETTLE_SLOW',
-          `PV ${pv.toFixed(1)}% belum settle ke SP=${SP}% setelah ${t.toFixed(0)}s. Expected <${expectedSettle.toFixed(0)}s.`,
-          'low');
-      }
-    }
-
-    // === A6: HUNT_DETECT ===
-    const hunts=sim.huntCount;
-    this.huntBuf.push({t,hunts});
-    if(this.huntBuf.length>3)this.huntBuf.shift();
-    if(this.huntBuf.length>=3){
-      const dHunt=this.huntBuf[2].hunts-this.huntBuf[0].hunts;
-      if(dHunt>=3){
-        this._addAnomaly(t,'A6','HUNT_DETECT',
-          `${dHunt} hunting events dalam ${(this.huntBuf[2].t-this.huntBuf[0].t).toFixed(0)}s. PV oscillasi di sekitar SP. Kp terlalu besar atau noise tinggi.`,
-          'low');
-      }
-    }
-
-    return this.anomalyLog[this.anomalyLog.length-1]||null;
-  }
-
-  _addAnomaly(t, id, type, msg, severity){
-    // Deduplicate — jangan spam anomali yang sama dalam 15s
-    const recent=this.anomalyLog.filter(a=>a.id===id&&t-a.t<15);
-    if(recent.length>0) return;
-    this.anomalyLog.push({t,id,type,msg,severity});
-    if(this.anomalyLog.length>50)this.anomalyLog.shift();
-  }
-
-  getStatus(){
-    if(this.anomalyLog.length===0) return {ok:true};
-    const last=this.anomalyLog[this.anomalyLog.length-1];
-    return {ok:false, last};
-  }
-}
-
-
 </script>
+
 <script>
 // ================================================================
-// AQUAFLOW v10 — REAL-TIME OBSERVER ENGINE
+// AQUAFLOW v10 — REAL-TIME OBSERVER ENGINE (IMPROVED)
 // ================================================================
 
-// --- State ---
-let ws = null;
-let wsConnected = false;
-let espOnline = false;
-let realTimeBuffer = [];   // {ts, t, pv, sp, out, mode, kp, ki, kd, running, alarmHi, alarmLo}
-const MAX_BUFFER = 3000;   // ~5 menit di 10Hz
-let observeStartTime = null;
-let observeT = 0;          // relative time in seconds from first data point
-let lastDataTs = null;
-let dataCount = 0;
-
-// Plant Observer (dari v99)
-let plantId = null;
-let predictor = null;
-let anomalyDet = null;
-let anomalyCount = 0;
-let anomalyLogEl = null;
-
-// Shadow Simulator (twin)
-let shadowSim = null;
-let shadowBootstrapped = false;
-let shadowHistory = [];    // [{t, realPv, simPv}]
-
-// Data Log (untuk export)
-let dataLog = [];          // persistent log rows
-let predAccBuf = [];       // untuk MAPE
-let lastPredCheckpoints = {}; // {wallTs: {pv_pred, t_obs}}
-
-// Chart window
-let chartWindowSec = 120;
-let predHorizonSec = 30;
-
-// Rate tracking
-let rateCountBuf = [];
+let ws=null,wsConnected=false,espOnline=false;
+let realTimeBuffer=[];
+const MAX_BUFFER=3000;
+let observeStartTime=null,observeT=0,lastDataTs=null,dataCount=0;
+let plantId=null,predictor=null,anomalyDet=null,anomalyCount=0,anomalyLogEl=null;
+let shadowSim=null,shadowBootstrapped=false,shadowHistory=[];
+let dataLog=[],predAccBuf=[],lastPredCheckpoints={};
+let chartWindowSec=60,predHorizonSec=30;
+let rateCountBuf=[];
+let atResult=null,atMethod='zn',atBackupPID=null,atPushDone=false;
+let pushTabMode='online';
 
 // ================================================================
-// WEBSOCKET CONNECTION
+// WEBSOCKET
 // ================================================================
-function toggleConnect() {
-  if (wsConnected || ws) {
-    disconnect();
-  } else {
-    connect();
-  }
-}
+function toggleConnect(){if(wsConnected||ws)disconnect();else connect();}
 
-function connect() {
-  let url = document.getElementById('wsUrlInput').value.trim();
-  if (!url) {
-    // Auto-detect: sama domain dengan halaman ini
-    url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
-  }
+function connect(){
+  let url=document.getElementById('wsUrlInput').value.trim();
+  if(!url)url=(location.protocol==='https:'?'wss://':'ws://')+location.host;
   setConnState('connecting');
-  try {
-    ws = new WebSocket(url);
-    ws.onopen = () => {
-      wsConnected = true;
-      setConnState('online');
-      if (!plantId) initObserver();
-    };
-    ws.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.type === 'state') onStateData(msg.data);
-      } catch(err) {}
-    };
-    ws.onclose = () => {
-      wsConnected = false;
-      espOnline = false;
-      setConnState('offline');
-      ws = null;
-      // Auto reconnect setelah 5s
-      setTimeout(() => { if (!wsConnected) connect(); }, 5000);
-    };
-    ws.onerror = () => ws.close();
-  } catch(err) {
-    setConnState('offline');
-  }
+  try{
+    ws=new WebSocket(url);
+    ws.onopen=()=>{wsConnected=true;setConnState('online');if(!plantId)initObserver();};
+    ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='state')onStateData(msg.data);}catch(err){}};
+    ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;setTimeout(()=>{if(!wsConnected)connect();},5000);};
+    ws.onerror=()=>ws.close();
+  }catch(err){setConnState('offline');}
 }
 
-function disconnect() {
-  if (ws) { ws.close(); ws = null; }
-  wsConnected = false;
-  setConnState('offline');
+function disconnect(){if(ws){ws.close();ws=null;}wsConnected=false;setConnState('offline');}
+
+function setConnState(state){
+  const dot=document.getElementById('connDot');
+  const label=document.getElementById('connLabel');
+  const btn=document.getElementById('btnConn');
+  dot.className='conn-dot '+(state==='online'?'online':state==='connecting'?'connecting':'');
+  label.className='conn-label '+state;
+  label.textContent=state==='online'?'CONNECTED':state==='connecting'?'CONNECTING...':'DISCONNECTED';
+  btn.textContent=(state==='online'||state==='connecting')?'DISCONNECT':'CONNECT';
+  btn.className='btn-conn'+(state==='online'?' active':'');
 }
 
-function setConnState(state) {
-  const dot = document.getElementById('connDot');
-  const label = document.getElementById('connLabel');
-  const btn = document.getElementById('btnConn');
-  dot.className = 'conn-dot ' + (state === 'online' ? 'online' : state === 'connecting' ? 'connecting' : '');
-  label.className = 'conn-label ' + state;
-  label.textContent = state === 'online' ? 'CONNECTED' : state === 'connecting' ? 'CONNECTING...' : 'DISCONNECTED';
-  btn.textContent = (state === 'online' || state === 'connecting') ? 'DISCONNECT' : 'CONNECT';
-  btn.className = 'btn-conn' + (state === 'online' ? ' active' : '');
-}
-
-// ================================================================
-// INIT OBSERVER ENGINES
-// ================================================================
-function initObserver() {
-  plantId = new PlantIdentifier();
-  predictor = new Predictor(plantId);
-  anomalyDet = new AnomalyDetector(plantId, predictor);
-  anomalyLogEl = document.getElementById('anomalyLog');
-  anomalyCount = 0;
-  realTimeBuffer = [];
-  observeStartTime = null;
-  observeT = 0;
-  shadowBootstrapped = false;
-  shadowHistory = [];
+function initObserver(){
+  plantId=new PlantIdentifier();
+  predictor=new Predictor(plantId);
+  anomalyDet=new AnomalyDetector(plantId,predictor);
+  anomalyLogEl=document.getElementById('anomalyLog');
+  anomalyCount=0;
+  realTimeBuffer=[];observeStartTime=null;observeT=0;
+  shadowBootstrapped=false;shadowHistory=[];
   console.log('[v10] Observer initialized');
 }
 
 // ================================================================
-// MAIN DATA HANDLER — dipanggil setiap kali ada data dari ESP
+// MAIN DATA HANDLER
 // ================================================================
-function onStateData(data) {
-  const wallTs = Date.now();
-  const realEspOnline = data.online;
-
-  // Update ESP status
-  if (espOnline !== realEspOnline) {
-    espOnline = realEspOnline;
-    updateEspBadge();
-  }
-  if (!realEspOnline) {
-    setLCD('ESP OFFLINE         ', '                    ', 'No data from device ','                    ');
-    return;
-  }
-
-  // Init waktu
-  if (observeStartTime === null) {
-    observeStartTime = wallTs;
-    observeT = 0;
-  } else {
-    observeT = (wallTs - observeStartTime) / 1000;
-  }
-
-  // Rate tracking
+function onStateData(data){
+  const wallTs=Date.now();
+  const realEspOnline=data.online;
+  if(espOnline!==realEspOnline){espOnline=realEspOnline;updateEspBadge();}
+  if(!realEspOnline){setLCD('ESP OFFLINE         ','                    ','No data from device ','                    ');return;}
+  if(observeStartTime===null){observeStartTime=wallTs;observeT=0;}
+  else observeT=(wallTs-observeStartTime)/1000;
   rateCountBuf.push(wallTs);
-  rateCountBuf = rateCountBuf.filter(t => wallTs - t < 5000);
-
-  lastDataTs = wallTs;
-  dataCount++;
-
-  const pv = data.pv;
-  const sp = data.sp;
-  const outPct = data.out || 0;
-  const mode = data.mode || '?';
-  const kp = data.kp || 0;
-  const ki = data.ki || 0;
-  const kd = data.kd || 0;
-  const alarmHi = data.alarmHi || 90;
-  const alarmLo = data.alarmLo || 10;
-
-  // Compute PV rate (dari buffer)
-  let pvRate = 0;
-  if (realTimeBuffer.length >= 3) {
-    const prev = realTimeBuffer[realTimeBuffer.length - 3];
-    const dtSec = (wallTs - prev.wallTs) / 1000;
-    if (dtSec > 0.05) pvRate = (pv - prev.pv) / dtSec;
+  rateCountBuf=rateCountBuf.filter(t=>wallTs-t<5000);
+  lastDataTs=wallTs;dataCount++;
+  const pv=data.pv,sp=data.sp,outPct=data.out||0,mode=data.mode||'?';
+  const kp=data.kp||0,ki=data.ki||0,kd=data.kd||0;
+  const alarmHi=data.alarmHi||90,alarmLo=data.alarmLo||10;
+  let pvRate=0;
+  if(realTimeBuffer.length>=3){
+    const prev=realTimeBuffer[realTimeBuffer.length-3];
+    const dtSec=(wallTs-prev.wallTs)/1000;
+    if(dtSec>0.05)pvRate=(pv-prev.pv)/dtSec;
   }
-
-  // Push to buffer
-  const rec = { wallTs, t: observeT, pv, sp, out: outPct, mode, kp, ki, kd, pvRate, alarmHi, alarmLo };
+  const rec={wallTs,t:observeT,pv,sp,out:outPct,mode,kp,ki,kd,pvRate,alarmHi,alarmLo};
   realTimeBuffer.push(rec);
-  if (realTimeBuffer.length > MAX_BUFFER) realTimeBuffer.shift();
-
-  // Update PlantIdentifier
-  plantId.update(observeT, pv, outPct, pvRate);
-
-  // Shadow simulator step
+  if(realTimeBuffer.length>MAX_BUFFER)realTimeBuffer.shift();
+  plantId.update(observeT,pv,outPct,pvRate);
   stepShadowSim(rec);
-
-  // Get plant params
-  const params = plantId.getParams();
-  const conf = params.confidence;
-
-  // Get prediction
-  let predResult = [];
-  if (conf >= 25) {
-    predResult = predictFromReal(observeT, pv, sp, kp, ki, kd, params, predHorizonSec);
+  const params=plantId.getParams();
+  const conf=params.confidence;
+  let predResult=[];
+  if(conf>=25)predResult=predictFromReal(observeT,pv,sp,kp,ki,kd,params,predHorizonSec);
+  const simProxy=makeSimProxy(rec,params);
+  const anom=anomalyDet.check(observeT,simProxy);
+  if(anom)handleAnomaly(anom);
+  const predNow=predResult.find(p=>Math.abs(p.t-(observeT+30))<1);
+  if(dataLog.length===0||(wallTs-dataLog[dataLog.length-1]._wallTs)>=2000){
+    dataLog.push({_wallTs:wallTs,ts:new Date(wallTs).toLocaleTimeString('id-ID'),t:observeT.toFixed(1),pv:pv.toFixed(2),sp:sp.toFixed(2),out:outPct.toFixed(1),mode,kp:kp.toFixed(3),ki:ki.toFixed(5),kd:kd.toFixed(5),pvRate:pvRate.toFixed(4),ofEst:params.outflowEst?(params.outflowEst*100).toFixed(3):'—',pred30:predNow?predNow.pv.toFixed(2):'—',conf:conf.toFixed(0),anomaly:anom?anom.id:''});
+    if(dataLog.length>5000)dataLog.shift();
+    appendLogRow(dataLog[dataLog.length-1],dataLog.length);
   }
-
-  // Anomaly check (pakai proxy sim object)
-  const simProxy = makeSimProxy(rec, params);
-  const anom = anomalyDet.check(observeT, simProxy);
-  if (anom) handleAnomaly(anom);
-
-  // Log row setiap 2 detik
-  const predNow = predResult.find(p => Math.abs(p.t - (observeT + 30)) < 1);
-  if (dataLog.length === 0 || (wallTs - dataLog[dataLog.length-1]._wallTs) >= 2000) {
-    dataLog.push({
-      _wallTs: wallTs,
-      ts: new Date(wallTs).toLocaleTimeString('id-ID'),
-      t: observeT.toFixed(1),
-      pv: pv.toFixed(2), sp: sp.toFixed(2), out: outPct.toFixed(1),
-      mode, kp: kp.toFixed(3), ki: ki.toFixed(5), kd: kd.toFixed(5),
-      pvRate: pvRate.toFixed(4),
-      ofEst: params.outflowEst ? (params.outflowEst * 100).toFixed(3) : '—',
-      pred30: predNow ? predNow.pv.toFixed(2) : '—',
-      conf: conf.toFixed(0),
-      anomaly: anom ? anom.id : ''
-    });
-    if (dataLog.length > 5000) dataLog.shift();
-    appendLogRow(dataLog[dataLog.length - 1], dataLog.length);
-  }
-
-  // Check pred accuracy
-  checkPredAccuracy(wallTs, pv);
-  if (predResult.length > 1) storePredCheckpoints(wallTs, predResult);
-
-  // Update UI
-  updateStatsUI(rec, pvRate);
-  updateObserverUI(params, conf);
-  updatePredUI(predResult, conf);
+  checkPredAccuracy(wallTs,pv);
+  if(predResult.length>1)storePredCheckpoints(wallTs,predResult);
+  updateStatsUI(rec,pvRate);
+  updateObserverUI(params,conf);
+  updatePredUI(predResult,conf);
   updateMainChart(predResult);
   updateShadowChart();
-  updateLCDFromReal(rec, conf, params);
+  updateLCDFromReal(rec,conf,params);
   updateMetrics();
 }
 
-// ================================================================
-// PREDICTION FROM REAL DATA (tanpa AquaFlowSim object)
-// ================================================================
-function predictFromReal(tNow, pvNow, SP, Kp, Ki, Kd, params, horizonS) {
-  const outflow = params.outflowEst;
-  const uncertainty = Math.max(0.05, (100 - params.confidence) / 100 * 0.3);
-  let pvP = pvNow;
-  let integP = 0; // simplified — tidak ada integ state real
-  const Ts = 0.5;
-  const nSteps = Math.round(horizonS / Ts);
-  const result = [{ t: tNow, pv: pvP, bandLo: pvP, bandHi: pvP }];
-
-  for (let i = 1; i <= nSteps; i++) {
-    const tP = tNow + i * Ts;
-    const e = SP - pvP;
-    const inDB = Math.abs(e) < (HW.DEADBAND || 1.5);
-    const eC = inDB ? 0 : Math.max(-25, Math.min(25, e));
-    const uUnsat = Kp * eC + integP;
-    const uSat = Math.max(0, Math.min(100, uUnsat));
-    const wErr = uSat - uUnsat;
-    if (!inDB) {
-      integP += Ki * eC * Ts + 1.2 * wErr * Ts;
-      integP = Math.max(-100, Math.min(100, integP));
-    }
-    const grossPPS = HW.PUMP_GROSS_PPS || 0.5;
-    const netRate = grossPPS * (uSat / 100) - outflow;
-    pvP = Math.max(0, Math.min(100, pvP + netRate * Ts));
-    const bandW = uncertainty * i * Ts * 0.15;
-    result.push({
-      t: tP, pv: pvP,
-      bandLo: Math.max(0, pvP - bandW),
-      bandHi: Math.min(100, pvP + bandW)
-    });
+function predictFromReal(tNow,pvNow,SP,Kp,Ki,Kd,params,horizonS){
+  const outflow=params.outflowEst;
+  const uncertainty=Math.max(0.05,(100-params.confidence)/100*0.3);
+  let pvP=pvNow,integP=0;
+  const Ts=0.5,nSteps=Math.round(horizonS/Ts);
+  const result=[{t:tNow,pv:pvP,bandLo:pvP,bandHi:pvP}];
+  for(let i=1;i<=nSteps;i++){
+    const tP=tNow+i*Ts,e=SP-pvP;
+    integP+=e*Ts;
+    const u=cf(Kp*e+Ki*integP,0,100);
+    const fr=pwmToFillRate(pctToPWM(u),outflow);
+    pvP=cf(pvP+fr*Ts,0,100);
+    const spread=uncertainty*Math.sqrt(i)*2;
+    result.push({t:tP,pv:pvP,bandLo:cf(pvP-spread,0,100),bandHi:cf(pvP+spread,0,100)});
   }
   return result;
 }
 
-// ================================================================
-// SHADOW SIMULATOR — mirror real plant behaviour
-// ================================================================
-function stepShadowSim(rec) {
-  const params = plantId ? plantId.getParams() : null;
-
-  // Bootstrap shadow sim saat confidence cukup
-  if (!shadowBootstrapped && params && params.confidence >= 30) {
-    const cfg = {
-      SP: rec.sp,
-      pvStart: rec.pv,
-      outflow: params.outflowEst > 0 ? params.outflowEst : 0.25,
-      mode: 'manual_pid',
-      Kp: rec.kp > 0 ? rec.kp : 4,
-      Ki: rec.ki > 0 ? rec.ki : 0.05,
-      Kd: rec.kd || 0,
-      noise: 0.15,
-      alarmHi: rec.alarmHi || 90,
-      alarmLo: rec.alarmLo || 10,
-      seed: 42
-    };
-    shadowSim = new AquaFlowSim(cfg);
-    shadowBootstrapped = true;
-    document.getElementById('shadowStatus').textContent =
-      `Shadow sim aktif — SP=${rec.sp.toFixed(1)}%, Kp=${cfg.Kp.toFixed(2)}, Kp-plant=${params.Kplant ? params.Kplant.toFixed(3) : '?'}, outflow=${(cfg.outflow * 100).toFixed(2)}%/s`;
+function stepShadowSim(rec){
+  if(!shadowBootstrapped||shadowSim===null){
+    const params=plantId.getParams();
+    if(params.confidence<20)return;
+    const cfg={SP:rec.sp,pvStart:rec.pv,outflow:params.outflowEst>0?params.outflowEst:0.25,mode:'manual_pid',Kp:rec.kp,Ki:rec.ki,Kd:rec.kd,noise:0.1,alarmHi:rec.alarmHi,alarmLo:rec.alarmLo,seed:42};
+    shadowSim=new AquaFlowSim(cfg);shadowBootstrapped=true;
+    document.getElementById('shadowSyncBadge').textContent='SYNCED';
+    document.getElementById('shadowSyncBadge').className='badge badge-green';
   }
-
-  // Update SP dan Kp di shadow sim dari real data
-  if (shadowSim) {
-    shadowSim.SP = rec.sp;
-    if (rec.kp > 0) { shadowSim.Kp = rec.kp; shadowSim.Ki = rec.ki; shadowSim.Kd = rec.kd; }
-
-    // Step shadow sim (4 steps per real data point)
-    for (let i = 0; i < 4; i++) {
-      if (shadowSim.t < rec.t + 4) shadowSim.step();
-    }
-
-    const sh = shadowSim.history;
-    if (sh.length > 0) {
-      const last = sh[sh.length - 1];
-      const drift = Math.abs(rec.pv - last.pv);
-      shadowHistory.push({ t: rec.t, realPv: rec.pv, simPv: last.pv });
-      if (shadowHistory.length > 500) shadowHistory.shift();
-
-      document.getElementById('simPvVal').textContent = last.pv.toFixed(1) + '%';
-      document.getElementById('simDriftVal').textContent = drift.toFixed(2) + '%';
-      document.getElementById('simDriftVal').style.color = drift < 2 ? 'var(--green)' : drift < 5 ? 'var(--yellow)' : 'var(--red)';
-      document.getElementById('simOutVal').textContent = last.pumpPct + '%';
-
-      const phaseBadges = {
-        fill: '<span class="phase-badge ph-observe">FILL</span>',
-        drain: '<span class="phase-badge ph-observe">DRAIN</span>',
-        relay: '<span class="phase-badge ph-learning">RELAY</span>',
-        pid: '<span class="phase-badge ph-predicting">PID</span>',
-        pid_tuned: '<span class="phase-badge ph-predicting">PID✓</span>',
-      };
-      document.getElementById('simPhaseEl').innerHTML = phaseBadges[last.phase] || last.phase;
-    }
-
-    if (shadowSim.settleT !== null)
-      document.getElementById('simSettleVal').textContent = shadowSim.settleT.toFixed(0) + 's';
-    document.getElementById('simOsVal').textContent = shadowSim.overshoot.toFixed(2) + '%';
-  }
+  shadowSim.SP=rec.sp;shadowSim.Kp=rec.kp;shadowSim.Ki=rec.ki;shadowSim.Kd=rec.kd;
+  for(let i=0;i<10;i++)shadowSim.step();
+  shadowHistory.push({t:rec.t,realPv:rec.pv,simPv:shadowSim.pv});
+  if(shadowHistory.length>600)shadowHistory.shift();
 }
 
-// ================================================================
-// ANOMALY — proxy object agar AnomalyDetector bisa jalan
-// ================================================================
-function makeSimProxy(rec, params) {
-  const h = realTimeBuffer.map(r => ({
-    t: r.t, pv: r.pv, sp: r.sp, pumpPct: r.out,
-    pvRate: r.pvRate, phase: 'pid', integ: 0
-  }));
-  return {
-    t: rec.t,
-    pv: rec.pv,
-    SP: rec.sp,
-    Kp: rec.kp,
-    Ki: rec.ki,
-    pv: rec.pv,
-    pvRate: rec.pvRate,
-    alarmHi: rec.alarmHi,
-    alarmLo: rec.alarmLo,
-    history: h,
-    kickStartT: 0,
-    _getPhase() { return 'pid'; }
-  };
-}
+function makeSimProxy(rec,params){return{pv:rec.pv,sp:rec.sp,out:rec.out,mode:rec.mode,kp:rec.kp,ki:rec.ki,kd:rec.kd};}
 
-// ================================================================
-// HANDLE ANOMALY
-// ================================================================
-function handleAnomaly(anom) {
+function handleAnomaly(anom){
   anomalyCount++;
-  const sevClass = { high: 'anomaly-hi', medium: 'anomaly-med', low: 'anomaly-lo' }[anom.severity] || 'anomaly-med';
-  const sevIcon = { high: '🔴', medium: '🟡', low: '🔵' }[anom.severity] || '🟡';
-  const row = document.createElement('div');
-  row.className = `anomaly-row ${sevClass}`;
-  row.innerHTML = `<span class="anomaly-time">${formatTime(anom.t)}</span><span class="anomaly-msg">${sevIcon} <b>[${anom.id}]</b> ${anom.msg}</span>`;
-  if (anomalyLogEl) {
-    anomalyLogEl.insertBefore(row, anomalyLogEl.firstChild);
-    while (anomalyLogEl.children.length > 30) anomalyLogEl.removeChild(anomalyLogEl.lastChild);
-  }
-  const statusEl = document.getElementById('anomalyStatus');
-  const colorMap = { high: '#2a0505', medium: '#1a1505' };
-  statusEl.style.background = colorMap[anom.severity] || '#051a0a';
-  statusEl.textContent = `${sevIcon} ${anom.id}: ${anom.msg.substring(0, 80)}`;
+  document.getElementById('anomCountBadge').textContent=anomalyCount+' events';
+  const el=document.getElementById('anomalyLog');
+  const cls=anom.sev==='error'?'anom-error':'anom-warn';
+  const ts=new Date().toLocaleTimeString('id-ID');
+  el.innerHTML=`<div class="anom-entry ${cls}">[${ts}] <b>${anom.id}</b>: ${anom.msg}</div>`+el.innerHTML;
 }
 
-function clearAnomalies() {
-  if (anomalyDet) anomalyDet.anomalyLog = [];
-  if (anomalyLogEl) anomalyLogEl.innerHTML = '';
-  document.getElementById('anomalyStatus').textContent = '✅ Cleared';
-  document.getElementById('anomalyStatus').style.background = '#051a0a';
-  anomalyCount = 0;
+function clearAnomalies(){
+  anomalyCount=0;
+  document.getElementById('anomCountBadge').textContent='0 events';
+  document.getElementById('anomalyLog').innerHTML='<div style="color:var(--muted);font-size:10px;text-align:center;padding:10px;">No anomalies detected</div>';
 }
 
-// ================================================================
-// PREDICTION ACCURACY (MAPE)
-// ================================================================
-function storePredCheckpoints(wallTs, predResult) {
-  predResult.forEach(p => {
-    const futureWallTs = wallTs + (p.t - (observeT)) * 1000;
-    const key = Math.round(futureWallTs / 1000) * 1000;
-    lastPredCheckpoints[key] = p.pv;
+function storePredCheckpoints(wallTs,predResult){
+  predResult.forEach(p=>{
+    const futureWallTs=wallTs+(p.t-observeT)*1000;
+    lastPredCheckpoints[futureWallTs.toFixed(-3)]={pv_pred:p.pv,t_obs:p.t};
   });
-  // Cleanup old
-  const cutoff = Date.now() - 120000;
-  Object.keys(lastPredCheckpoints).forEach(k => { if (parseInt(k) < cutoff) delete lastPredCheckpoints[k]; });
 }
 
-function checkPredAccuracy(wallTs, pvActual) {
-  const key = Math.round(wallTs / 1000) * 1000;
-  if (lastPredCheckpoints[key] !== undefined) {
-    const pred = lastPredCheckpoints[key];
-    const ape = Math.abs(pvActual - pred) / Math.max(0.1, Math.abs(pvActual)) * 100;
-    predAccBuf.push(ape);
-    if (predAccBuf.length > 30) predAccBuf.shift();
+function checkPredAccuracy(wallTs,pvActual){
+  const key=Math.round(wallTs/1000)*1000;
+  const cp=lastPredCheckpoints[key];
+  if(cp){
+    const err=Math.abs(pvActual-cp.pv_pred);
+    predAccBuf.push(err/Math.max(pvActual,1)*100);
+    if(predAccBuf.length>50)predAccBuf.shift();
     delete lastPredCheckpoints[key];
   }
 }
 
 // ================================================================
-// UI UPDATES
+// UI UPDATE FUNCTIONS
 // ================================================================
-function updateStatsUI(rec, pvRate) {
-  document.getElementById('pvVal').textContent = rec.pv.toFixed(1);
-  document.getElementById('spVal').textContent = rec.sp.toFixed(1);
-  document.getElementById('outVal').textContent = rec.out.toFixed(1);
-  document.getElementById('modeVal').textContent = rec.mode || '?';
-  document.getElementById('pvBar').style.width = rec.pv + '%';
-  document.getElementById('spBar').style.width = rec.sp + '%';
-  document.getElementById('outBar').style.width = rec.out + '%';
-
-  const err = rec.sp - rec.pv;
-  document.getElementById('errVal').textContent = err.toFixed(2);
-  document.getElementById('errBar').style.width = Math.min(100, Math.abs(err) * 2) + '%';
-
-  document.getElementById('kpVal').textContent = rec.kp.toFixed(3);
-  document.getElementById('kiVal').textContent = rec.ki.toFixed(5);
-  document.getElementById('kdVal').textContent = rec.kd.toFixed(5);
-
-  const trendEl = document.getElementById('pvTrend');
-  if (pvRate > 0.05) { trendEl.textContent = '↑ +' + (pvRate * 100).toFixed(2) + '%/s'; trendEl.style.color = 'var(--green)'; }
-  else if (pvRate < -0.05) { trendEl.textContent = '↓ ' + (pvRate * 100).toFixed(2) + '%/s'; trendEl.style.color = 'var(--red)'; }
-  else { trendEl.textContent = '→ stable'; trendEl.style.color = 'var(--muted)'; }
-  document.getElementById('pvRateDisplay').textContent = `dPV/dt: ${(pvRate*100).toFixed(3)}%/s`;
-
-  document.getElementById('mAlarms').textContent = rec.alarmHi + '/' + rec.alarmLo;
-
-  // Phase badge
-  const err2 = Math.abs(rec.sp - rec.pv);
-  let phaseBadge = '';
-  if (rec.pv >= rec.alarmHi) phaseBadge = '<span class="phase-badge ph-alarm">ALARM HI</span>';
-  else if (rec.pv <= rec.alarmLo) phaseBadge = '<span class="phase-badge ph-alarm">ALARM LO</span>';
-  else if (err2 < 1.5) phaseBadge = '<span class="phase-badge ph-predicting">STABLE</span>';
-  else if (pvRate > 0.02) phaseBadge = '<span class="phase-badge ph-observe">FILLING</span>';
-  else if (pvRate < -0.02) phaseBadge = '<span class="phase-badge ph-alarm">DRAINING</span>';
-  else phaseBadge = '<span class="phase-badge ph-observe">OBSERVING</span>';
-  document.getElementById('phaseEl').innerHTML = phaseBadge;
-
-  document.getElementById('lastDataTime').textContent = 'Last: ' + new Date().toLocaleTimeString('id-ID');
+function updateStatsUI(rec,pvRate){
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('sPV',rec.pv.toFixed(1));
+  set('sSP',rec.sp.toFixed(1));
+  set('sOUT',rec.out.toFixed(1));
+  const err=rec.sp-rec.pv;
+  set('sERR',err.toFixed(1));
+  document.getElementById('sERR').style.color=Math.abs(err)<2?'var(--green)':Math.abs(err)<10?'var(--yellow)':'var(--red)';
+  set('sMODE',rec.mode.toUpperCase());
+  set('sOBST',formatTime(observeT));
+  set('sDataCount',dataCount+' pts');
+  const trendArrow=pvRate>0.1?'▲':pvRate<-0.1?'▼':'→';
+  set('sPVTrend',trendArrow+' '+(pvRate>0?'+':'')+pvRate.toFixed(2)+'%/s');
+  set('kpVal',rec.kp.toFixed(4));
+  set('kiVal',rec.ki.toFixed(5));
+  set('kdVal',rec.kd.toFixed(5));
+  // Rate
+  const hz=rateCountBuf.length/5;
+  const connRate=document.getElementById('connRate');
+  if(connRate)connRate.textContent=`Data: ${dataCount} pts · ${hz.toFixed(1)} Hz`;
+  const rateBadge=document.getElementById('dataRateBadge');
+  if(rateBadge)rateBadge.textContent=hz.toFixed(1)+' Hz';
 }
 
-function updateObserverUI(params, conf) {
-  document.getElementById('confVal').textContent = conf.toFixed(0) + '%';
-  document.getElementById('confBar').style.width = conf + '%';
-  document.getElementById('confBar').style.background = conf >= 70 ? 'var(--green)' : conf >= 40 ? 'var(--yellow)' : 'var(--blue)';
-
-  if (params.outflowEst != null)
-    document.getElementById('ofEstVal').textContent = (params.outflowEst * 100).toFixed(3) + ' %/s';
-  if (params.Kplant != null)
-    document.getElementById('kplantVal').textContent = params.Kplant.toFixed(3);
-  if (params.deadTime != null)
-    document.getElementById('dtVal').textContent = params.deadTime.toFixed(2) + 's';
-
-  // Rise rate dari buffer
-  if (realTimeBuffer.length >= 10) {
-    const recent = realTimeBuffer.slice(-10);
-    const avgRate = recent.reduce((s, r) => s + r.pvRate, 0) / recent.length;
-    document.getElementById('riseRateVal').textContent = (avgRate * 100).toFixed(3) + ' %/s';
-  }
-
-  const status = conf < 15 ? 'Collecting data... (' + realTimeBuffer.length + ' samples)'
-    : conf < 40 ? 'Learning plant characteristics...'
-    : conf < 70 ? 'Plant model building up...'
-    : 'Plant identified — prediction active ✓';
-  document.getElementById('obsStatus').textContent = status;
-  document.getElementById('obsStatus').style.color = conf >= 70 ? 'var(--green)' : conf >= 40 ? 'var(--yellow)' : 'var(--muted)';
-
-  // Update autotune UI
-  const lastRec2 = realTimeBuffer.length > 0 ? realTimeBuffer[realTimeBuffer.length - 1] : null;
-  updateATUI(params, conf, lastRec2);
+function updateObserverUI(params,conf){
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('obsConf',conf.toFixed(0)+'%');
+  document.getElementById('obsConf').style.color=conf>=70?'var(--green)':conf>=40?'var(--yellow)':'var(--red)';
+  set('obsK',params.Kplant?params.Kplant.toFixed(3):'—');
+  set('obsL',params.deadTime.toFixed(2)+'s');
+  set('obsOf',params.outflowEst?(params.outflowEst*100).toFixed(2)+'%/s':'—');
+  const lastRec=realTimeBuffer.length>0?realTimeBuffer[realTimeBuffer.length-1]:null;
+  if(lastRec)set('obsPVRate',lastRec.pvRate.toFixed(3)+'%/s');
+  updateATUI(params,conf,lastRec);
 }
 
-function updatePredUI(predResult, conf) {
-  if (predResult.length < 2 || conf < 25) {
-    document.getElementById('predStatus').textContent = 'Confidence ' + conf.toFixed(0) + '% — perlu ≥25% untuk prediksi';
+function updatePredUI(predResult,conf){
+  if(predResult.length===0){
+    document.getElementById('predPV').textContent='—';
     return;
   }
-  const p10 = predResult.find(p => p.t >= observeT + 9.5);
-  const p30 = predResult.find(p => p.t >= observeT + 29);
-  const p60 = predResult.find(p => p.t >= observeT + 59);
-  if (p10) document.getElementById('pred10Val').textContent = p10.pv.toFixed(1);
-  if (p30) document.getElementById('pred30Val').textContent = p30.pv.toFixed(1);
-  if (p60) document.getElementById('pred60Val').textContent = p60.pv.toFixed(1);
-
-  if (predAccBuf.length >= 3) {
-    const mape = predAccBuf.reduce((s, v) => s + v, 0) / predAccBuf.length;
-    document.getElementById('predAccVal').textContent = mape.toFixed(2) + '%';
-    document.getElementById('predAccVal').style.color = mape < 5 ? 'var(--green)' : mape < 15 ? 'var(--yellow)' : 'var(--red)';
-  }
-  document.getElementById('predStatus').textContent = `Horizon ${predHorizonSec}s aktif — ${predResult.length} titik prediksi`;
-}
-
-function updateMetrics() {
-  document.getElementById('mRecords').textContent = dataLog.length;
-  document.getElementById('recCountBadge').textContent = dataLog.length + ' records';
-  document.getElementById('logCountBadge').textContent = dataLog.length + ' records';
-  document.getElementById('mAnomalies').textContent = anomalyCount;
-
-  const hz = rateCountBuf.length / 5;
-  document.getElementById('mDataRate').textContent = hz.toFixed(1) + ' Hz';
-
-  if (observeStartTime) {
-    const upSec = (Date.now() - observeStartTime) / 1000;
-    document.getElementById('mUptime').textContent = upSec > 60
-      ? (upSec / 60).toFixed(1) + 'm'
-      : upSec.toFixed(0) + 's';
+  const last=predResult[predResult.length-1];
+  document.getElementById('predPV').textContent=last.pv.toFixed(1)+'%';
+  document.getElementById('predBand').textContent=`[${last.bandLo.toFixed(1)}, ${last.bandHi.toFixed(1)}]`;
+  const mape=predAccBuf.length>5?predAccBuf.reduce((s,v)=>s+v,0)/predAccBuf.length:null;
+  document.getElementById('predMAPE').textContent=mape?mape.toFixed(1)+'%':'—';
+  const lastRec=realTimeBuffer.length>0?realTimeBuffer[realTimeBuffer.length-1]:null;
+  if(lastRec){
+    const sp=lastRec.sp,pv=lastRec.pv;
+    const trend=last.pv>pv+1?'▲ Naik':last.pv<pv-1?'▼ Turun':'→ Stabil';
+    const approachSP=Math.abs(last.pv-sp)<Math.abs(pv-sp);
+    document.getElementById('predTrend').textContent=trend+(approachSP?' · → SP':'');
   }
 }
 
-function updateEspBadge() {
-  const el = document.getElementById('espStatus');
-  el.textContent = 'ESP: ' + (espOnline ? '⬤ ONLINE' : '⬤ OFFLINE');
-  el.className = 'conn-esp ' + (espOnline ? 'online' : '');
+function updateMetrics(){
+  const mape=predAccBuf.length>5?predAccBuf.reduce((s,v)=>s+v,0)/predAccBuf.length:null;
+  document.getElementById('metMAPE').textContent=mape?mape.toFixed(2)+'%':'—';
+  const errBuf=realTimeBuffer.slice(-50).map(r=>Math.abs(r.sp-r.pv));
+  const avgErr=errBuf.length>0?errBuf.reduce((s,v)=>s+v,0)/errBuf.length:null;
+  document.getElementById('metAvgErr').textContent=avgErr?avgErr.toFixed(2)+'%':'—';
+  document.getElementById('metAnomRate').textContent=anomalyCount>0?(anomalyCount/(observeT/60)).toFixed(2)+'/min':'0/min';
+  document.getElementById('metUptime').textContent=observeT>0?formatTime(observeT):'—';
 }
 
-// ================================================================
-// MAIN CHART (realtime PV + SP + OUT + Prediksi)
-// ================================================================
-function updateMainChart(predResult) {
-  if (realTimeBuffer.length < 2) return;
-  const now = observeT;
-  const winSec = chartWindowSec > 0 ? chartWindowSec : now + 10;
-  const tMin = chartWindowSec > 0 ? Math.max(0, now - winSec) : 0;
-  const tMax = now + Math.max(5, predHorizonSec);
-
-  const buf = realTimeBuffer.filter(r => r.t >= tMin);
-  const step = Math.max(1, Math.floor(buf.length / 600));
-
-  const pvData = buf.filter((_, i) => i % step === 0).map(r => ({ x: r.t, y: r.pv }));
-  const spData = buf.filter((_, i) => i % step === 0).map(r => ({ x: r.t, y: r.sp }));
-  const outData = buf.filter((_, i) => i % step === 0).map(r => ({ x: r.t, y: r.out }));
-
-  const datasets = [
-    { data: spData, color: 'rgba(245,158,11,0.7)', width: 1.5, dash: [6, 4] },
-    { data: outData, color: 'rgba(16,185,129,0.5)', width: 1.2, dash: [3, 2] },
-    { data: pvData, color: '#00d4b4', width: 2.5 },
-  ];
-
-  // Prediksi line
-  if (predResult.length > 1) {
-    const predLine = predResult.map(p => ({ x: p.t, y: p.pv }));
-    const bandHi = predResult.map(p => ({ x: p.t, y: p.bandHi }));
-    const bandLo = predResult.map(p => ({ x: p.t, y: p.bandLo }));
-    datasets.push({ data: predLine, color: 'rgba(167,139,250,0.9)', width: 1.5, dash: [4, 3] });
-    datasets.push({ data: bandHi, color: 'rgba(167,139,250,0.2)', width: 0.5 });
-    datasets.push({ data: bandLo, color: 'rgba(167,139,250,0.2)', width: 0.5 });
+function updateEspBadge(){
+  const badge=document.getElementById('espBadge');
+  const onlineBadge=document.getElementById('espOnlineBadge');
+  if(espOnline){
+    badge.className='badge badge-green';badge.textContent='ESP ONLINE';
+    if(onlineBadge){onlineBadge.textContent='ONLINE';onlineBadge.style.color='var(--green)';}
+  }else{
+    badge.className='badge badge-red';badge.textContent='ESP OFFLINE';
+    if(onlineBadge){onlineBadge.textContent='OFFLINE';onlineBadge.style.color='var(--red)';}
   }
-
-  drawChart('mainChart', datasets, { xMin: tMin, xMax: tMax, yMin: 0, yMax: 105 });
 }
 
-function updateShadowChart() {
-  if (shadowHistory.length < 2) return;
-  const step = Math.max(1, Math.floor(shadowHistory.length / 300));
-  const realLine = shadowHistory.filter((_, i) => i % step === 0).map(r => ({ x: r.t, y: r.realPv }));
-  const simLine = shadowHistory.filter((_, i) => i % step === 0).map(r => ({ x: r.t, y: r.simPv }));
-  drawChart('shadowChart', [
-    { data: realLine, color: '#00d4b4', width: 2 },
-    { data: simLine, color: 'rgba(167,139,250,0.8)', width: 1.5, dash: [4, 3] }
-  ], { yMin: 0, yMax: 105 });
+function updateMainChart(predResult){
+  if(realTimeBuffer.length<2)return;
+  const now=observeT;
+  const winStart=now-chartWindowSec;
+  const visible=realTimeBuffer.filter(r=>r.t>=winStart);
+  if(visible.length<2)return;
+  const pvData=visible.map(r=>({x:r.t,y:r.pv}));
+  const spData=visible.map(r=>({x:r.t,y:r.sp}));
+  const outData=visible.map(r=>({x:r.t,y:r.out}));
+  const predData=predResult.map(p=>({x:p.t,y:p.pv}));
+  const bandData=predResult.map(p=>({x:p.t,hi:p.bandHi,lo:p.bandLo}));
+  const allY=[...pvData,...spData,...outData,...predData].map(p=>p.y).filter(isFinite);
+  const minY=Math.max(0,Math.min(...allY)-5);
+  const maxY=Math.min(100,Math.max(...allY)+5);
+  drawChart('mainChart',[
+    {data:pvData,color:'#00d4b4',width:2},
+    {data:spData,color:'#f59e0b',width:1.5,dash:[6,3]},
+    {data:outData,color:'#10b981',width:1.5},
+    {data:predData,color:'rgba(167,139,250,0.8)',width:1.5,dash:[4,3]},
+  ],{minX:winStart,maxX:now+predHorizonSec,minY,maxY,bandDataset:{data:bandData,color:'#a78bfa'}});
 }
 
-// ================================================================
-// LCD UPDATE
-// ================================================================
-function updateLCDFromReal(rec, conf, params) {
-  const pvS = rec.pv.toFixed(0).padStart(4);
-  const spS = rec.sp.toFixed(0).padStart(4);
-  const outS = rec.out.toFixed(0).padStart(3);
-  const confS = conf.toFixed(0).padStart(3);
-  const err = (rec.sp - rec.pv);
+function updateShadowChart(){
+  if(shadowHistory.length<2)return;
+  const recent=shadowHistory.slice(-200);
+  const realData=recent.map(r=>({x:r.t,y:r.realPv}));
+  const simData=recent.map(r=>({x:r.t,y:r.simPv}));
+  const allY=[...realData,...simData].map(p=>p.y).filter(isFinite);
+  const minY=Math.max(0,Math.min(...allY)-5),maxY=Math.min(100,Math.max(...allY)+5);
+  const last=shadowHistory[shadowHistory.length-1];
+  const diverg=Math.abs(last.realPv-last.simPv);
+  document.getElementById('shadowRealPV').textContent=last.realPv.toFixed(2)+'%';
+  document.getElementById('shadowSimPV').textContent=last.simPv.toFixed(2)+'%';
+  const divEl=document.getElementById('shadowDiverg');
+  divEl.textContent=diverg.toFixed(2)+'%';
+  divEl.style.color=diverg<2?'var(--green)':diverg<5?'var(--yellow)':'var(--red)';
+  drawChart('shadowChart',[
+    {data:realData,color:'#00d4b4',width:1.5},
+    {data:simData,color:'rgba(167,139,250,0.7)',width:1.5,dash:[5,3]},
+  ],{minY,maxY});
+}
+
+function updateLCDFromReal(rec,conf,params){
+  const modeStr=rec.mode.toUpperCase().substring(0,6).padEnd(6);
+  const pvStr=rec.pv.toFixed(1).padStart(5);
+  const spStr=rec.sp.toFixed(1).padStart(5);
+  const outStr=rec.out.toFixed(0).padStart(3);
+  const confStr=conf.toFixed(0).padStart(2)+'%';
   setLCD(
-    `PV:${pvS}% SP:${spS}%  `,
-    `OUT:${outS}% ERR:${err > 0 ? '+' : ''}${err.toFixed(1).padStart(5)}%`,
-    `CONF:${confS}% ${conf >= 70 ? 'PRED OK  ' : conf >= 25 ? 'LEARNING ' : 'NO PRED  '}`,
-    `LOG:${dataLog.length.toString().padStart(4)} ${rec.mode || '?'}         `
+    `PV:${pvStr}% SP:${spStr}%  `,
+    `OUT:${outStr}% MOD:${modeStr} `,
+    `Kp:${rec.kp.toFixed(3)} Ki:${rec.ki.toFixed(4)}`,
+    `Conf:${confStr} ${espOnline?'ESP:ON ':'ESP:OFF'}`
   );
 }
 
-function setLCD(r0, r1, r2, r3) {
-  ['lcd0', 'lcd1', 'lcd2', 'lcd3'].forEach((id, i) => {
-    const rows = [r0, r1, r2, r3];
-    const el = document.getElementById(id);
-    if (el) el.textContent = rows[i].substring(0, 20).padEnd(20);
+function setLCD(r0,r1,r2,r3){
+  const pad=(s,n=20)=>s.substring(0,n).padEnd(n);
+  document.getElementById('lcd0').textContent=pad(r0);
+  document.getElementById('lcd1').textContent=pad(r1);
+  document.getElementById('lcd2').textContent=pad(r2);
+  document.getElementById('lcd3').textContent=pad(r3);
+}
+
+// ================================================================
+// LOG TABLE
+// ================================================================
+function appendLogRow(row,rowNum){
+  const tbody=document.getElementById('logBody');
+  if(!tbody)return;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${rowNum}</td><td>${row.ts}</td><td>${row.t}</td><td style="color:var(--cyan)">${row.pv}</td><td style="color:var(--yellow)">${row.sp}</td><td style="color:var(--green)">${row.out}</td><td>${row.mode}</td><td>${row.kp}</td><td>${row.ki}</td><td>${row.pvRate}</td><td>${row.ofEst}</td><td style="color:var(--purple)">${row.pred30}</td><td>${row.conf}</td><td style="color:var(--red)">${row.anomaly}</td>`;
+  tbody.insertBefore(tr,tbody.firstChild);
+  if(tbody.children.length>200)tbody.removeChild(tbody.lastChild);
+  document.getElementById('logCountBadge').textContent=dataLog.length+' records';
+}
+
+function clearLog(){dataLog=[];document.getElementById('logBody').innerHTML='';document.getElementById('logCountBadge').textContent='0 records';}
+
+function exportCSV(){
+  if(dataLog.length===0){alert('Belum ada data.');return;}
+  const headers=['#','Time','T(s)','PV','SP','OUT%','Mode','Kp','Ki','Kd','PVRate','OF%','Pred+30','Conf','Anomaly'];
+  const rows=dataLog.map((r,i)=>[i+1,r.ts,r.t,r.pv,r.sp,r.out,r.mode,r.kp,r.ki,r.kd,r.pvRate,r.ofEst,r.pred30,r.conf,r.anomaly]);
+  const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`aquaflow_log_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.csv`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+// ================================================================
+// CHART WINDOW
+// ================================================================
+function changeWindow(sec){
+  chartWindowSec=sec;
+  ['w60','w120','w300'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.className='w-btn'+(parseInt(id.slice(1))===sec?' active':'');
   });
 }
 
-// ================================================================
-// DATA LOG TABLE
-// ================================================================
-function appendLogRow(row, rowNum) {
-  const tbody = document.getElementById('logTableBody');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td style="color:var(--muted)">${rowNum}</td>
-    <td>${row.ts}</td>
-    <td style="color:var(--cyan)">${row.pv}</td>
-    <td style="color:var(--yellow)">${row.sp}</td>
-    <td style="color:var(--green)">${row.out}</td>
-    <td>${row.mode}</td>
-    <td style="color:var(--cyan)">${row.kp}</td>
-    <td style="color:var(--cyan)">${row.ki}</td>
-    <td style="color:var(--cyan)">${row.kd}</td>
-    <td style="color:${parseFloat(row.pvRate) > 0 ? 'var(--green)' : 'var(--red)'}">${row.pvRate}</td>
-    <td>${row.ofEst}</td>
-    <td style="color:var(--purple)">${row.pred30}</td>
-    <td style="color:${parseInt(row.conf) >= 70 ? 'var(--green)' : 'var(--yellow)'}">${row.conf}%</td>
-    <td style="color:var(--red)">${row.anomaly || ''}</td>
-  `;
-  tbody.insertBefore(tr, tbody.firstChild);
-  // Limit DOM rows
-  while (tbody.children.length > 200) tbody.removeChild(tbody.lastChild);
-}
-
-function clearLog() {
-  dataLog = [];
-  document.getElementById('logTableBody').innerHTML = '';
-  document.getElementById('logCountBadge').textContent = '0 records';
-}
-
-function exportCSV() {
-  if (dataLog.length === 0) { alert('Belum ada data.'); return; }
-  const headers = ['#','Timestamp','T(s)','PV%','SP%','OUT%','Mode','Kp','Ki','Kd','PV_Rate(%/s)','OutflowEst(%/s)','Pred+30s','Confidence%','Anomaly'];
-  const rows = dataLog.map((r, i) => [
-    i + 1, r.ts, r.t, r.pv, r.sp, r.out, r.mode, r.kp, r.ki, r.kd,
-    r.pvRate, r.ofEst, r.pred30, r.conf, r.anomaly
-  ]);
-  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `aquaflow_log_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+function formatTime(sec){
+  if(sec<60)return sec.toFixed(0)+'s';
+  const m=Math.floor(sec/60),s=Math.floor(sec%60);
+  return `${m}m ${s}s`;
 }
 
 // ================================================================
-// CHART CONTROLS
+// AUTO-TUNE ENGINE
 // ================================================================
-function changeWindow() {
-  chartWindowSec = parseInt(document.getElementById('windowSel').value);
-}
-document.getElementById('predHorizonSel').addEventListener('change', () => {
-  predHorizonSec = parseInt(document.getElementById('predHorizonSel').value);
-});
-
-// ================================================================
-// HELPERS
-// ================================================================
-function formatTime(sec) {
-  if (sec < 60) return sec.toFixed(0) + 's';
-  return (sec / 60).toFixed(1) + 'm';
-}
-
-// ================================================================
-// CLOCK
-// ================================================================
-setInterval(() => {
-  document.getElementById('clockEl').textContent = new Date().toLocaleTimeString('id-ID');
-}, 1000);
-
-// ================================================================
-// AUTO-CONNECT (jika dibuka dari server yang sama)
-// ================================================================
-window.addEventListener('DOMContentLoaded', () => {
-  const autoUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
-  document.getElementById('wsUrlInput').value = autoUrl;
-  // Auto connect jika bukan file:// 
-  if (location.protocol !== 'file:') {
-    setTimeout(connect, 500);
-  }
-});
-
-// ================================================================
-// AUTO-TUNE ENGINE — Hitung PID dari karakteristik plant terukur
-// ================================================================
-let atMethod = 'zn';
-let atResult = null;        // {Kp, Ki, Kd, method, ...}
-let atBackupPID = null;     // backup PID sebelum push
-let atPushDone = false;
-
-function selectATMethod(m) {
-  atMethod = m;
-  ['zn','imc','chien'].forEach(n => {
-    document.getElementById('atM_'+n).classList.toggle('selected', n===m);
+function selectATMethod(m){
+  atMethod=m;
+  ['zn','imc','chien','znrelay'].forEach(n=>{
+    const el=document.getElementById('atM_'+n);
+    if(el)el.classList.toggle('selected',n===m);
   });
-  const labels = {zn:'ZN', imc:'IMC', chien:'CHR', znrelay:'ZN-RELAY'};
-  document.getElementById('atMethodLabel').textContent = labels[m] || m.toUpperCase();
-  if (plantId && plantId.getParams().confidence >= 40) computeATRecommendation();
+  const labels={zn:'ZN OL',imc:'IMC',chien:'CHR PI',znrelay:'ZN RELAY'};
+  const kdNotes={zn:'',imc:'',chien:'(PI only — Kd forced 0)',znrelay:'(PI only — sama seperti ESP)'};
+  document.getElementById('atMethodLabel').textContent=labels[m]||m.toUpperCase();
+  document.getElementById('kdNote').textContent=kdNotes[m]||'';
+  if(plantId&&plantId.getParams().confidence>=40)computeATRecommendation();
 }
 
-// ----------------------------------------------------------------
-// Core: hitung Kp/Ki/Kd dari plant params
-// ----------------------------------------------------------------
-function computeATRecommendation() {
-  if (!plantId) return null;
-  const params = plantId.getParams();
-  const conf = params.confidence;
-  if (conf < 40) return null;
-
-  // Plant parameters
-  const Kp_plant = params.Kplant > 0 ? params.Kplant : 1.0;
-  const L = Math.max(0.1, params.deadTime);       // dead time (s)
-  const T = Math.max(1.0, 1.0 / (params.outflowEst > 0 ? params.outflowEst : 0.25)); // plant time constant est.
-
-  let Kp = 0, Ki = 0, Kd = 0;
-  let methodLabel = '';
-
-  if (atMethod === 'zn') {
-    // Ziegler-Nichols Open Loop (Cohen-Coon variant untuk lag-dominant)
-    // Kp = 0.9/(Kp_plant * (L/T)),  Ti = 3.33*L,  Td = 0.5*L
-    const ratio = L / Math.max(0.01, T);
-    Kp = 0.9 / (Kp_plant * Math.max(ratio, 0.05));
-    const Ti = 3.33 * L;
-    const Td = 0.5 * L;
-    Ki = Kp / Ti;
-    Kd = Kp * Td;
-    methodLabel = 'Ziegler-Nichols OL';
-
-  } else if (atMethod === 'imc') {
-    // IMC-PID (lambda tuning, lambda = 2*L untuk balance performance/robustness)
-    const lambda = Math.max(L * 2, T * 0.2);  // closed-loop time constant
-    Kp = (T + L / 2) / (Kp_plant * (lambda + L / 2));
-    const Ti = T + L / 2;
-    const Td = (T * L) / (2 * T + L);
-    Ki = Kp / Ti;
-    Kd = Kp * Td;
-    methodLabel = 'IMC Lambda';
-
-  } else if (atMethod === 'chien') {
-    // Chien-Hrones-Reswick (0% overshoot, servo)
-    const ratio = L / Math.max(0.01, T);
-    Kp = 0.6 / (Kp_plant * Math.max(ratio, 0.05));
-    const Ti = 4.0 * L;
-    Ki = Kp / Ti;
-    Kd = 0;  // CHR PI only for 0% OS
-    methodLabel = 'CHR 0% OS';
-
-  } else if (atMethod === 'znrelay') {
-    // ZN Relay — jalankan shadow sim dengan relay test, ambil Ku/Pu
-    const relayResult = runZNRelayOnShadow(params);
-    if (relayResult) {
-      Kp = relayResult.Kp;
-      Ki = relayResult.Ki;
-      Kd = relayResult.Kd;
-      methodLabel = `ZN Relay (Ku=${relayResult.Ku.toFixed(3)} Pu=${relayResult.Pu.toFixed(2)}s)`;
-      // Override atResult extra info
-      atResult = { Kp, Ki, Kd, method: methodLabel, Kplant: Kp_plant, L, T, conf,
-        Ku: relayResult.Ku, Pu: relayResult.Pu };
+function computeATRecommendation(){
+  if(!plantId)return null;
+  const params=plantId.getParams();
+  const conf=params.confidence;
+  if(conf<40)return null;
+  const Kp_plant=params.Kplant>0?params.Kplant:1.0;
+  const L=Math.max(0.1,params.deadTime);
+  const T=Math.max(1.0,1.0/(params.outflowEst>0?params.outflowEst:0.25));
+  let Kp=0,Ki=0,Kd=0,methodLabel='';
+  if(atMethod==='zn'){
+    const ratio=L/Math.max(0.01,T);
+    Kp=0.9/(Kp_plant*Math.max(ratio,0.05));
+    Ki=Kp/(3.33*L);Kd=Kp*(0.5*L);
+    methodLabel='Ziegler-Nichols OL';
+  }else if(atMethod==='imc'){
+    const lambda=Math.max(L*2,T*0.2);
+    Kp=(T+L/2)/(Kp_plant*(lambda+L/2));
+    Ki=Kp/(T+L/2);Kd=Kp*(T*L/(2*T+L));
+    methodLabel='IMC Lambda';
+  }else if(atMethod==='chien'){
+    const ratio=L/Math.max(0.01,T);
+    Kp=0.6/(Kp_plant*Math.max(ratio,0.05));
+    Ki=Kp/(4.0*L);Kd=0;
+    methodLabel='CHR 0% OS (PI only)';
+  }else if(atMethod==='znrelay'){
+    const relayResult=runZNRelayOnShadow(params);
+    if(relayResult){
+      Kp=relayResult.Kp;Ki=relayResult.Ki;Kd=relayResult.Kd;
+      methodLabel=`ZN Relay PI (Ku=${relayResult.Ku.toFixed(3)} Pu=${relayResult.Pu.toFixed(2)}s)`;
+      atResult={Kp,Ki,Kd,method:methodLabel,Kplant:Kp_plant,L,T,conf,Ku:relayResult.Ku,Pu:relayResult.Pu};
       return atResult;
-    } else {
-      // Fallback ke ZN OL jika relay gagal
-      const ratio = L / Math.max(0.01, T);
-      Kp = 0.9 / (Kp_plant * Math.max(ratio, 0.05));
-      const Ti = 3.33 * L;
-      Ki = Kp / Ti;
-      Kd = Kp * 0.5 * L;
-      methodLabel = 'ZN Relay (fallback OL)';
+    }else{
+      const ratio=L/Math.max(0.01,T);
+      Kp=0.9/(Kp_plant*Math.max(ratio,0.05));Ki=Kp/(3.33*L);Kd=0;
+      methodLabel='ZN Relay (fallback OL PI)';
     }
   }
-
-  // Clamp to sane values
-  Kp = Math.max(0.01, Math.min(50, Kp));
-  Ki = Math.max(0.0001, Math.min(10, Ki));
-  Kd = Math.max(0, Math.min(5, Kd));
-
-  atResult = { Kp, Ki, Kd, method: methodLabel, Kplant: Kp_plant, L, T, conf };
+  Kp=Math.max(0.01,Math.min(50,Kp));
+  Ki=Math.max(0.0001,Math.min(10,Ki));
+  Kd=Math.max(0,Math.min(5,Kd));
+  atResult={Kp,Ki,Kd,method:methodLabel,Kplant:Kp_plant,L,T,conf};
   return atResult;
 }
 
-// ----------------------------------------------------------------
-// Estimate settle time + overshoot via quick shadow sim
-// ----------------------------------------------------------------
-function quickSimEstimate(Kp, Ki, Kd, label, callback) {
-  if (!plantId) return null;
-  const params = plantId.getParams();
-  const lastRec = realTimeBuffer.length > 0 ? realTimeBuffer[realTimeBuffer.length - 1] : null;
-  if (!lastRec) return null;
-
-  const cfg = {
-    SP: lastRec.sp,
-    pvStart: lastRec.pv,
-    outflow: params.outflowEst > 0 ? params.outflowEst : 0.25,
-    mode: 'manual_pid',
-    Kp, Ki, Kd,
-    noise: 0.2,
-    alarmHi: lastRec.alarmHi || 90,
-    alarmLo: lastRec.alarmLo || 10,
-    seed: 99
-  };
-  const sim = new AquaFlowSim(cfg);
-  const hist = sim.runFull(400);  // run 400s sim
-
-  // Extract metrics
-  const lastPVs = hist.slice(-30).map(r => r.pv);
-  const ssErr = Math.abs(lastPVs.reduce((s,v) => s+v, 0) / lastPVs.length - cfg.SP);
-  
-  return {
-    settleT: sim.settleT,
-    overshoot: sim.overshoot,
-    ssErr,
-    label,
-    Kp, Ki, Kd
-  };
+function quickSimEstimate(Kp,Ki,Kd,label,callback){
+  if(!plantId)return null;
+  const params=plantId.getParams();
+  const lastRec=realTimeBuffer.length>0?realTimeBuffer[realTimeBuffer.length-1]:null;
+  if(!lastRec)return null;
+  const cfg={SP:lastRec.sp,pvStart:lastRec.pv,outflow:params.outflowEst>0?params.outflowEst:0.25,mode:'manual_pid',Kp,Ki,Kd,noise:0.2,alarmHi:lastRec.alarmHi||90,alarmLo:lastRec.alarmLo||10,seed:99};
+  const sim=new AquaFlowSim(cfg);
+  const hist=sim.runFull(400);
+  const lastPVs=hist.slice(-30).map(r=>r.pv);
+  const ssErr=Math.abs(lastPVs.reduce((s,v)=>s+v,0)/lastPVs.length-cfg.SP);
+  const result={settleT:sim.settleT,overshoot:sim.overshoot,ssErr};
+  if(callback)callback(result);
+  return result;
 }
 
-// ----------------------------------------------------------------
-// Run comparison simulation: current vs new
-// ----------------------------------------------------------------
-function runATSimCompare() {
-  const rec = computeATRecommendation();
-  if (!rec) {
-    document.getElementById('atSimStatus').textContent = '❌ Belum cukup confidence untuk simulate.';
-    return;
+function runATSimCompare(){
+  if(!atResult){alert('Hitung rekomendasi dulu');return;}
+  const lastRec=realTimeBuffer.length>0?realTimeBuffer[realTimeBuffer.length-1]:null;
+  if(!lastRec){alert('Belum ada data real');return;}
+  document.getElementById('btnSimCompare').disabled=true;
+  document.getElementById('atSimStatus').textContent='Menjalankan simulasi...';
+  document.getElementById('atSimStatus').className='at-sim-warn';
+  setTimeout(()=>{
+    const curResult=quickSimEstimate(lastRec.kp,lastRec.ki,lastRec.kd,'current');
+    const newResult=quickSimEstimate(atResult.Kp,atResult.Ki,atResult.Kd,'new');
+    if(!curResult||!newResult){document.getElementById('btnSimCompare').disabled=false;return;}
+    document.getElementById('atCurSettle').textContent=curResult.settleT?curResult.settleT.toFixed(0)+'s':'>400s';
+    document.getElementById('atCurOs').textContent=curResult.overshoot.toFixed(2)+'%';
+    document.getElementById('atNewSettle').textContent=newResult.settleT?newResult.settleT.toFixed(0)+'s':'>400s';
+    document.getElementById('atNewOs').textContent=newResult.overshoot.toFixed(2)+'%';
+    let settleImprv='—',osImprv='—';
+    if(curResult.settleT&&newResult.settleT){
+      const diff=curResult.settleT-newResult.settleT;
+      settleImprv=(diff>0?'-':'+')+Math.abs(diff).toFixed(0)+'s';
+      document.getElementById('atImpSettle').style.color=diff>0?'var(--green)':'var(--red)';
+    }
+    const osDiff=curResult.overshoot-newResult.overshoot;
+    osImprv=(osDiff>0?'-':'+')+Math.abs(osDiff).toFixed(2)+'%';
+    document.getElementById('atImpSettle').textContent=settleImprv;
+    document.getElementById('atImpOs').textContent=osImprv;
+    document.getElementById('atImpOs').style.color=osDiff>0?'var(--green)':'var(--red)';
+    document.getElementById('atImpSse').textContent=newResult.ssErr.toFixed(3)+'% SS err';
+    const betterSettle=newResult.settleT&&curResult.settleT&&newResult.settleT<curResult.settleT;
+    const betterOs=newResult.overshoot<curResult.overshoot;
+    const verdict=(betterSettle&&betterOs)?'at-sim-ok':(betterSettle||betterOs)?'at-sim-warn':'at-sim-bad';
+    const verdictText=(betterSettle&&betterOs)?`✅ Rekomendasi LEBIH BAIK — Settle: ${curResult.settleT?curResult.settleT.toFixed(0)+'s':'?'} → ${newResult.settleT?newResult.settleT.toFixed(0)+'s':'?'}, OS: ${curResult.overshoot.toFixed(1)}% → ${newResult.overshoot.toFixed(1)}%`:(betterSettle||betterOs)?`⚠️ Rekomendasi LEBIH BAIK sebagian — cek detail sebelum push`:`❌ Rekomendasi tidak lebih baik — coba metode lain`;
+    const simEl=document.getElementById('atSimResult');
+    simEl.className='at-sim-result '+verdict;
+    document.getElementById('atSimStatus').className=verdict;
+    document.getElementById('atSimStatus').textContent=verdictText;
+    document.getElementById('btnSimCompare').disabled=false;
+    document.getElementById('btnPushPID').disabled=false;
+  },80);
+}
+
+// ================================================================
+// PUSH PANEL
+// ================================================================
+function openPushPanel(){
+  if(!atResult)return;
+  const panel=document.getElementById('pushPanel');
+  panel.style.display=panel.style.display==='none'?'block':'none';
+  if(panel.style.display==='block'){
+    updateOfflinePanel();
+    updateScoreUI(plantId.getParams(),plantId.getParams().confidence);
   }
-  const lastRec = realTimeBuffer.length > 0 ? realTimeBuffer[realTimeBuffer.length - 1] : null;
-  if (!lastRec) return;
-
-  document.getElementById('atSimStatus').textContent = '⏳ Running simulation...';
-  document.getElementById('btnSimCompare').disabled = true;
-
-  setTimeout(() => {
-    // Simulate current PID
-    const curResult = quickSimEstimate(lastRec.kp || 4, lastRec.ki || 0.05, lastRec.kd || 0, 'Current');
-    // Simulate new PID
-    const newResult = quickSimEstimate(rec.Kp, rec.Ki, rec.Kd, rec.method);
-
-    if (!curResult || !newResult) {
-      document.getElementById('atSimStatus').textContent = '❌ Gagal menjalankan simulasi.';
-      document.getElementById('btnSimCompare').disabled = false;
-      return;
-    }
-
-    // Display current sim result
-    document.getElementById('atCurSettle').textContent = curResult.settleT ? curResult.settleT.toFixed(0)+'s' : '>400s';
-    document.getElementById('atCurOs').textContent = curResult.overshoot.toFixed(2)+'%';
-
-    // Display new sim result
-    document.getElementById('atNewSettle').textContent = newResult.settleT ? newResult.settleT.toFixed(0)+'s' : '>400s';
-    document.getElementById('atNewOs').textContent = newResult.overshoot.toFixed(2)+'%';
-
-    // Improvement
-    let settleImprv = '—', osImprv = '—';
-    if (curResult.settleT && newResult.settleT) {
-      const diff = curResult.settleT - newResult.settleT;
-      settleImprv = (diff > 0 ? '-' : '+') + Math.abs(diff).toFixed(0) + 's';
-      document.getElementById('atImpSettle').style.color = diff > 0 ? 'var(--green)' : 'var(--red)';
-    }
-    const osDiff = curResult.overshoot - newResult.overshoot;
-    osImprv = (osDiff > 0 ? '-' : '+') + Math.abs(osDiff).toFixed(2) + '%';
-    document.getElementById('atImpSettle').textContent = settleImprv;
-    document.getElementById('atImpOs').textContent = osImprv;
-    document.getElementById('atImpOs').style.color = osDiff > 0 ? 'var(--green)' : 'var(--red)';
-    document.getElementById('atImpSse').textContent = newResult.ssErr.toFixed(3) + '% SS err';
-
-    // Summary verdict
-    const betterSettle = newResult.settleT && curResult.settleT && newResult.settleT < curResult.settleT;
-    const betterOs = newResult.overshoot < curResult.overshoot;
-    const verdict = (betterSettle && betterOs) ? 'at-sim-ok'
-      : (betterSettle || betterOs) ? 'at-sim-warn'
-      : 'at-sim-bad';
-    const verdictText = (betterSettle && betterOs)
-      ? `✅ Rekomendasi LEBIH BAIK — Settle: ${curResult.settleT ? curResult.settleT.toFixed(0)+'s' : '?'} → ${newResult.settleT ? newResult.settleT.toFixed(0)+'s' : '?'}, Overshoot: ${curResult.overshoot.toFixed(1)}% → ${newResult.overshoot.toFixed(1)}%`
-      : (betterSettle || betterOs)
-      ? `⚠️ Rekomendasi LEBIH BAIK sebagian — cek detail di atas sebelum push`
-      : `❌ Rekomendasi tidak lebih baik dari PID saat ini — coba metode lain`;
-    const simEl = document.getElementById('atSimResult');
-    simEl.className = 'at-sim-result ' + verdict;
-    document.getElementById('atSimStatus').className = verdict;
-    document.getElementById('atSimStatus').textContent = verdictText;
-
-    document.getElementById('btnSimCompare').disabled = false;
-    document.getElementById('btnPushPID').disabled = false;
-  }, 80);
 }
 
-// ----------------------------------------------------------------
-// Push PID ke ESP via WebSocket
-// ----------------------------------------------------------------
-function showPushConfirm() {
-  if (!atResult) return;
-  const cmd = `kp=${atResult.Kp.toFixed(2)},ki=${atResult.Ki.toFixed(5)},kd=${atResult.Kd.toFixed(5)}`;
-  const safetyOn = document.getElementById('safetyToggle').checked;
-  if (safetyOn) {
-    // Manual confirm — tampilkan dialog
-    document.getElementById('pushCmdPreview').textContent = cmd;
-    document.getElementById('pushConfirm').style.display = 'block';
-  } else {
-    // Safety OFF — langsung push
-    addPushLog('⚠️ Safety mode OFF — langsung push tanpa konfirmasi', 'warn');
+function switchPushTab(tab){
+  pushTabMode=tab;
+  document.getElementById('tabOnline').className='push-tab'+(tab==='online'?' active':'');
+  document.getElementById('tabOffline').className='push-tab'+(tab==='offline'?' active':'');
+  document.getElementById('pushOnlinePanel').className='push-online-panel'+(tab==='online'?' active':'');
+  document.getElementById('pushOfflinePanel').className='push-offline-panel'+(tab==='offline'?' active':'');
+  if(tab==='offline')updateOfflinePanel();
+}
+
+function updateOfflinePanel(){
+  if(!atResult)return;
+  document.getElementById('offKp').textContent=atResult.Kp.toFixed(4);
+  document.getElementById('offKi').textContent=atResult.Ki.toFixed(5);
+  document.getElementById('offKd').textContent=atResult.Kd.toFixed(5);
+  const cmd=`kp=${atResult.Kp.toFixed(2)},ki=${atResult.Ki.toFixed(5)},kd=${atResult.Kd.toFixed(5)}`;
+  document.getElementById('offCmdFull').textContent=cmd;
+}
+
+function copyOfflineCmd(){
+  if(!atResult)return;
+  const cmd=`kp=${atResult.Kp.toFixed(2)},ki=${atResult.Ki.toFixed(5)},kd=${atResult.Kd.toFixed(5)}`;
+  navigator.clipboard.writeText(cmd).then(()=>{
+    const btn=document.getElementById('offCopyBtn');
+    btn.textContent='✅ COPIED!';btn.className='offline-copy-btn copied';
+    setTimeout(()=>{btn.textContent='📋 COPY COMMAND';btn.className='offline-copy-btn';},2000);
+  });
+}
+
+function showPushConfirm(){
+  if(!atResult)return;
+  const cmd=`kp=${atResult.Kp.toFixed(2)},ki=${atResult.Ki.toFixed(5)},kd=${atResult.Kd.toFixed(5)}`;
+  const safetyOn=document.getElementById('safetyToggle').checked;
+  if(safetyOn){
+    document.getElementById('pushCmdPreview').textContent=cmd;
+    document.getElementById('pushConfirm').style.display='block';
+  }else{
+    addPushLog('⚠️ Safety mode OFF — langsung push','warn');
     confirmPush();
   }
 }
 
-function cancelPush() {
-  document.getElementById('pushConfirm').style.display = 'none';
+function cancelPush(){document.getElementById('pushConfirm').style.display='none';}
+
+function confirmPush(){
+  if(!atResult||!ws||ws.readyState!==WebSocket.OPEN){addPushLog('❌ WebSocket tidak terhubung!','error');return;}
+  const lastRec=realTimeBuffer.length>0?realTimeBuffer[realTimeBuffer.length-1]:null;
+  atBackupPID=lastRec?{kp:lastRec.kp,ki:lastRec.ki,kd:lastRec.kd}:null;
+  const cmd=`kp=${atResult.Kp.toFixed(2)},ki=${atResult.Ki.toFixed(5)},kd=${atResult.Kd.toFixed(5)}`;
+  ws.send(JSON.stringify({type:'cmd',cmd}));
+  addPushLog(`✅ PUSHED: ${cmd}`,'ok');
+  addPushLog(`   Method: ${atResult.method} | Conf=${atResult.conf.toFixed(0)}%`,'info');
+  if(atBackupPID)addPushLog(`   Backup: kp=${atBackupPID.kp.toFixed(3)}, ki=${atBackupPID.ki.toFixed(5)})`,'info');
+  document.getElementById('pushConfirm').style.display='none';
+  document.getElementById('pushLogWrap').style.display='block';
+  document.getElementById('btnRevertPID').style.display='';
+  document.getElementById('btnRevertPID').disabled=false;
+  atPushDone=true;
+  const panel=document.getElementById('atPanel');
+  panel.style.borderColor='var(--green)';
+  setTimeout(()=>{panel.style.borderColor='#1a3a4a';},3000);
 }
 
-function confirmPush() {
-  if (!atResult || !ws || ws.readyState !== WebSocket.OPEN) {
-    addPushLog('❌ WebSocket tidak terhubung!', 'error');
-    return;
-  }
-  const lastRec = realTimeBuffer.length > 0 ? realTimeBuffer[realTimeBuffer.length - 1] : null;
-
-  // Backup current PID
-  atBackupPID = lastRec ? { kp: lastRec.kp, ki: lastRec.ki, kd: lastRec.kd } : null;
-
-  // Send command
-  const cmd = `kp=${atResult.Kp.toFixed(2)},ki=${atResult.Ki.toFixed(5)},kd=${atResult.Kd.toFixed(5)}`;
-  ws.send(JSON.stringify({ type: 'cmd', cmd }));
-
-  addPushLog(`✅ PUSHED: ${cmd}`, 'ok');
-  addPushLog(`   Method: ${atResult.method} | Kplant=${atResult.Kplant.toFixed(3)} | L=${atResult.L.toFixed(2)}s | Conf=${atResult.conf.toFixed(0)}%`, 'info');
-
-  if (atBackupPID) {
-    addPushLog(`   Backup: kp=${atBackupPID.kp.toFixed(3)}, ki=${atBackupPID.ki.toFixed(5)}, kd=${atBackupPID.kd.toFixed(5)}`, 'info');
-  }
-
-  document.getElementById('pushConfirm').style.display = 'none';
-  document.getElementById('pushLogWrap').style.display = 'block';
-  document.getElementById('btnRevertPID').style.display = '';
-  document.getElementById('btnRevertPID').disabled = false;
-  atPushDone = true;
-
-  // Flash panel border green
-  const panel = document.getElementById('atPanel');
-  panel.style.borderColor = 'var(--green)';
-  setTimeout(() => { panel.style.borderColor = 'var(--cyan)'; }, 3000);
+function revertPID(){
+  if(!atBackupPID||!ws||ws.readyState!==WebSocket.OPEN){addPushLog('❌ Tidak bisa revert','error');return;}
+  const cmd=`kp=${atBackupPID.kp.toFixed(2)},ki=${atBackupPID.ki.toFixed(5)},kd=${atBackupPID.kd.toFixed(5)}`;
+  ws.send(JSON.stringify({type:'cmd',cmd}));
+  addPushLog(`↩ REVERTED: ${cmd}`,'warn');
+  document.getElementById('btnRevertPID').disabled=true;
 }
 
-function revertPID() {
-  if (!atBackupPID || !ws || ws.readyState !== WebSocket.OPEN) {
-    addPushLog('❌ Tidak bisa revert — tidak ada backup atau WebSocket terputus', 'error');
-    return;
-  }
-  const cmd = `kp=${atBackupPID.kp.toFixed(2)},ki=${atBackupPID.ki.toFixed(5)},kd=${atBackupPID.kd.toFixed(5)}`;
-  ws.send(JSON.stringify({ type: 'cmd', cmd }));
-  addPushLog(`↩ REVERTED: ${cmd}`, 'warn');
-  document.getElementById('btnRevertPID').disabled = true;
+function addPushLog(msg,type){
+  const el=document.getElementById('pushLog');if(!el)return;
+  const color=type==='ok'?'var(--green)':type==='error'?'var(--red)':type==='warn'?'var(--yellow)':'var(--muted)';
+  const ts=new Date().toLocaleTimeString('id-ID');
+  el.innerHTML+=`<span style="color:${color}">[${ts}] ${msg}</span>\n`;
+  el.scrollTop=el.scrollHeight;
 }
 
-function addPushLog(msg, type) {
-  const el = document.getElementById('pushLog');
-  if (!el) return;
-  const color = type === 'ok' ? 'var(--green)' : type === 'error' ? 'var(--red)' : type === 'warn' ? 'var(--yellow)' : 'var(--muted)';
-  const ts = new Date().toLocaleTimeString('id-ID');
-  el.innerHTML += `<span style="color:${color}">[${ts}] ${msg}</span>\n`;
-  el.scrollTop = el.scrollHeight;
-}
-
-// ----------------------------------------------------------------
-// Update autotune UI — dipanggil dari updateObserverUI
-// ----------------------------------------------------------------
-function updateATUI(params, conf, lastRec) {
-  // Update confidence gate
-  document.getElementById('atConfGate').textContent = conf.toFixed(0) + '%';
-  document.getElementById('atConfBadge').textContent = conf >= 40
-    ? `✅ Active — Kplant=${params.Kplant ? params.Kplant.toFixed(3) : '?'} | L=${params.deadTime.toFixed(2)}s | Conf=${conf.toFixed(0)}%`
-    : `Menunggu confidence ≥ 40% (saat ini ${conf.toFixed(0)}%)`;
-  document.getElementById('atConfBadge').style.color = conf >= 40 ? 'var(--cyan)' : 'var(--muted)';
-
-  if (conf >= 40) {
-    document.getElementById('atGate').style.display = 'none';
-    document.getElementById('atContent').style.display = 'block';
-
-    // Plant info string
-    updateScoreUI(params, conf);
-  const T_est = params.outflowEst > 0 ? (1.0 / params.outflowEst).toFixed(1) : '?';
-    document.getElementById('atPlantInfo').textContent =
-      `Plant: K=${params.Kplant ? params.Kplant.toFixed(3) : '?'} | T≈${T_est}s | L=${params.deadTime.toFixed(2)}s`;
-
-    // Update current PID display
-    if (lastRec) {
-      document.getElementById('atCurKp').textContent = lastRec.kp.toFixed(4);
-      document.getElementById('atCurKi').textContent = lastRec.ki.toFixed(5);
-      document.getElementById('atCurKd').textContent = lastRec.kd.toFixed(5);
+// ================================================================
+// AT UI + SCORING
+// ================================================================
+function updateATUI(params,conf,lastRec){
+  document.getElementById('atConfGate').textContent=conf.toFixed(0)+'%';
+  document.getElementById('atConfBadge').textContent=conf>=40?`✅ Active — K=${params.Kplant?params.Kplant.toFixed(3):'?'} L=${params.deadTime.toFixed(2)}s Conf=${conf.toFixed(0)}%`:`Menunggu confidence ≥ 40% (${conf.toFixed(0)}%)`;
+  document.getElementById('atConfBadge').style.color=conf>=40?'var(--cyan)':'var(--muted)';
+  if(conf>=40){
+    document.getElementById('atGate').style.display='none';
+    document.getElementById('atContent').style.display='block';
+    updateScoreUI(params,conf);
+    const T_est=params.outflowEst>0?(1.0/params.outflowEst).toFixed(1):'?';
+    document.getElementById('atPlantInfo').textContent=`Plant: K=${params.Kplant?params.Kplant.toFixed(3):'?'} | T≈${T_est}s | L=${params.deadTime.toFixed(2)}s`;
+    if(lastRec){
+      document.getElementById('atCurKp').textContent=lastRec.kp.toFixed(4);
+      document.getElementById('atCurKi').textContent=lastRec.ki.toFixed(5);
+      document.getElementById('atCurKd').textContent=lastRec.kd.toFixed(5);
     }
-
-    // Auto-compute recommendation
-    const rec = computeATRecommendation();
-    if (rec) {
-      document.getElementById('atNewKp').textContent = rec.Kp.toFixed(4);
-      document.getElementById('atNewKi').textContent = rec.Ki.toFixed(5);
-      document.getElementById('atNewKd').textContent = rec.Kd.toFixed(5);
+    const rec=computeATRecommendation();
+    if(rec){
+      document.getElementById('atNewKp').textContent=rec.Kp.toFixed(4);
+      document.getElementById('atNewKi').textContent=rec.Ki.toFixed(5);
+      document.getElementById('atNewKd').textContent=rec.Kd.toFixed(5);
+      if(pushTabMode==='offline')updateOfflinePanel();
     }
-  } else {
-    document.getElementById('atGate').style.display = 'block';
-    document.getElementById('atContent').style.display = 'none';
+  }else{
+    document.getElementById('atGate').style.display='block';
+    document.getElementById('atContent').style.display='none';
   }
 }
 
-
-// ----------------------------------------------------------------
-// ZN RELAY via shadow sim — jalankan relay test pada model plant
-// ----------------------------------------------------------------
-function runZNRelayOnShadow(params) {
-  const lastRec = realTimeBuffer.length > 0 ? realTimeBuffer[realTimeBuffer.length-1] : null;
-  if (!lastRec) return null;
-
-  const outflow = params.outflowEst > 0 ? params.outflowEst : 0.25;
-  const SP = lastRec.sp > 0 ? lastRec.sp : 50;
-
-  // Bootstrap shadow sim di mode autotune_pi
-  const cfg = {
-    SP,
-    pvStart: Math.min(SP * 0.4, 20),  // mulai dari bawah supaya relay bisa catch
-    outflow,
-    mode: 'autotune_pi',
-    noise: 0.1,
-    alarmHi: lastRec.alarmHi || 90,
-    alarmLo: lastRec.alarmLo || 10,
-    seed: 7
-  };
-  const sim = new AquaFlowSim(cfg);
-
-  // Jalankan sampai autotune selesai atau timeout
-  let maxT = 800;
-  while (sim.t < maxT) {
-    sim.step();
-    if (sim.tunedKp !== null || sim.tunCancel) break;
-  }
-
-  if (sim.tunCancel || sim.tunedKp === null) return null;
-
-  return {
-    Kp: sim.tunedKp,
-    Ki: sim.tunedKi,
-    Kd: sim.tunedKd || 0,
-    Ku: sim.tunedKu,
-    Pu: sim.tunedPu
-  };
+function runZNRelayOnShadow(params){
+  const lastRec=realTimeBuffer.length>0?realTimeBuffer[realTimeBuffer.length-1]:null;
+  if(!lastRec)return null;
+  const outflow=params.outflowEst>0?params.outflowEst:0.25;
+  const SP=lastRec.sp>0?lastRec.sp:50;
+  const cfg={SP,pvStart:Math.min(SP*0.4,20),outflow,mode:'autotune_pi',noise:0.1,alarmHi:lastRec.alarmHi||90,alarmLo:lastRec.alarmLo||10,seed:7};
+  const sim=new AquaFlowSim(cfg);
+  let maxT=800;
+  while(sim.t<maxT){sim.step();if(sim.tunedKp!==null||sim.tunCancel)break;}
+  if(sim.tunCancel||sim.tunedKp===null)return null;
+  return{Kp:sim.tunedKp,Ki:sim.tunedKi,Kd:sim.tunedKd||0,Ku:sim.tunedKu,Pu:sim.tunedPu};
 }
 
-// ----------------------------------------------------------------
-// SCORING — hitung reliability score tiap metode (0-100)
-// ----------------------------------------------------------------
-function computeAllScores(params, conf) {
-  const scores = {};
-  const L = Math.max(0.1, params.deadTime);
-  const T = Math.max(1, 1.0 / (params.outflowEst > 0 ? params.outflowEst : 0.25));
-  const ratio = L / T;  // dead time ratio — semakin kecil semakin bagus untuk ZN
-
-  // ZN OL: bagus kalau ratio kecil (<0.3) dan conf tinggi
-  const znScore = Math.min(99, conf * 0.5 + (1 - Math.min(1, ratio / 0.5)) * 50);
-
-  // IMC: bagus kalau conf tinggi, sedikit penalty kalau ratio besar
-  const imcScore = Math.min(99, conf * 0.7 + (1 - Math.min(1, ratio / 0.8)) * 30);
-
-  // CHR: mirip ZN tapi lebih robust ke ratio besar
-  const chrScore = Math.min(99, conf * 0.6 + (1 - Math.min(1, ratio / 0.7)) * 40);
-
-  // ZN Relay: paling akurat kalau AquaFlowSim bisa resolve tuning
-  // Score naik dengan conf, tapi butuh conf > 50 untuk reliable
-  const znRelayScore = conf >= 50 ? Math.min(99, conf * 0.8 + 20) : Math.min(60, conf * 0.6);
-
-  scores.zn = znScore;
-  scores.imc = imcScore;
-  scores.chien = chrScore;
-  scores.znrelay = znRelayScore;
-
-  // Find best
-  const best = Object.entries(scores).sort((a,b) => b[1]-a[1])[0];
-  return { scores, best: best[0], bestScore: best[1] };
+function computeAllScores(params,conf){
+  const scores={};
+  const L=Math.max(0.1,params.deadTime);
+  const T=Math.max(1,1.0/(params.outflowEst>0?params.outflowEst:0.25));
+  const ratio=L/T;
+  scores.zn=Math.min(99,conf*0.5+(1-Math.min(1,ratio/0.5))*50);
+  scores.imc=Math.min(99,conf*0.7+(1-Math.min(1,ratio/0.8))*30);
+  scores.chien=Math.min(99,conf*0.6+(1-Math.min(1,ratio/0.7))*40);
+  scores.znrelay=conf>=50?Math.min(99,conf*0.8+20):Math.min(60,conf*0.6);
+  const best=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
+  scores.best=best[0];scores.bestScore=best[1];
+  return scores;
 }
 
-function updateScoreUI(params, conf) {
-  const { scores, best, bestScore } = computeAllScores(params, conf);
-  const methodNames = { zn: 'ZN OL', imc: 'IMC', chien: 'CHR', znrelay: 'ZN RELAY' };
-  const ids = { zn: 'scoreZN', imc: 'scoreIMC', chien: 'scoreCHR', znrelay: 'scoreZNR' };
-
-  Object.keys(scores).forEach(m => {
-    const el = document.getElementById(ids[m]);
-    if (!el) return;
-    const sc = scores[m];
-    const color = sc >= 75 ? 'var(--green)' : sc >= 50 ? 'var(--yellow)' : 'var(--red)';
-    const bg = m === best ? (sc >= 75 ? '#052e1c' : '#1a1a05') : '#0a1525';
-    const border = m === best ? `1px solid ${color}` : '1px solid transparent';
-    el.style.cssText = `padding:2px 7px;border-radius:4px;background:${bg};font-size:9px;color:${color};border:${border}`;
-    el.textContent = `${methodNames[m]}: ${sc.toFixed(0)}%`;
+function updateScoreUI(params,conf){
+  const scores=computeAllScores(params,conf);
+  const colorScore=s=>s>=70?'var(--green)':s>=50?'var(--yellow)':'var(--muted)';
+  const labels={zn:'ZN OL',imc:'IMC',chien:'CHR',znrelay:'ZN-Relay'};
+  ['zn','imc','chien','znrelay'].forEach(k=>{
+    const el=document.getElementById('score'+k.charAt(0).toUpperCase()+k.slice(1).replace('relay','NR').replace('znrelay','ZNR'));
+    // Use correct IDs
   });
-
-  const bestNames = { zn: 'ZN Open Loop', imc: 'IMC Lambda', chien: 'CHR', znrelay: 'ZN Relay Shadow' };
-  document.getElementById('scoreBestLabel').innerHTML =
-    `⭐ Rekomendasi terbaik: <span style="color:var(--cyan)">${bestNames[best]}</span> (${bestScore.toFixed(0)}% reliable)`;
+  document.getElementById('scoreZN').textContent=`ZN: ${scores.zn.toFixed(0)}`;
+  document.getElementById('scoreZN').style.color=colorScore(scores.zn);
+  document.getElementById('scoreIMC').textContent=`IMC: ${scores.imc.toFixed(0)}`;
+  document.getElementById('scoreIMC').style.color=colorScore(scores.imc);
+  document.getElementById('scoreCHR').textContent=`CHR: ${scores.chien.toFixed(0)}`;
+  document.getElementById('scoreCHR').style.color=colorScore(scores.chien);
+  document.getElementById('scoreZNR').textContent=`ZN-Relay: ${scores.znrelay.toFixed(0)}`;
+  document.getElementById('scoreZNR').style.color=colorScore(scores.znrelay);
+  const bestLabels={zn:'📐 ZN OL',imc:'⚗️ IMC',chien:'📊 CHR',znrelay:'⚡ ZN Relay'};
+  document.getElementById('scoreBestLabel').textContent=`⭐ Recommended: ${bestLabels[scores.best]||scores.best} (score ${scores.bestScore.toFixed(0)})`;
 }
 
+// ================================================================
+// INIT
+// ================================================================
+setInterval(()=>{
+  const now=Date.now();
+  if(lastDataTs&&now-lastDataTs>3000&&espOnline){
+    espOnline=false;updateEspBadge();
+  }
+},1000);
+
+document.getElementById('safetyToggle').addEventListener('change',function(){
+  document.getElementById('safetyLabel').textContent=this.checked?'🔒 SAFETY MODE: Konfirmasi sebelum push':'⚠️ SAFETY OFF: Push langsung tanpa konfirmasi';
+  document.getElementById('safetyLabel').style.color=this.checked?'var(--cyan)':'var(--yellow)';
+});
 </script>
+</body>
+</html>
