@@ -466,7 +466,7 @@ function updateUI(){
   txt.textContent=s.online?'ONLINE':'OFFLINE';
   document.getElementById('pvVal').textContent=s.pv.toFixed(1);
   document.getElementById('spVal').textContent=s.sp.toFixed(1);
-  document.getElementById('outVal').textContent=s.out.toFixed(1);
+  document.getElementById('outVal').textContent=s.out;
   const err=s.sp-s.pv;
   document.getElementById('errVal').textContent=err.toFixed(1);
   document.getElementById('errVal').style.color=Math.abs(err)<2?'var(--green)':Math.abs(err)<10?'var(--yellow)':'var(--red)';
