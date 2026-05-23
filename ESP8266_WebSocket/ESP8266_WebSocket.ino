@@ -18,8 +18,8 @@
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>  // Library: "WebSockets" by Markus Sattler
 
-#define WIFI_SSID    "hai"
-#define WIFI_PASS    "Rahasiaku12"
+#define WIFI_SSID    "YOUR_WIFI_SSID"
+#define WIFI_PASS    "YOUR_WIFI_PASSWORD"
 #define WS_HOST      "aquaflow-ws-production.up.railway.app"
 #define WS_PORT      443
 #define WS_PATH      "/esp"
