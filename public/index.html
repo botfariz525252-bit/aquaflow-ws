@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AquaFlow — PID Dashboard</title>
+<title>AquaFlow v8e — PID Dashboard</title>
 <style>
   :root {
     --bg: #0a0e1a;
@@ -20,7 +20,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; min-height: 100vh; }
 
-  /* HEADER */
   .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); }
   .logo { display: flex; align-items: center; gap: 10px; }
   .logo-icon { font-size: 24px; }
@@ -35,13 +34,11 @@
   .status-text.offline { color: var(--red); }
   .clock { font-size: 13px; color: var(--muted); }
 
-  /* GRID */
   .main { padding: 20px 24px; }
   .cards-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
   .row2 { display: grid; grid-template-columns: 1fr 380px; gap: 16px; margin-bottom: 20px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 
-  /* CARD */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
   .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .card-title { font-size: 11px; letter-spacing: 2px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
@@ -53,7 +50,6 @@
   .val-red { color: var(--red); }
   .val-purple { color: var(--purple); }
 
-  /* PROGRESS BAR */
   .prog-wrap { position: relative; }
   .prog-bar { height: 4px; background: #1f2937; border-radius: 2px; overflow: hidden; }
   .prog-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
@@ -61,15 +57,12 @@
   .fill-yellow { background: var(--yellow); }
   .fill-green { background: var(--green); }
   .fill-red { background: var(--red); }
-  .fill-purple { background: var(--purple); }
   .prog-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-  /* TREND CHART */
   .trend-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .trend-pts { font-size: 11px; color: var(--muted); }
   #trendChart { width: 100%; height: 200px; }
 
-  /* CONTROL */
   .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
   .btn { padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: inherit; font-size: 13px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
   .btn:hover { opacity: 0.85; }
@@ -88,7 +81,6 @@
   .btn-send { background: var(--cyan); border: none; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 16px; transition: opacity 0.2s; }
   .btn-send:hover { opacity: 0.8; }
 
-  /* PID TUNING */
   .pid-row { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
   .pid-field label { font-size: 10px; color: var(--muted); letter-spacing: 1px; display: block; margin-bottom: 4px; }
   .pid-field input { width: 100%; background: #1f2937; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; }
@@ -98,7 +90,6 @@
   .btn-load { background: transparent; border: none; color: var(--muted); font-family: inherit; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
   .btn-load:hover { color: var(--cyan); }
 
-  /* SYSTEM */
   .sys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
   .sys-item { background: #1a2235; border-radius: 8px; padding: 10px 14px; }
   .sys-item-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
@@ -107,21 +98,66 @@
   .sys-item-val.green { color: var(--green); }
   .sys-item-val.yellow { color: var(--yellow); }
 
-  /* CMD LOG */
   .cmd-log-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
   .cmd-entry { display: flex; justify-content: space-between; align-items: center; background: #1a2235; border-radius: 6px; padding: 8px 12px; font-size: 11px; }
   .cmd-badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; letter-spacing: 1px; }
   .badge-sent { background: #064e3b; color: var(--green); }
-  .badge-pend { background: #422006; color: var(--yellow); }
   .cmd-text { color: var(--text); flex: 1; margin: 0 10px; }
   .cmd-ts { color: var(--muted); }
 
-  /* SCROLLBAR */
+  /* ===== SIMULATOR PANEL ===== */
+  .sim-panel { background: var(--card); border: 1px solid #1e3a5f; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .sim-title { font-size: 12px; letter-spacing: 3px; color: var(--purple); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .sim-grid { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 12px; align-items: end; margin-bottom: 16px; }
+  .sim-field label { font-size: 10px; color: var(--muted); letter-spacing: 1px; display: block; margin-bottom: 5px; }
+  .sim-field input {
+    width: 100%; background: #0d1626; border: 1px solid #1e3a5f;
+    border-radius: 6px; padding: 9px 12px; color: var(--purple);
+    font-family: inherit; font-size: 13px; outline: none;
+  }
+  .sim-field input:focus { border-color: var(--purple); }
+  .btn-sim {
+    background: var(--purple); border: none; border-radius: 8px;
+    padding: 9px 20px; color: #0a0e1a; font-family: inherit;
+    font-size: 12px; letter-spacing: 2px; cursor: pointer;
+    font-weight: bold; white-space: nowrap; transition: opacity 0.2s;
+    height: 38px;
+  }
+  .btn-sim:hover { opacity: 0.85; }
+  .btn-sim:disabled { opacity: 0.4; cursor: not-allowed; }
+  .sim-results { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .sim-left { display: flex; flex-direction: column; gap: 10px; }
+  .sim-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .sim-stat { background: #0d1626; border-radius: 8px; padding: 10px 12px; text-align: center; }
+  .sim-stat-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+  .sim-stat-val { font-size: 18px; font-weight: bold; color: var(--purple); }
+  .sim-stat-val.ok { color: var(--green); }
+  .sim-stat-val.warn { color: var(--yellow); }
+  .sim-stat-val.err { color: var(--red); }
+  .sim-kpki { background: #0d1626; border-radius: 8px; padding: 12px 16px; }
+  .sim-kpki-title { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 8px; }
+  .sim-kpki-vals { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .sim-kpki-item { text-align: center; }
+  .sim-kpki-item .klabel { font-size: 9px; color: var(--muted); }
+  .sim-kpki-item .kval { font-size: 16px; font-weight: bold; color: var(--cyan); margin-top: 2px; }
+  .btn-apply { width: 100%; padding: 10px; background: transparent; border: 1px solid var(--cyan); border-radius: 8px; color: var(--cyan); font-family: inherit; font-size: 11px; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+  .btn-apply:hover { background: var(--cyan); color: #000; }
+  .btn-apply:disabled { opacity: 0.3; cursor: not-allowed; }
+  .sim-chart-wrap { background: #0d1626; border-radius: 8px; padding: 12px; }
+  .sim-chart-title { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-bottom: 8px; }
+  #simChart { width: 100%; height: 160px; }
+  .sim-log { background: #0d1626; border-radius: 8px; padding: 10px 14px; max-height: 130px; overflow-y: auto; font-size: 11px; color: var(--muted); line-height: 1.7; }
+  .sim-log .ev-fill { color: #60a5fa; }
+  .sim-log .ev-drain { color: #fdba74; }
+  .sim-log .ev-relay { color: var(--purple); }
+  .sim-log .ev-done { color: var(--green); font-weight: bold; }
+  .sim-log .ev-fail { color: var(--red); font-weight: bold; }
+  .sim-warn { font-size: 10px; color: var(--yellow); background: #1c1500; border: 1px solid #3d2e00; border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; display: none; }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-  /* ALARM FLASH */
   @keyframes flash { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
   .alarm-active { animation: flash 1s infinite; }
 
@@ -129,6 +165,8 @@
     .cards-row { grid-template-columns: 1fr 1fr; }
     .row2 { grid-template-columns: 1fr; }
     .row3 { grid-template-columns: 1fr; }
+    .sim-grid { grid-template-columns: 1fr 1fr; }
+    .sim-results { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -139,10 +177,12 @@
     <div class="logo-icon">🔥</div>
     <div>
       <div class="logo-text">AQUA<span>FLOW</span></div>
-      <div class="logo-sub">PID Water Level Controller — Real-time Dashboard</div>
+      <div class="logo-sub">PID Water Level Controller v8e — Real-time Dashboard</div>
     </div>
   </div>
   <div class="status-bar">
+      <a href="/aquaflow_sim_v99.html" target="_blank" style="padding:5px 12px;background:transparent;border:1px solid var(--purple);border-radius:5px;color:var(--purple);font-size:10px;letter-spacing:1px;text-decoration:none;font-family:monospace;">🔬 OPEN SIMULATOR</a>
+      <a href="/aquaflow_observer_v10.html" target="_blank" style="padding:5px 12px;background:transparent;border:1px solid var(--blue);border-radius:5px;color:var(--blue);font-size:10px;letter-spacing:1px;text-decoration:none;font-family:monospace;">👁 OBSERVER v10</a>
     <div class="status-dot" id="statusDot"></div>
     <div class="status-text offline" id="statusText">OFFLINE</div>
     <div class="clock" id="clock">00:00:00</div>
@@ -154,10 +194,7 @@
   <!-- ROW 1: 4 METRIC CARDS -->
   <div class="cards-row">
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">⚡ PROCESS VALUE</div>
-        <div class="card-unit">%</div>
-      </div>
+      <div class="card-header"><div class="card-title">⚡ PROCESS VALUE</div><div class="card-unit">%</div></div>
       <div class="card-value val-cyan" id="pvVal">0.0</div>
       <div class="prog-wrap">
         <div class="prog-bar"><div class="prog-fill fill-cyan" id="pvBar" style="width:0%"></div></div>
@@ -165,10 +202,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">🎯 SETPOINT</div>
-        <div class="card-unit">%</div>
-      </div>
+      <div class="card-header"><div class="card-title">🎯 SETPOINT</div><div class="card-unit">%</div></div>
       <div class="card-value val-yellow" id="spVal">0.0</div>
       <div class="prog-wrap">
         <div class="prog-bar"><div class="prog-fill fill-yellow" id="spBar" style="width:0%"></div></div>
@@ -176,10 +210,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">⚙️ PWM OUTPUT</div>
-        <div class="card-unit">%</div>
-      </div>
+      <div class="card-header"><div class="card-title">⚙️ PWM OUTPUT</div><div class="card-unit">%</div></div>
       <div class="card-value val-green" id="outVal">0.0</div>
       <div class="prog-wrap">
         <div class="prog-bar"><div class="prog-fill fill-green" id="outBar" style="width:0%"></div></div>
@@ -187,10 +218,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">🌡️ ERROR</div>
-        <div class="card-unit">%</div>
-      </div>
+      <div class="card-header"><div class="card-title">🌡️ ERROR</div><div class="card-unit">%</div></div>
       <div class="card-value val-red" id="errVal">0.0</div>
       <div class="prog-wrap">
         <div class="prog-bar"><div class="prog-fill fill-red" id="errBar" style="width:50%"></div></div>
@@ -209,24 +237,22 @@
       <canvas id="trendChart"></canvas>
     </div>
     <div class="card">
-      <div class="card-title" style="margin-bottom:14px">⚡ CONTROL</div>
+      <div class="card-title" style="margin-bottom:14px">🕹️ CONTROL</div>
       <div class="btn-row">
         <button class="btn btn-start" id="btnStart" onclick="sendCmd('run=1')">▶ START</button>
-        <button class="btn btn-stop" id="btnStop" onclick="sendCmd('run=0')">⏹ STOP</button>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-pid" id="btnPID" onclick="sendCmd('mode=P')">PID MODE</button>
-        <button class="btn btn-manual" id="btnManual" onclick="sendCmd('mode=M')">MANUAL</button>
+        <button class="btn btn-stop" id="btnStop" onclick="sendCmd('run=0')">■ STOP</button>
+        <button class="btn btn-pid" id="btnPID" onclick="sendCmd('mode=P')">⚙ PID MODE</button>
+        <button class="btn btn-manual" id="btnManual" onclick="sendCmd('mode=M')">✋ MANUAL</button>
       </div>
       <div class="ctrl-label">SETPOINT (%)</div>
       <div class="input-row">
-        <input class="ctrl-input" id="spInput" type="number" min="0" max="100" step="0.1" placeholder="50.0"/>
-        <button class="btn-send" onclick="setSP()">🔄</button>
+        <input class="ctrl-input" id="spInput" type="number" min="0" max="100" step="0.5" placeholder="50.0"/>
+        <button class="btn-send" onclick="setSP()">→</button>
       </div>
-      <div class="ctrl-label">MANUAL PWM (0-255)</div>
+      <div class="ctrl-label">MANUAL PWM (0–255)</div>
       <div class="input-row">
-        <input class="ctrl-input" id="pwmInput" type="number" min="0" max="255" step="5" placeholder="0"/>
-        <button class="btn-send" onclick="setPWM()">⚡</button>
+        <input class="ctrl-input" id="pwmInput" type="number" min="0" max="255" step="1" placeholder="0"/>
+        <button class="btn-send" onclick="setPWM()">→</button>
       </div>
     </div>
   </div>
@@ -258,30 +284,12 @@
     <div class="card">
       <div class="card-title" style="margin-bottom:10px">⚙️ SYSTEM</div>
       <div class="sys-grid">
-        <div class="sys-item">
-          <div class="sys-item-label">MODE</div>
-          <div class="sys-item-val" id="sysMode">—</div>
-        </div>
-        <div class="sys-item">
-          <div class="sys-item-label">STATUS</div>
-          <div class="sys-item-val" id="sysStatus">—</div>
-        </div>
-        <div class="sys-item">
-          <div class="sys-item-label">PWM OUT</div>
-          <div class="sys-item-val yellow" id="sysPWM">0</div>
-        </div>
-        <div class="sys-item">
-          <div class="sys-item-label">ALARM HI</div>
-          <div class="sys-item-val red" id="sysAlHi">—</div>
-        </div>
-        <div class="sys-item">
-          <div class="sys-item-label">ALARM LO</div>
-          <div class="sys-item-val red" id="sysAlLo">—</div>
-        </div>
-        <div class="sys-item">
-          <div class="sys-item-label">Kp / Ki / Kd</div>
-          <div class="sys-item-val" style="font-size:12px" id="sysPID">—</div>
-        </div>
+        <div class="sys-item"><div class="sys-item-label">MODE</div><div class="sys-item-val" id="sysMode">—</div></div>
+        <div class="sys-item"><div class="sys-item-label">STATUS</div><div class="sys-item-val" id="sysStatus">—</div></div>
+        <div class="sys-item"><div class="sys-item-label">PWM OUT</div><div class="sys-item-val yellow" id="sysPWM">0</div></div>
+        <div class="sys-item"><div class="sys-item-label">ALARM HI</div><div class="sys-item-val red" id="sysAlHi">—</div></div>
+        <div class="sys-item"><div class="sys-item-label">ALARM LO</div><div class="sys-item-val red" id="sysAlLo">—</div></div>
+        <div class="sys-item"><div class="sys-item-label">Kp / Ki / Kd</div><div class="sys-item-val" style="font-size:12px" id="sysPID">—</div></div>
       </div>
     </div>
 
@@ -289,6 +297,84 @@
       <div class="card-title" style="margin-bottom:4px">📋 COMMAND LOG</div>
       <div class="cmd-log-list" id="cmdLog">
         <div style="color:var(--muted);font-size:11px;text-align:center;padding:20px">No commands yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: SIMULATOR PANEL -->
+  <div class="sim-panel">
+    <div class="sim-title">🧪 AUTOTUNE &amp; PID SIMULATOR — Tangki 10L + Nikuma 160PSI</div>
+
+    <div class="sim-warn" id="simWarn"></div>
+
+    <div class="sim-grid">
+      <div class="sim-field">
+        <label>PUMP MAX (L/min)</label>
+        <input id="simPump" type="number" value="1.5" step="0.1" min="0.1" max="5" oninput="simCheckPhysics()"/>
+      </div>
+      <div class="sim-field">
+        <label>DRAIN (L/min)</label>
+        <input id="simDrain" type="number" value="0.6" step="0.05" min="0.05" max="3" oninput="simCheckPhysics()"/>
+      </div>
+      <div class="sim-field">
+        <label>SETPOINT (%)</label>
+        <input id="simSP" type="number" value="50" step="1" min="10" max="90"/>
+      </div>
+      <div class="sim-field">
+        <label>PV START (%)</label>
+        <input id="simPVstart" type="number" value="75" step="1" min="0" max="100"/>
+      </div>
+      <div class="sim-field">
+        <label>TANK (L)</label>
+        <input id="simTank" type="number" value="10" step="1" min="1" max="200"/>
+      </div>
+      <button class="btn-sim" id="btnRunSim" onclick="runSimulator()">▶ RUN SIM</button>
+    </div>
+
+    <div class="sim-results" id="simResults" style="display:none">
+      <div class="sim-left">
+        <div class="sim-stats">
+          <div class="sim-stat">
+            <div class="sim-stat-label">STATUS</div>
+            <div class="sim-stat-val" id="simStatus">—</div>
+          </div>
+          <div class="sim-stat">
+            <div class="sim-stat-label">Pu (period)</div>
+            <div class="sim-stat-val" id="simPu">—</div>
+          </div>
+          <div class="sim-stat">
+            <div class="sim-stat-label">AMPLITUDE</div>
+            <div class="sim-stat-val" id="simAmp">—</div>
+          </div>
+          <div class="sim-stat">
+            <div class="sim-stat-label">RISE TIME</div>
+            <div class="sim-stat-val" id="simRise">—</div>
+          </div>
+          <div class="sim-stat">
+            <div class="sim-stat-label">OVERSHOOT</div>
+            <div class="sim-stat-val" id="simOver">—</div>
+          </div>
+          <div class="sim-stat">
+            <div class="sim-stat-label">SETTLE ±2%</div>
+            <div class="sim-stat-val" id="simSettle">—</div>
+          </div>
+        </div>
+        <div class="sim-kpki">
+          <div class="sim-kpki-title">HASIL AUTOTUNE (Ziegler-Nichols PI)</div>
+          <div class="sim-kpki-vals">
+            <div class="sim-kpki-item"><div class="klabel">Kp</div><div class="kval" id="simKp">—</div></div>
+            <div class="sim-kpki-item"><div class="klabel">Ki</div><div class="kval" id="simKi">—</div></div>
+            <div class="sim-kpki-item"><div class="klabel">Ku</div><div class="kval" id="simKu">—</div></div>
+          </div>
+        </div>
+        <button class="btn-apply" id="btnApply" onclick="applyToController()" disabled>⬆ APPLY KP/KI KE CONTROLLER</button>
+        <div class="sim-log" id="simLog"><span style="color:var(--muted)">Tekan RUN SIM untuk memulai...</span></div>
+      </div>
+      <div>
+        <div class="sim-chart-wrap">
+          <div class="sim-chart-title">📈 PID RESPONSE POST-AUTOTUNE (PV start=20%)</div>
+          <canvas id="simChart"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -303,7 +389,7 @@ let state = { pv:0, sp:0, out:0, mode:'P', running:0, alarmHi:0, alarmLo:0, kp:0
 
 function connect() {
   ws = new WebSocket(WS_URL);
-  ws.onopen = () => { console.log('WS connected'); clearTimeout(reconnTimer); };
+  ws.onopen = () => { clearTimeout(reconnTimer); };
   ws.onmessage = (e) => {
     const msg = JSON.parse(e.data);
     if (msg.type === 'state') { state = msg.data; updateUI(); }
@@ -315,9 +401,7 @@ function connect() {
 connect();
 
 function sendCmd(cmd) {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'cmd', cmd }));
-  }
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'cmd', cmd }));
 }
 function setSP() {
   const v = parseFloat(document.getElementById('spInput').value);
@@ -340,78 +424,42 @@ function loadPID() {
 }
 
 // ===== CLOCK =====
-setInterval(() => {
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('id-ID');
-}, 1000);
+setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('id-ID'); }, 1000);
 
-// ===== TREND DATA =====
+// ===== TREND =====
 const MAX_PTS = 60;
 let trendPV = [], trendSP = [], trendLabels = [];
-
 function addTrend(pv, sp) {
   const t = new Date().toLocaleTimeString('id-ID');
   trendPV.push(pv); trendSP.push(sp); trendLabels.push(t);
   if (trendPV.length > MAX_PTS) { trendPV.shift(); trendSP.shift(); trendLabels.shift(); }
 }
-
-// ===== CANVAS CHART =====
 const canvas = document.getElementById('trendChart');
 const ctx = canvas.getContext('2d');
-
-function resizeCanvas() {
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-}
+function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
 window.addEventListener('resize', () => { resizeCanvas(); drawChart(); });
 resizeCanvas();
-
 function drawChart() {
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
-
-  // Background grid
   ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 1;
-  for (let y = 0; y <= 4; y++) {
-    const yp = H - (y / 4) * H;
-    ctx.beginPath(); ctx.moveTo(0, yp); ctx.lineTo(W, yp); ctx.stroke();
-  }
-
+  for (let y = 0; y <= 4; y++) { const yp = H - (y/4)*H; ctx.beginPath(); ctx.moveTo(0,yp); ctx.lineTo(W,yp); ctx.stroke(); }
   if (trendPV.length < 2) return;
-
-  const drawLine = (data, color) => {
+  const drawLine = (data, color, dashed) => {
     ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2;
-    data.forEach((v, i) => {
-      const x = (i / (MAX_PTS - 1)) * W;
-      const y = H - (v / 100) * H;
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+    if (dashed) ctx.setLineDash([6,4]); else ctx.setLineDash([]);
+    data.forEach((v,i) => { const x=(i/(MAX_PTS-1))*W, y=H-(v/100)*H; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.stroke(); ctx.setLineDash([]);
   };
-
-  // SP dashed line
-  ctx.setLineDash([6, 4]);
-  drawLine(trendSP, '#f59e0b');
-  ctx.setLineDash([]);
-
-  // PV solid line
-  drawLine(trendPV, '#00d4b4');
-
-  // SP label
+  drawLine(trendSP, '#f59e0b', true);
+  drawLine(trendPV, '#00d4b4', false);
   if (trendSP.length > 0) {
-    const lastSP = trendSP[trendSP.length - 1];
-    const yp = H - (lastSP / 100) * H;
-    ctx.fillStyle = '#f59e0b'; ctx.font = '10px Courier New';
-    ctx.fillText('SP', W * 0.45, yp - 4);
+    const lastSP = trendSP[trendSP.length-1];
+    ctx.fillStyle='#f59e0b'; ctx.font='10px Courier New';
+    ctx.fillText('SP', W*0.45, H-(lastSP/100)*H-4);
   }
-
-  // Time labels
-  ctx.fillStyle = '#6b7280'; ctx.font = '10px Courier New';
-  if (trendLabels.length > 0) {
-    ctx.fillText(trendLabels[0], 2, H - 4);
-    ctx.fillText(trendLabels[trendLabels.length - 1], W - 60, H - 4);
-  }
-
-  // Points count
+  ctx.fillStyle='#6b7280'; ctx.font='10px Courier New';
+  if (trendLabels.length > 0) { ctx.fillText(trendLabels[0], 2, H-4); ctx.fillText(trendLabels[trendLabels.length-1], W-60, H-4); }
   document.getElementById('trendPts').textContent = trendPV.length + ' pts';
 }
 
@@ -419,72 +467,248 @@ function drawChart() {
 let lastPV = null;
 function updateUI() {
   const s = state;
-
-  // Online status
   const dot = document.getElementById('statusDot');
   const txt = document.getElementById('statusText');
   dot.className = 'status-dot' + (s.online ? ' online' : '');
   txt.className = 'status-text ' + (s.online ? 'online' : 'offline');
   txt.textContent = s.online ? 'ONLINE' : 'OFFLINE';
-
-  // Cards
   document.getElementById('pvVal').textContent = s.pv.toFixed(1);
   document.getElementById('spVal').textContent = s.sp.toFixed(1);
   document.getElementById('outVal').textContent = s.out.toFixed(1);
   const err = s.sp - s.pv;
   document.getElementById('errVal').textContent = err.toFixed(1);
-
-  document.getElementById('pvBar').style.width = Math.min(100, Math.max(0, s.pv)) + '%';
-  document.getElementById('spBar').style.width = Math.min(100, Math.max(0, s.sp)) + '%';
-  document.getElementById('outBar').style.width = Math.min(100, Math.max(0, s.out)) + '%';
-  const errPct = Math.min(100, Math.max(0, ((err + 50) / 100) * 100));
-  document.getElementById('errBar').style.width = errPct + '%';
-
-  // Alarm flash
-  document.getElementById('pvVal').className = 'card-value val-cyan' + (s.alarmHi || s.alarmLo ? ' alarm-active' : '');
-
-  // Control buttons
-  document.getElementById('btnStart').className = 'btn btn-start' + (s.running ? ' active' : '');
-  document.getElementById('btnStop').className = 'btn btn-stop' + (!s.running ? ' active' : '');
-  document.getElementById('btnPID').className = 'btn btn-pid' + (s.mode === 'P' ? ' active' : '');
-  document.getElementById('btnManual').className = 'btn btn-manual' + (s.mode === 'M' ? ' active' : '');
-
-  // System panel
-  document.getElementById('sysMode').textContent = s.mode === 'P' ? 'PID' : 'MANUAL';
-  document.getElementById('sysMode').className = 'sys-item-val ' + (s.mode === 'P' ? 'green' : 'yellow');
-  document.getElementById('sysStatus').textContent = s.running ? 'RUNNING' : 'STOPPED';
-  document.getElementById('sysStatus').className = 'sys-item-val ' + (s.running ? 'green' : 'red');
+  document.getElementById('pvBar').style.width = Math.min(100,Math.max(0,s.pv))+'%';
+  document.getElementById('spBar').style.width = Math.min(100,Math.max(0,s.sp))+'%';
+  document.getElementById('outBar').style.width = Math.min(100,Math.max(0,s.out))+'%';
+  document.getElementById('errBar').style.width = Math.min(100,Math.max(0,((err+50)/100)*100))+'%';
+  document.getElementById('pvVal').className = 'card-value val-cyan' + ((s.alarmHi||s.alarmLo)?' alarm-active':'');
+  document.getElementById('btnStart').className = 'btn btn-start' + (s.running?' active':'');
+  document.getElementById('btnStop').className = 'btn btn-stop' + (!s.running?' active':'');
+  document.getElementById('btnPID').className = 'btn btn-pid' + (s.mode==='P'?' active':'');
+  document.getElementById('btnManual').className = 'btn btn-manual' + (s.mode==='M'?' active':'');
+  document.getElementById('sysMode').textContent = s.mode==='P'?'PID':'MANUAL';
+  document.getElementById('sysMode').className = 'sys-item-val '+(s.mode==='P'?'green':'yellow');
+  document.getElementById('sysStatus').textContent = s.running?'RUNNING':'STOPPED';
+  document.getElementById('sysStatus').className = 'sys-item-val '+(s.running?'green':'red');
   document.getElementById('sysPWM').textContent = s.out;
-  document.getElementById('sysAlHi').textContent = s.alarmHi ? 'ACTIVE' : 'OFF';
-  document.getElementById('sysAlLo').textContent = s.alarmLo ? 'ACTIVE' : 'OFF';
-  document.getElementById('sysPID').textContent = s.kp.toFixed(2) + ' / ' + s.ki.toFixed(3) + ' / ' + s.kd.toFixed(3);
-
-  // Trend
-  if (s.online && lastPV !== s.pv) {
-    addTrend(s.pv, s.sp);
-    drawChart();
-    lastPV = s.pv;
-  }
+  document.getElementById('sysAlHi').textContent = s.alarmHi?'ACTIVE':'OFF';
+  document.getElementById('sysAlLo').textContent = s.alarmLo?'ACTIVE':'OFF';
+  document.getElementById('sysPID').textContent = s.kp.toFixed(2)+' / '+s.ki.toFixed(3)+' / '+s.kd.toFixed(3);
+  if (s.online && lastPV !== s.pv) { addTrend(s.pv, s.sp); drawChart(); lastPV = s.pv; }
 }
-
 function renderCmdLog(log) {
   const el = document.getElementById('cmdLog');
-  if (!log || log.length === 0) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:11px;text-align:center;padding:20px">No commands yet</div>';
-    return;
+  if (!log||log.length===0) { el.innerHTML='<div style="color:var(--muted);font-size:11px;text-align:center;padding:20px">No commands yet</div>'; return; }
+  el.innerHTML = [...log].reverse().map(e=>`<div class="cmd-entry"><span class="cmd-badge badge-sent">SENT</span><span class="cmd-text">${e.cmd}</span><span class="cmd-ts">${e.ts}</span></div>`).join('');
+}
+updateUI(); drawChart();
+
+// ===== SIMULATOR =====
+let simResult = null;
+
+function simCheckPhysics() {
+  const pump  = parseFloat(document.getElementById('simPump').value) || 1.5;
+  const drain = parseFloat(document.getElementById('simDrain').value) || 0.6;
+  const warn  = document.getElementById('simWarn');
+  const TUN_BIAS=50, TUN_AMP=40;
+  const offFlow = (TUN_BIAS-TUN_AMP)/100 * pump;
+  const netDn = offFlow - drain;
+  const onFlow = (TUN_BIAS+TUN_AMP)/100 * pump;
+  const netUp = onFlow - drain;
+  if (netDn >= 0) {
+    warn.style.display = 'block';
+    warn.textContent = `⚠ DRAIN terlalu kecil! Relay OFF = ${offFlow.toFixed(2)} L/min vs DRAIN = ${drain} L/min → net = +${netDn.toFixed(3)} → tangki tidak turun saat relay OFF, osilasi tidak terjadi. Naikkan DRAIN ke > ${(offFlow+0.05).toFixed(2)} L/min.`;
+  } else if (netUp <= 0) {
+    warn.style.display = 'block';
+    warn.textContent = `⚠ PUMP terlalu kecil! Relay ON = ${onFlow.toFixed(2)} L/min vs DRAIN = ${drain} L/min → tangki tidak naik. Naikkan PUMP MAX.`;
+  } else {
+    warn.style.display = 'none';
   }
-  el.innerHTML = [...log].reverse().map(e =>
-    `<div class="cmd-entry">
-      <span class="cmd-badge badge-sent">SENT</span>
-      <span class="cmd-text">${e.cmd}</span>
-      <span class="cmd-ts">${e.ts}</span>
-    </div>`
-  ).join('');
 }
 
-// Init
-updateUI();
-drawChart();
+function runSimulator() {
+  const PUMP     = parseFloat(document.getElementById('simPump').value)   || 1.5;
+  const DRAIN    = parseFloat(document.getElementById('simDrain').value)  || 0.6;
+  const SP       = parseFloat(document.getElementById('simSP').value)     || 50;
+  const PV_START = parseFloat(document.getElementById('simPVstart').value)|| 75;
+  const TANK     = parseFloat(document.getElementById('simTank').value)   || 10;
+
+  const TUN_BIAS=50, TUN_AMP=40;
+  const Ts=0.1;
+
+  document.getElementById('simResults').style.display = 'grid';
+  document.getElementById('simStatus').textContent = 'RUNNING...';
+  document.getElementById('simStatus').className = 'sim-stat-val warn';
+  document.getElementById('btnRunSim').disabled = true;
+  document.getElementById('btnApply').disabled = true;
+  simResult = null;
+
+  setTimeout(() => {
+    const events = [];
+    const log = (cls, msg) => events.push(`<span class="${cls}">${msg}</span>`);
+
+    // ── Physics-based autotune calculation ──────────────────────────
+    const relayOn  = (TUN_BIAS+TUN_AMP)/100 * PUMP;
+    const relayOff = (TUN_BIAS-TUN_AMP)/100 * PUMP;
+    const netUp = relayOn  - DRAIN;
+    const netDn = relayOff - DRAIN;
+
+    let result = null, cancelReason = null;
+
+    if (netDn >= 0) {
+      cancelReason = 'DRAIN terlalu kecil — relay OFF tidak bisa turunkan level';
+      log('ev-fail', `❌ ${cancelReason}`);
+    } else if (netUp <= 0) {
+      cancelReason = 'PUMP terlalu kecil — relay ON tidak bisa naikkan level';
+      log('ev-fail', `❌ ${cancelReason}`);
+    } else {
+      const rUp = netUp / TANK * 100;  // %/min
+      const rDn = Math.abs(netDn) / TANK * 100;
+      const halfUp = 2 * TUN_AMP / rUp;   // menit
+      const halfDn = 2 * TUN_AMP / rDn;
+      const Pu_min = halfUp + halfDn;
+      const Pu = Pu_min * 60;  // detik
+      const totalTune = Pu_min * 4; // ~8 crossings = 4 full cycles
+
+      // Realistic amplitude: sonar sensor lag + noise
+      // Sonar resolusi ~3mm → tangki 10L diameter ~30cm → 1cm = ~7%
+      // Lag EMA filter (a=0.15) adds ~1-2cm overshoot
+      // a_realistic = max(0.5, min(AMP*0.4, halfDn * rDn * 0.3))
+      const a_est = Math.min(TUN_AMP * 0.4, Math.max(1.5, halfDn * rDn * 0.25));
+      const Ku = (4 * TUN_AMP) / (Math.PI * a_est);
+      const Kp = 0.45 * Ku;
+      const Ki = Kp / (0.83 * Pu);
+
+      log('ev-fill', `FILL→DRAIN: PV mulai dari ${PV_START.toFixed(1)}%`);
+      if (PV_START > SP + TUN_AMP) {
+        const drainVol = (PV_START - (SP+TUN_AMP)) * TANK / 100;
+        const drainTime = drainVol / Math.abs(netDn);
+        log('ev-drain', `DRAIN: ${PV_START.toFixed(1)}% → ${(SP+TUN_AMP).toFixed(0)}%, estimasi ${(drainTime/60).toFixed(1)} menit`);
+      } else {
+        log('ev-drain', `PV=${PV_START.toFixed(1)}% ≤ SP+AMP=${(SP+TUN_AMP).toFixed(0)}% → skip drain, langsung relay`);
+      }
+      log('ev-relay', `RELAY: rate naik ${rUp.toFixed(1)}%/min, turun ${rDn.toFixed(1)}%/min`);
+      log('ev-relay', `Half-cycle: ↑${halfUp.toFixed(1)}min ↓${halfDn.toFixed(1)}min → Pu=${Pu.toFixed(0)}s (${Pu_min.toFixed(1)}min)`);
+      log('ev-relay', `Amplitudo estimasi: a≈${a_est.toFixed(1)}% (sonar sensor + EMA filter)`);
+      log('ev-done', `✅ Kp=${Kp.toFixed(4)}, Ki=${Ki.toFixed(5)}, Ku=${Ku.toFixed(3)}`);
+      log('ev-relay', `⏱ Estimasi total autotune: ~${totalTune.toFixed(0)} menit (${(8)} crossings)`);
+
+      result = { a: a_est, Pu, Ku, Kp, Ki, halfUp, halfDn, Pu_min, totalTune };
+    }
+
+    // ── PID Step Response Simulation ─────────────────────────────────
+    let pidPV=[PV_START>50?20:PV_START], pidSP_arr=[SP], pidT=[0];
+    let pvPid = 20; // always start from 20% for step response
+    let integ=0, riseTime=null, overshoot=0, settleStart=null, settleTime=null;
+
+    if (result) {
+      const {Kp, Ki} = result;
+      const SIM_DURATION = Math.min(7200, result.Pu * 6);
+
+      for (let tp=0; tp<=SIM_DURATION; tp+=Ts) {
+        const e = SP - pvPid, inDB = Math.abs(e) < 0.5;
+        const eC = inDB ? 0 : Math.max(-25, Math.min(25, e));
+        const uUnsat = Kp*eC + integ;
+        const uSat = Math.max(0, Math.min(100, uUnsat));
+        if (!inDB) {
+          integ += (Ki*eC*Ts) + (0.5*(uSat-uUnsat)*Ts);
+          integ = Math.max(-100, Math.min(100, integ));
+        }
+        const out = Math.max(0, Math.min(100, Kp*eC + integ));
+        const dp = ((out/100*PUMP - DRAIN) / TANK) * 100 * (Ts/60);
+        pvPid = Math.max(0, Math.min(100, pvPid + dp));
+
+        if (pvPid > SP && (pvPid-SP) > overshoot) overshoot = pvPid - SP;
+        if (riseTime === null && pvPid >= SP*0.9) riseTime = tp;
+        const inBand = Math.abs(pvPid - SP) <= 2;
+        if (inBand && settleStart === null) settleStart = tp;
+        else if (!inBand) settleStart = null;
+        if (settleStart !== null && tp - settleStart >= 30 && settleTime === null) settleTime = tp;
+
+        // Sample for chart (every 30s)
+        if (tp % 30 < Ts) { pidPV.push(pvPid); pidSP_arr.push(SP); pidT.push(tp); }
+      }
+    }
+
+    // ── Update UI ─────────────────────────────────────────────────────
+    document.getElementById('btnRunSim').disabled = false;
+    document.getElementById('simLog').innerHTML = events.join('<br/>') || '<span style="color:var(--muted)">No events</span>';
+    document.getElementById('simLog').scrollTop = 99999;
+
+    if (result) {
+      document.getElementById('simStatus').textContent  = '✅ OK';
+      document.getElementById('simStatus').className    = 'sim-stat-val ok';
+      document.getElementById('simPu').textContent      = result.Pu.toFixed(0)+'s ('+(result.Pu/60).toFixed(1)+'m)';
+      document.getElementById('simPu').className        = 'sim-stat-val ok';
+      document.getElementById('simAmp').textContent     = result.a.toFixed(1)+'%';
+      document.getElementById('simKp').textContent      = result.Kp.toFixed(4);
+      document.getElementById('simKi').textContent      = result.Ki.toFixed(5);
+      document.getElementById('simKu').textContent      = result.Ku.toFixed(3);
+      document.getElementById('simRise').textContent    = riseTime ? (riseTime/60).toFixed(1)+'m' : 'N/A';
+      document.getElementById('simRise').className      = 'sim-stat-val '+(riseTime&&riseTime<1800?'ok':'warn');
+      document.getElementById('simOver').textContent    = overshoot.toFixed(1)+'%';
+      document.getElementById('simOver').className      = 'sim-stat-val '+(overshoot<5?'ok':overshoot<15?'warn':'err');
+      document.getElementById('simSettle').textContent  = settleTime ? (settleTime/60).toFixed(1)+'m' : '>2h';
+      document.getElementById('simSettle').className    = 'sim-stat-val '+(settleTime&&settleTime<3600?'ok':settleTime?'warn':'err');
+      document.getElementById('btnApply').disabled = false;
+      simResult = result;
+    } else {
+      document.getElementById('simStatus').textContent = '❌ GAGAL';
+      document.getElementById('simStatus').className   = 'sim-stat-val err';
+      ['simPu','simAmp','simKp','simKi','simKu','simRise','simOver','simSettle'].forEach(id => {
+        document.getElementById(id).textContent = '—';
+        document.getElementById(id).className = 'sim-stat-val';
+      });
+      simResult = null;
+    }
+
+    drawSimChart(pidT, pidPV, pidSP_arr, SP);
+  }, 50);
+}
+
+function drawSimChart(tArr, pvArr, spArr, SP) {
+  const c = document.getElementById('simChart');
+  c.width = c.offsetWidth; c.height = c.offsetHeight;
+  const cx = c.getContext('2d');
+  const W=c.width, H=c.height;
+  cx.clearRect(0,0,W,H);
+  cx.fillStyle='#0d1626'; cx.fillRect(0,0,W,H);
+  // Grid
+  cx.strokeStyle='#1a2b3c'; cx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=H-(i/4)*H; cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke();}
+  // SP line
+  const spY = H-(SP/100)*H;
+  cx.strokeStyle='#f59e0b33'; cx.lineWidth=1; cx.setLineDash([6,4]);
+  cx.beginPath(); cx.moveTo(0,spY); cx.lineTo(W,spY); cx.stroke();
+  cx.setLineDash([]);
+  if(pvArr.length < 2){cx.fillStyle='#6b7280';cx.font='12px Courier New';cx.fillText('No data',W/2-30,H/2);return;}
+  // PV line
+  cx.strokeStyle='#a78bfa'; cx.lineWidth=2;
+  cx.beginPath();
+  pvArr.forEach((v,i)=>{ const x=(i/(pvArr.length-1))*W, y=H-(v/100)*H; i===0?cx.moveTo(x,y):cx.lineTo(x,y); });
+  cx.stroke();
+  // Labels
+  cx.fillStyle='#f59e0b'; cx.font='10px Courier New'; cx.fillText(`SP=${SP}%`,4,spY-4);
+  cx.fillStyle='#a78bfa'; cx.fillText('PV',4,20);
+  cx.fillStyle='#6b7280';
+  if(tArr.length>0){ cx.fillText('0s',4,H-4); cx.fillText(tArr[tArr.length-1].toFixed(0)+'s',W-40,H-4); }
+}
+
+function applyToController() {
+  if(!simResult) return;
+  const {Kp,Ki} = simResult;
+  document.getElementById('kpInput').value = Kp.toFixed(4);
+  document.getElementById('kiInput').value = Ki.toFixed(5);
+  document.getElementById('kdInput').value = '0.000';
+  sendPID();
+  const btn = document.getElementById('btnApply');
+  btn.textContent = '✅ APPLIED!';
+  btn.style.background = 'var(--green)'; btn.style.color='#000';
+  setTimeout(()=>{ btn.textContent='⬆ APPLY KP/KI KE CONTROLLER'; btn.style.background=''; btn.style.color=''; }, 2000);
+}
+
+// Init physics check
+simCheckPhysics();
 </script>
 </body>
 </html>
