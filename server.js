@@ -14,6 +14,7 @@ let state = {
   pv: 0, sp: 0, out: 0, mode: 'P',
   running: 0, alarmHi: 0, alarmLo: 0,
   kp: 0, ki: 0, kd: 0,
+  tune: 0,
   online: false,
   lastSeen: null
 };
@@ -74,6 +75,7 @@ wss.on('connection', (ws, req) => {
         state.running = gI('run');
         state.alarmHi = gI('ah');
         state.alarmLo = gI('al');
+        state.tune    = gI('tune');
         state.online  = true;
         state.lastSeen = Date.now();
 
