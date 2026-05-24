@@ -965,19 +965,23 @@ class AnomalyDetector {
     const params=this.plantId.getParams();
     const conf=params.confidence;
     if(conf<30)return null;
-    // Check: is PV moving when pump is high?
-    const recentHigh=this._pvBuf.slice(-10).filter(r=>r.out>60);
-    if(recentHigh.length>=8){
+    // FIX#OB5: Anomali PUMP_STUCK — PV tidak naik padahal pompa tinggi
+    // Perbaikan: filter lebih ketat, tunggu 15 sample bukan 8, threshold kecil 0.3%
+    // supaya tidak false-alarm saat steady state (pompa memang jalan pelan tapi PV stabil)
+    const recentHigh=this._pvBuf.slice(-15).filter(r=>r.out>50);
+    if(recentHigh.length>=12){
       const pvChange=recentHigh[recentHigh.length-1].pv-recentHigh[0].pv;
-      const expectedChange=HW.PUMP_GROSS_PPS*(recentHigh.length*0.1)*50;
-      if(Math.abs(pvChange)<0.5&&expectedChange>1){
+      // Hanya anomali kalau PV benar-benar stuck (tidak naik SAMA SEKALI) DAN out tinggi
+      // Kalau out 50-70% dan PV stabil = steady state normal, bukan anomali
+      const avgOut=recentHigh.reduce((s,r)=>s+r.out,0)/recentHigh.length;
+      if(pvChange<0.3&&avgOut>70){
         this._lastAnom=t;
-        return{id:'PUMP_STUCK',msg:`Pump >60% tapi PV tidak naik (Δ${pvChange.toFixed(2)}%)`,sev:'error'};
+        return{id:'PUMP_STUCK',msg:`Pompa avg ${avgOut.toFixed(0)}% tapi PV tidak naik (Δ${pvChange.toFixed(2)}%) — cek sensor/pompa`,sev:'error'};
       }
     }
-    // Check: PV drifting with no control action
+    // FIX#OB5: Anomali UNEXPECT_RISE — PV naik tanpa pompa (hanya kalau out benar-benar 0)
     const recent10=this._pvBuf.slice(-10);
-    const allLowOut=recent10.every(r=>r.out<5);
+    const allLowOut=recent10.every(r=>r.out<2); // FIX: <5 → <2, supaya tidak false alarm saat steady state low PWM
     if(allLowOut){
       const drift=recent10[recent10.length-1].pv-recent10[0].pv;
       if(drift>3){
@@ -1726,3 +1730,4 @@ document.getElementById('safetyToggle').addEventListener('change',function(){
 </script>
 </body>
 </html>
+
