@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>AquaFlow v10 — Real-Time Observer + Predictor</title>
+<title>AquaFlow v11 — Real-Time Observer + Predictor [PATCHED]</title>
 <style>
 :root{
   --bg:#07090f;--card:#0f1623;--card2:#111d2e;--border:#1a2a3a;
@@ -1004,6 +1004,7 @@ let realTimeBuffer=[];
 const MAX_BUFFER=600; // FIX#RAM1: 3000→600 kurangi RAM HP
 let _lastChartDraw=0,_lastShadowStep=0,_lastPredict=0; // FIX#THROT1: throttle timer
 let observeStartTime=null,observeT=0,lastDataTs=null,dataCount=0;
+let _observerActive=false; // FIX#ZB1: guard zombie observer
 let plantId=null,predictor=null,anomalyDet=null,anomalyCount=0,anomalyLogEl=null;
 let shadowSim=null,shadowBootstrapped=false,shadowHistory=[];
 let dataLog=[],predAccBuf=[],lastPredCheckpoints={};
@@ -1025,7 +1026,7 @@ function connect(){
     ws=new WebSocket(url);
     ws.onopen=()=>{wsConnected=true;setConnState('online');initObserver();startWsPing();};  // FIX#OB1: reinit observer tiap reconnect supaya buffer fresh
     ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='state')onStateData(msg.data);}catch(err){}};
-    ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;stopWsPing();setTimeout(()=>{if(!wsConnected)connect();},2000); // FIX#RECONN1: 5s→2s};
+    ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;stopWsPing();setTimeout(()=>{if(!wsConnected)connect();},2000);}; // FIX#RECONN1 + FIX#ZB4: _observerActive reset on hard disconnect handled by dataStale check
     ws.onerror=()=>ws.close();
   }catch(err){setConnState('offline');}
 }
@@ -1056,6 +1057,11 @@ document.addEventListener('visibilitychange', () => {
     } else {
       // WS masih open, restart ping timer aja (mungkin timer sempat freeze)
       startWsPing();
+      // FIX#VIS1: adjust observeStartTime supaya observeT tidak lompat setelah tab freeze
+      if(observeStartTime!==null && lastDataTs!==null){
+        const gap=Date.now()-lastDataTs;
+        if(gap>2000) observeStartTime+=gap; // geser start time sebesar gap freeze
+      }
     }
   }
 });
@@ -1072,14 +1078,31 @@ function setConnState(state){
 }
 
 function initObserver(){
+  // FIX#ZB1: guard — jangan reinit kalau observer sudah aktif dan data masih mengalir
+  // Hanya full-reinit kalau belum pernah init, atau kalau data sudah mati >5s (real disconnect)
+  const now=Date.now();
+  const dataStale=!lastDataTs||(now-lastDataTs>5000);
+  if(_observerActive && !dataStale){
+    // WS reconnect tapi observer masih fresh — skip reinit, cukup re-subscribe
+    console.log('[v11] initObserver skipped — observer still active, data fresh');
+    return;
+  }
+  // FIX#ZB1: full reinit hanya kalau data stale atau belum pernah init
+  _observerActive=true;
   plantId=new PlantIdentifier();
   predictor=new Predictor(plantId);
   anomalyDet=new AnomalyDetector(plantId,predictor);
   anomalyLogEl=document.getElementById('anomalyLog');
   anomalyCount=0;
-  realTimeBuffer=[];observeStartTime=null;observeT=0;
-  shadowBootstrapped=false;shadowHistory=[];
-  console.log('[v10] Observer initialized');
+  // FIX#ZB2: hanya reset buffer kalau data stale — jaga kontinuitas chart saat reconnect cepat
+  if(dataStale){
+    realTimeBuffer=[];observeStartTime=null;observeT=0;
+    shadowBootstrapped=false;shadowHistory=[];
+    _lastChartDraw=0;_lastShadowStep=0;_lastPredict=0; // FIX#ZB3: reset throttle timers
+    console.log('[v11] Observer FULL reinit (data stale)');
+  } else {
+    console.log('[v11] Observer SOFT reinit (buffer kept)');
+  }
 }
 
 // ================================================================
@@ -1726,7 +1749,7 @@ function updateScoreUI(params,conf){
 // ================================================================
 setInterval(()=>{
   const now=Date.now();
-  if(lastDataTs&&now-lastDataTs>3000&&espOnline){
+  if(lastDataTs&&now-lastDataTs>8000&&espOnline){ // FIX#TO1: 3s→8s lawan false offline (server sudah 6s, browser cek 8s)
     espOnline=false;updateEspBadge();
   }
 },1000);
