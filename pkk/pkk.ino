@@ -418,13 +418,17 @@ bool  emaInitDone=false;
 
 uint32_t tCtrl=0,tLCD=0,eeLastMs=0,espLastMs=0;
 uint8_t bootWarmup=0;
+// FIX#LCD1: watchdog LCD — deteksi noise EMI dari pompa, auto-recover
+uint32_t lcdWatchMs=0;
+uint8_t  lcdFailCount=0;
+static bool lcdAlive=true;
 uint32_t tunLastMs=0,tunPrevMs=0;
 uint32_t kickStartMs=0;
 uint32_t tunFillStartMs=0;
 uint32_t tunDrainStartMs=0;
 
 #define KICKSTART_PWM       160
-#define KICKSTART_MS        700UL
+#define KICKSTART_MS        1000UL  // FIX#P16: 700→1000ms — kickstart lebih lama biar pompa punya momentum
 #define PWM_MIN_RUN         30    // FIX#P14: threshold fisik pompa = PWM 30
 #define PWM_MIN_STEADY      20    // FIX#P14: floor lebih rendah sesuai PWM_MIN_RUN baru
 #define HYST_BAND           0.8f  // FIX#P14: hysteresis band — pompa nyala lagi saat PV < SP-0.8%
@@ -436,7 +440,7 @@ uint32_t tunDrainStartMs=0;
 #define EE_MIN              5000UL   // FIX#67: was 60000UL, 5s cukup aman (UNO EEPROM ~100k writes)
 #define SENSOR_ERR_MAX      10
 #define ANTIWINDUP_KC       1.2f
-#define KICKSTART_ERR_MIN   20.0f
+#define KICKSTART_ERR_MIN   10.0f   // FIX#P16: 20→10% — kickstart aktif di error lebih kecil, pompa tidak lambat start
 #define INTEG_SP_RESET_THR  15.0f
 #define D_FILTER_A          0.05f
 #define EE_MAGIC            0xB4     // FIX#91 v10.5: bump — paksa re-init, fix alarm EEPROM save definitif
@@ -888,7 +892,7 @@ void tuneStep(float pv){
       float a=(tunPVhi-tunPVlo)/2.0f;
       if(a<0.1f){ cancelTune(0); return; }
       float Pu_raw=2.0f*(float)(now-tunPrevMs)/1000.0f/(float)(tunXcount-1);
-      float Pu = Pu_raw * 0.75f;
+      float Pu = Pu_raw;  // FIX#AT1: hapus faktor 0.75 — TL formula sudah conservative, tidak perlu double de-tune
       float relayD=TUN_AMP;  // FIX#P4: relayD harus = amplitudo relay (TUN_AMP), bukan (BIAS+AMP)*0.5
       float Ku=(4.0f*relayD)/(3.14159f*a);
       float newKp,newKi,newKd=0;
@@ -896,14 +900,14 @@ void tuneStep(float pv){
       // TL lebih konservatif dari ZN Classic → cocok untuk tangki asimetris (turun lambat)
       // De-tune 0.6x tambahan → pastikan no overshoot meski outflow sedang
       if(tmode==TM_PI){
-        newKp = 0.3158f*Ku * 0.6f;           // TL PI: 0.3158*Ku, de-tune 0.6x
+        newKp = 0.3158f*Ku * 0.75f;          // FIX#AT1: TL PI de-tune 0.6→0.75, kurangi steady-state error
         float Ti = 2.2f*Pu;
-        newKi = newKp / Ti;                   // Ki = Kp / Ti
+        newKi = (newKp / Ti) * 0.75f;        // FIX#AT1: Ki juga scale sama biar tidak terlalu aggressive
       } else {
         newKp = 0.4545f*Ku * 0.6f;           // TL PID: 0.4545*Ku, de-tune 0.6x
         float Ti = 2.2f*Pu;
         float Td = Pu / 6.3f;
-        newKi = newKp / Ti;                   // Ki = Kp / Ti
+        newKi = (newKp / Ti) * 0.75f;        // FIX#AT1: Ki juga scale sama biar tidak terlalu aggressive
         newKd = newKp * Td * 0.6f;           // Kd de-tune 0.6x juga
       }
       float kdMax = cf(Pu * 0.125f, 0, 50.0f);
@@ -1271,8 +1275,31 @@ void dEdit(){
   LP_P(3,PSTR("A=Cancel   #=Enter  "));
 }
 
+// FIX#LCD1: recover LCD kalau kena EMI noise dari pompa (kedip 2x tanpa sebab)
+// Dipanggil setiap 2 detik dari loop(), deteksi I2C hang via Wire.endTransmission
+void lcdRecover(){
+  Wire.beginTransmission(0x27);
+  uint8_t err = Wire.endTransmission();
+  if(err != 0){
+    lcdFailCount++;
+    if(lcdFailCount >= 2){
+      // I2C bus tidak respons 2x berturut — reinit
+      Wire.begin();
+      delayMicroseconds(50);
+      lcd.init();
+      lcd.backlight();
+      lcdFailCount = 0;
+      lcdAlive = false;  // paksa full redraw
+    }
+  } else {
+    lcdFailCount = 0;
+    lcdAlive = true;
+  }
+}
+
 void drawUI(){
   static Scr ls=(Scr)255;
+  if(!lcdAlive){ lcd.clear(); ls=(Scr)255; lcdAlive=true; }  // FIX#LCD1: force redraw setelah recover
   if(scr!=ls){lcd.clear();ls=scr;}
   switch(scr){
     case S_SPLASH: LP_P(0,PSTR("  AquaFlow v10.5  ")); LP_P(1,PSTR("  PID Controller  ")); break;  // FIX#85-90
@@ -1511,7 +1538,10 @@ void loop(){
   }
   if(now-espLastMs>=ESP_INTERVAL){espLastMs=now;sendToESP();}
   eeFlush(now);
+  // FIX#LCD1: cek LCD tiap 2 detik — auto-recover dari EMI noise pompa
+  if(now-lcdWatchMs>=2000){lcdWatchMs=now;lcdRecover();}
   if(now-tLCD>=300){tLCD=now;drawUI();}
 }
+
 
 
