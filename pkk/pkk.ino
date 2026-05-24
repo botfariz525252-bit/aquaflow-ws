@@ -1,3 +1,4 @@
+//  *** VERSION v10.5.6 — FIX#RAM1-3: hemat RAM — shBuf 60→56, PSTR Serial format, F() LCD ***
 //  *** VERSION v10.5.5 — FIX#P7+P8: deadband 2.5→1.0, partial integrator di deadband ***
 //
 //  FIX#P6 — ZN formula: ganti ZN Classic → Tyreus-Luyben + de-tune 0.6x
@@ -383,7 +384,7 @@ volatile uint32_t echoStart    = 0;
 volatile uint32_t echoDuration = 0;
 volatile bool     echoReady    = false;
 
-static char shBuf[60];
+static char shBuf[56];  // FIX#RAM1: 60->56, cukup untuk string terpanjang 54 chars
 static char lbBuf[21];
 #define lb lbBuf
 
@@ -809,8 +810,8 @@ void sendToESP(){
     else                    tunePhase=3;  // relay (termasuk direct relay)
   } else if(F.tunDone)      tunePhase=4;
   else if(F.tunCancel)      tunePhase=5;
-  snprintf(shBuf,sizeof(shBuf),
-    "DATA:pv=%d,sp=%d,out=%d,mode=%c,run=%d,ah=%d,al=%d,tune=%d",
+  snprintf_P(shBuf,sizeof(shBuf),  // FIX#RAM2: pakai PSTR → format string di flash bukan RAM
+    PSTR("DATA:pv=%d,sp=%d,out=%d,mode=%c,run=%d,ah=%d,al=%d,tune=%d"),
     (int)(lastPV+0.5f),(int)(pidSP+0.5f),
     pwmToDisplay(pidLastPWM),
     amode==AM_PID?'P':'M',
@@ -820,8 +821,8 @@ void sendToESP(){
     tunePhase
   );
   Serial.println(shBuf);
-  snprintf(shBuf,sizeof(shBuf),
-    "PIDK:kp=%d,ki=%d,kd=%d,en=%d%d",
+  snprintf_P(shBuf,sizeof(shBuf),  // FIX#RAM2
+    PSTR("PIDK:kp=%d,ki=%d,kd=%d,en=%d%d"),
     (int)(pidKp*100),(int)(pidKi*1000),(int)(pidKd*1000),
     F.alarmHiEn?1:0,F.alarmLoEn?1:0
   );
@@ -1257,7 +1258,7 @@ void handleKey(char k){
         } else {
           // FIX#73: tampilkan error jelas di LCD
           lcd.setCursor(0,3);
-          lcd.print("ERR:LRV<=URV! B=Set ");
+          lcd.print(F("ERR:LRV<=URV! B=Set "));  // FIX#RAM3: F() macro → string di flash
         }
       }
       break;
@@ -1352,3 +1353,4 @@ void loop(){
   eeFlush(now);
   if(now-tLCD>=300){tLCD=now;drawUI();}
 }
+
