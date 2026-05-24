@@ -1,3 +1,4 @@
+//  *** VERSION v10.5.7 — FIX#AB1: auto-bias estimation sebelum relay, bias optimal dari dPV ***
 //  *** VERSION v10.5.6 — FIX#RAM1-3: hemat RAM — shBuf 60→56, PSTR Serial format, F() LCD ***
 //  *** VERSION v10.5.5 — FIX#P7+P8: deadband 2.5→1.0, partial integrator di deadband ***
 //
@@ -321,7 +322,9 @@ struct Flags {
   uint8_t tunDirectRelay:1;
   // FIX#61: flag URV sudah di-set via tombol B
   uint8_t urvSetDone    :1;
-} F = {1,0,0,0,0,0,0,0,0,0,0,0,0,0};  // FIX#69/71: alarmLoAct=0, alarmHiEn=0, alarmLoEn=0, tunReasonIdx=0
+  // FIX#AB1: flag fase auto-bias estimation
+  uint8_t tunBiasEst    :1;
+} F = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0};  // FIX#AB1: tambah tunBiasEst=0
 
 const char tr0[] PROGMEM="NONE";
 const char tr1[] PROGMEM="USER";
@@ -338,6 +341,12 @@ float alarmHi=90,alarmLo=10;
 #define TUN_BIAS 50.0f
 #define TUN_AMP  50.0f
 float tunPVhi,tunPVlo,tunSign=0;
+// FIX#AB1: auto-bias estimation variables
+float tunBiasEstUp=0,tunBiasEstDown=0; // rate naik/turun saat estimasi (%/detik)
+float tunBiasEstPVstart=0;             // PV saat fase estimasi dimulai
+uint32_t tunBiasEstMs=0;               // timestamp mulai tiap fase
+uint8_t tunBiasEstPhase=0;            // 0=idle,1=ukur naik(pompa ON),2=ukur turun(pompa OFF),3=selesai
+float tunBiasDynamic=TUN_BIAS;        // bias yang dihitung dari estimasi
 float emaVal=0,lastPV=0,pvS=0,lastPVdisp=0;
 bool  emaInitDone=false;
 
@@ -625,6 +634,7 @@ void cancelTune(uint8_t reasonIdx){
   F.tunActive=0; F.tunCancel=1; F.tunDone=0;
   F.tunReasonIdx=reasonIdx;
   F.tunFilling=0; F.tunDraining=0; F.tunDirectRelay=0;
+  F.tunBiasEst=0; tunBiasEstPhase=0;  // FIX#AB1: reset bias estimation state
   pidInteg=0; tunSign=0; dFiltered=0;
   pidPrevPV=lastPV;
   // FIX#63: reset pvPrev & pvRate agar tidak spike saat PID resume
@@ -644,27 +654,65 @@ void startTune(){
   // FIX#63: reset pvPrev & pvRate agar tidak stale saat pidStep pertama jalan
   pvPrev=lastPV; pvRate=0;
 
-  // FIX#60: cek apakah PV sudah dekat SP → skip fill/drain langsung relay
-  float pvDist = fabs(lastPV - pidSP);
-  if(pvDist <= TUN_DIRECT_RELAY_THR){
-    // Langsung relay dari posisi PV sekarang
-    F.tunFilling=0; F.tunDraining=0; F.tunDirectRelay=1;
-    tunSign = (lastPV < pidSP) ? 1.0f : -1.0f;
-    tunFillStartMs=millis();  // reuse sebagai relay timer start
-    tunLastMs=millis();
-  } else if(lastPV < pidSP){
-    // PV terlalu jauh di bawah → fill dulu, maks 5 menit
-    F.tunFilling=1; F.tunDraining=0; F.tunDirectRelay=0;
-    tunFillStartMs=millis();
-  } else {
-    // PV terlalu tinggi → drain dulu, maks 5 menit
-    F.tunFilling=0; F.tunDraining=1; F.tunDirectRelay=0;
-    tunDrainStartMs=millis();
-  }
+  // FIX#AB1: mulai dengan auto-bias estimation (10 detik) sebelum fill/drain/relay
+  // Estimasi outflow rate dengan ukur dPV saat pompa ON 5 detik dan OFF 5 detik
+  F.tunBiasEst=1; F.tunFilling=0; F.tunDraining=0; F.tunDirectRelay=0;
+  tunBiasEstPhase=1;           // fase 1: pompa ON, ukur rate naik
+  tunBiasEstPVstart=lastPV;
+  tunBiasEstMs=millis();
+  tunBiasEstUp=0; tunBiasEstDown=0;
+  tunBiasDynamic=TUN_BIAS;     // default dulu, akan di-update setelah estimasi
 }
 
 void tuneStep(float pv){
   uint32_t now=millis();
+
+  // --- FIX#AB1: FASE AUTO-BIAS ESTIMATION ---
+  // Fase 1 (5 detik): pompa 100%, ukur rate naik
+  // Fase 2 (5 detik): pompa 0%, ukur rate turun
+  // Setelah selesai: hitung bias optimal, lanjut ke fill/drain/relay normal
+  if(F.tunBiasEst){
+    float elapsed = (float)(now - tunBiasEstMs) / 1000.0f;
+    if(tunBiasEstPhase==1){
+      setPWM(100);
+      if(elapsed >= 5.0f){
+        // Selesai fase 1: hitung rate naik
+        float dPV = pv - tunBiasEstPVstart;
+        tunBiasEstUp = (dPV > 0) ? (dPV / elapsed) : 0.01f;  // %/detik, min 0.01 biar tidak div/0
+        // Mulai fase 2: pompa OFF
+        tunBiasEstPhase=2;
+        tunBiasEstPVstart=pv;
+        tunBiasEstMs=now;
+      }
+    } else if(tunBiasEstPhase==2){
+      stopPump();
+      if(elapsed >= 5.0f){
+        // Selesai fase 2: hitung rate turun
+        float dPV = tunBiasEstPVstart - pv;   // positif kalau turun
+        tunBiasEstDown = (dPV > 0) ? (dPV / elapsed) : 0.01f;
+        // Hitung bias optimal: outflow_rate/(inflow_rate+outflow_rate)*100 + margin 20%
+        float total = tunBiasEstUp + tunBiasEstDown;
+        float biasCalc = (tunBiasEstDown / total) * 100.0f + 20.0f;
+        tunBiasDynamic = cf(biasCalc, 30.0f, 70.0f);  // clamp 30-70%
+        // Selesai estimasi — lanjut ke fill/drain/relay normal
+        F.tunBiasEst=0;
+        tunBiasEstPhase=3;  // done
+        float pvDist = fabs(pv - pidSP);
+        if(pvDist <= TUN_DIRECT_RELAY_THR){
+          F.tunDirectRelay=1;
+          tunSign = (pv < pidSP) ? 1.0f : -1.0f;
+          tunFillStartMs=now; tunLastMs=now;
+        } else if(pv < pidSP){
+          F.tunFilling=1;
+          tunFillStartMs=now;
+        } else {
+          F.tunDraining=1;
+          tunDrainStartMs=now;
+        }
+      }
+    }
+    return;
+  }
 
   // --- FASE FILL (kalau PV terlalu jauh di bawah SP) ---
   if(F.tunFilling){
@@ -718,7 +766,8 @@ void tuneStep(float pv){
   if(pv <= pidSP - RELAY_BAND) relayOn = true;
   float newSign = relayOn ? 1.0f : -1.0f;
 
-  if(relayOn) setPWM((int)cf(TUN_BIAS+TUN_AMP,0,100));
+  // FIX#AB1: pakai tunBiasDynamic (hasil estimasi) bukan hardcoded TUN_BIAS
+  if(relayOn) setPWM((int)cf(tunBiasDynamic+TUN_AMP,0,100));
   else        stopPump();
 
   if(tunPrevMs==0){ tunPrevMs=now; tunSign=newSign; return; }
@@ -805,7 +854,8 @@ float readPV(){
 void sendToESP(){
   int tunePhase=0;
   if(F.tunActive){
-    if(F.tunFilling)        tunePhase=1;
+    if(F.tunBiasEst)        tunePhase=6;  // FIX#AB1: fase bias estimation
+    else if(F.tunFilling)   tunePhase=1;
     else if(F.tunDraining)  tunePhase=2;
     else                    tunePhase=3;  // relay (termasuk direct relay)
   } else if(F.tunDone)      tunePhase=4;
@@ -987,7 +1037,13 @@ void dPSub(){
 void dArun(){
   const char* m=(tmode==TM_PI)?"PI":"PID";
   if(F.tunActive){
-    if(F.tunFilling){
+    if(F.tunBiasEst){
+      // FIX#AB1: tampil fase estimasi bias di LCD
+      snprintf_P(lb,21,PSTR("AUTO %s EST BIAS"),m); LP(0,lb);
+      snprintf_P(lb,21,PSTR("PH%d up=%-3d dn=%-3d  "),tunBiasEstPhase,(int)(tunBiasEstUp*100),(int)(tunBiasEstDown*100)); LP(1,lb);
+      dtostrf(lastPV,4,1,ta); snprintf_P(lb,21,PSTR("PV:%s%% B=%d%%       "),ta,(int)tunBiasDynamic); LP(2,lb);
+      LP_P(3,PSTR("estimating...       "));
+    } else if(F.tunFilling){
       snprintf_P(lb,21,PSTR("AUTO %s FILLING..."),m); LP(0,lb);
       dtostrf(lastPV,4,1,ta); dtostrf(pidSP,4,1,tb);
       snprintf_P(lb,21,PSTR("PV:%s%% SP:%s%%  "),ta,tb); LP(1,lb);
