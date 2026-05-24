@@ -1,4 +1,4 @@
-// AquaFlow WS Server v10.5.4 — FIX#S4: handle DATA: dengan kp/ki/kd + HB: heartbeat
+// AquaFlow WS Server v10.5.5 — FIX#S5: HB update pv + validasi PV range server-side
 const express = require('express');
 const { WebSocketServer, WebSocket } = require('ws');
 const http = require('http');
@@ -79,7 +79,9 @@ wss.on('connection', (ws, req) => {
         const gI = (k) => { const m = p.match(new RegExp(k + '=([\\d\\-]+)')); return m ? parseInt(m[1]) : 0; };
         const gC = (k) => { const m = p.match(new RegExp(k + '=([A-Za-z])')); return m ? m[1] : '?'; };
 
-        state.pv      = gF('pv');
+        const pvRaw = gF('pv');
+        // FIX#S5: tolak PV gila di server — double protection terhadap serial glitch
+        if (pvRaw >= -5 && pvRaw <= 110) state.pv = pvRaw;
         state.sp      = gF('sp');
         state.out     = gI('out');
         state.mode    = gC('mode');
@@ -112,6 +114,9 @@ wss.on('connection', (ws, req) => {
       // FIX#S4: handle HB: heartbeat — update lastSeen + online, jangan broadcast penuh
       // Cukup kirim state ringan supaya observer tahu ESP masih hidup
       if (line.startsWith('HB:')) {
+        // FIX#S5: update pv dari HB frame supaya observer tidak stale
+        const hbPv = parseFloat((line.match(/pv=([\d.\-]+)/) || [])[1]);
+        if (!isNaN(hbPv) && hbPv >= -5 && hbPv <= 110) state.pv = hbPv;
         state.lastSeen = Date.now();
         if (!state.online) {
           state.online = true;

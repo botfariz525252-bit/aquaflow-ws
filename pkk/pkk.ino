@@ -1,3 +1,16 @@
+//  *** VERSION v10.6.0 — FIX#P11: validasi PV range anti-garbage, FIX#P12: pompa gradual start ***
+//
+//  FIX#P11 — LCD tampil PV random (misal 102090930)
+//    - Bug: serial buffer corruption / partial frame → atof() baca sampah → PV gila
+//    - Fix: validasi output readPV() — kalau pv < -5 atau pv > 110, reject → pakai lastPV
+//    - Tambah counter pvRejectCount untuk debug
+//
+//  FIX#P12 — Pompa kenceng banget saat 1% steady state
+//    - Bug: pidSettledOnce=0 saat observer baru buka → pompa mulai dari PWM_MIN_RUN=50
+//      langsung → PV overshoot naik cepat
+//    - Fix: saat pidSettledOnce=0 tapi pidInteg > 0 (ada riwayat), set settled=1
+//      supaya floor PWM_MIN_STEADY=25 yang dipakai, bukan langsung 50
+//
 //  *** VERSION v10.5.9 — FIX#P10: antiwindup di deadband, cegah PV drift naik perlahan ***
 //
 //  FIX#P10 — Integrator drift naik saat steady state
@@ -616,6 +629,9 @@ void pidStep(float pv,float dt){
   float e_raw=pidSP-pv;
   bool inDeadband = (fabs(e_raw) < 1.0f);  // FIX#P7: perkecil deadband 2.5→1.0% (deadband lebar bikin PV settle sembarang dalam ±2.5%)
   if(inDeadband && !F.pidSettledOnce) F.pidSettledOnce=1;
+  // FIX#P12: kalau ada integrator dari sesi sebelumnya (misal observer reconnect),
+  // anggap sudah settled → pakai floor PWM_MIN_STEADY bukan langsung PWM_MIN_RUN
+  if(!F.pidSettledOnce && pidInteg > 5.0f) F.pidSettledOnce=1;
   float e = inDeadband ? 0.0f : e_raw;
   e=cf(e,-25,25);
   float ff=pidKff*(pidSP-prevSP); prevSP=pidSP;
@@ -882,6 +898,11 @@ float readPV(){
   if(!emaInitDone){emaVal=med;emaInitDone=true;}
   else emaVal+=EMA_A*(med-emaVal);
   pvS+=0.1f*(emaVal-pvS);
+  // FIX#P11: validasi range — reject nilai gila akibat serial corruption
+  if(emaVal < -5.0f || emaVal > 110.0f){
+    sensorErrCount++;
+    return lastPV;  // buang, pakai lastPV yang valid
+  }
   return emaVal;
 }
 

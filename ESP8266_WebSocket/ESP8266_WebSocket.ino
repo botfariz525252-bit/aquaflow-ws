@@ -1,5 +1,5 @@
 // ESP8266 - AquaFlow WebSocket Client
-// *** VERSION v9.5 ***
+// *** VERSION v9.6 — FIX#ESP3: validasi PV range sebelum broadcast ke WS ***
 // Hardware Serial (pin RX/TX ESP8266)
 // Connect ke Railway WebSocket server
 //
@@ -78,7 +78,11 @@ void parseFromUNO(const char* line) {
   auto gC = [&](const char* k) -> char {
     const char* f = strstr(p, k); return f ? *(f + strlen(k)) : '?';
   };
-  pv      = gF("pv=");
+  float pvNew = gF("pv=");
+  // FIX#ESP3: validasi range PV — tolak nilai gila akibat serial glitch
+  // Kalau pv aneh (>110 atau <-5), buang frame ini sama sekali
+  if(pvNew < -5.0f || pvNew > 110.0f) return;
+  pv      = pvNew;
   sp      = gF("sp=");
   out     = gI("out=");
   running = gI("run=");
