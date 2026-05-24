@@ -1,3 +1,13 @@
+//  *** VERSION v10.6.3 — FIX#P15: setPWM() map 0-100% ke 0-255 dulu, baru floor ke MIN_RUN ***
+//
+//  FIX#P15 — 1% output PID langsung lompat ke PWM_MIN_RUN=30 (bukan PWM 2-3)
+//    - Bug: map(pw, 0,100, PWM_MIN_RUN, PWM_MAX_RUN)
+//      Akibat: output 1% = PWM 30, output 0% = PWM 30 juga → range PID cuma 30-250
+//    - Fix: map(pw, 0,100, 0, 255) dulu → dapat PWM proporsional 0-255
+//      Lalu kalau hasilnya > 0 tapi < PWM_MIN_RUN → clamp ke PWM_MIN_RUN
+//      (supaya pompa tidak stall di PWM yang terlalu rendah)
+//      Kalau pw=0 → PWM=0, pompa mati total
+//
 //  *** VERSION v10.6.2 — FIX#P14: PWM_MIN_RUN 50→30, hysteresis anti-lep-lepan ***
 //
 //  FIX#P14 — Pompa lep-lepan (nyala-mati cepat) di sekitar SP
@@ -467,8 +477,9 @@ uint32_t keyPressTime=0;
 
 // =============================================
 int pwmToDisplay(uint8_t pwm){
+  // FIX#P15: sekarang PWM proporsional 0-255, map langsung ke 0-100%
   if(pwm==0) return 0;
-  return (int)constrain(map((long)pwm,(long)PWM_MIN_RUN,(long)PWM_MAX_RUN,0L,100L),0L,100L);
+  return (int)constrain(map((long)pwm,0L,255L,0L,100L),0L,100L);
 }
 
 void echoISR(){
@@ -630,10 +641,11 @@ void setPWM(int pw){
     F.kickActive=0; pidLastPWM=PWM_MIN_RUN;
     pidInteg=0; dFiltered=0;
   }
-  int pwM=(int)map((long)pw,0,100,(long)PWM_MIN_RUN,(long)PWM_MAX_RUN);
-  pwM=constrain(pwM,PWM_MIN_RUN,PWM_MAX_RUN);
-  // FIX#P9 (REVISI FIX#P13): floor PWM_MIN_STEADY dipindah ke pidStep() dengan guard e_raw>0
-  // setPWM TIDAK lagi apply floor sendiri — biar pidStep yang kontrol penuh
+  // FIX#P15: map 0-100% ke 0-255 proporsional dulu
+  // Baru kalau hasilnya > 0 tapi < PWM_MIN_RUN, clamp ke MIN_RUN (hindari stall)
+  int pwM=(int)map((long)pw,0L,100L,0L,255L);
+  if(pwM > 0 && pwM < PWM_MIN_RUN) pwM = PWM_MIN_RUN;
+  pwM=constrain(pwM,0,PWM_MAX_RUN);
   pidLastPWM=(uint8_t)pwM;
   analogWrite(PIN_PUMP,pidLastPWM);
 }
