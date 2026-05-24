@@ -1,3 +1,13 @@
+//  *** VERSION v10.5.9 — FIX#P10: antiwindup di deadband, cegah PV drift naik perlahan ***
+//
+//  FIX#P10 — Integrator drift naik saat steady state
+//    - Bug: partial integrator (FIX#P8) + PWM floor (FIX#P9) = integrator windup pelan
+//      Di dalam deadband: antiwindup TIDAK aktif (hanya di luar deadband)
+//      Akibat: pidInteg akumulasi terus → output naik pelan → PV lama-lama jauh di atas SP
+//    - Fix 1: di dalam deadband, kalau e_raw < 0 (PV sudah di atas SP), DECAY integrator
+//      pakai faktor 0.999 per step — pelan tapi pasti turun
+//    - Fix 2: terapkan antiwindup (wErr) juga di dalam deadband
+//      supaya kalau output sudah saturasi, integrator tidak terus naik
 //  *** VERSION v10.5.8 — FIX#P9: steady-state PWM floor, cegah pompa nyala-mati ***
 //
 //  FIX#P9 — PWM floor saat steady state: cegah hunting pompa nyala-mati
@@ -622,13 +632,19 @@ void pidStep(float pv,float dt){
     pidInteg+=(pidKi*e*dt)+(ANTIWINDUP_KC*wErr*dt);
     pidInteg=cf(pidInteg,-100,100);
   } else {
-    // FIX#P8: deadband partial integrator — tetap koreksi pelan supaya outflow terkompensasi
-    // Sebelumnya: freeze total (e_raw>0) atau decay 0.9999 (e_raw<0)
-    // Masalah: integrator nggak bisa kompensasi outflow konstan → PV drift ±2% dari SP
-    // Fix: jalankan integrator dengan gain 10% di dalam deadband, pakai e_raw (bukan e=0)
-    // Ini cukup untuk hold level melawan outflow, tanpa bikin hunting
+    // FIX#P8+P10: deadband integrator — partial accumulation + antiwindup + decay arah atas
     float e_db = cf(e_raw, -1.0f, 1.0f);  // clamp ke ±deadband
-    pidInteg += (pidKi * 0.1f * e_db * dt);  // partial integration, gain 10%
+    if (e_raw > 0.0f) {
+      // PV di bawah SP: partial integrator 10% supaya bisa kompensasi outflow
+      pidInteg += (pidKi * 0.1f * e_db * dt);
+    } else {
+      // FIX#P10: PV sudah di atas SP (e_raw <= 0) → DECAY integrator pelan
+      // Ini rem integrator supaya tidak terus akumulasi ke atas
+      pidInteg *= 0.999f;
+    }
+    // FIX#P10: antiwindup tetap aktif di dalam deadband
+    // Kalau output saturasi, wErr akan negatif → tarik integrator turun
+    pidInteg += (ANTIWINDUP_KC * wErr * dt);
     pidInteg = cf(pidInteg,-100,100);
   }
   float oRaw=cf(P+pidInteg+dFiltered+ff,0,100);
