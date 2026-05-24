@@ -740,7 +740,13 @@ class AquaFlowSim {
           const d=pctToPWM(amp)/255*5;
           const Ku=(4*d)/(Math.PI*avgAmp/100);
           this.tunedKu=Ku;this.tunedPu=Pu;
-          this.tunedKp=0.45*Ku;this.tunedKi=this.tunedKp/(Pu/1.2);this.tunedKd=0;
+          // FIX#AT1: Tyreus-Luyben + de-tune 0.6x untuk sistem asimetris (inflow cepat, outflow lambat)
+          // ZN Classic (0.45*Ku) terlalu agresif → PV overshoot +2% nyangkut di atas SP
+          // TL formula: Kp=0.316*Ku, Ti=2.2*Pu → de-tune 0.6x → Kp=0.190*Ku
+          const TL_DETUNE = 0.6;
+          this.tunedKp = TL_DETUNE * 0.316 * Ku;               // = 0.190 * Ku
+          this.tunedKi = this.tunedKp / (2.2 * Pu);            // TL Ti = 2.2*Pu
+          this.tunedKd = 0;
           this.running=false;
         }
       }
@@ -981,7 +987,7 @@ function connect(){
   setConnState('connecting');
   try{
     ws=new WebSocket(url);
-    ws.onopen=()=>{wsConnected=true;setConnState('online');if(!plantId)initObserver();startWsPing();};
+    ws.onopen=()=>{wsConnected=true;setConnState('online');initObserver();startWsPing();};  // FIX#OB1: reinit observer tiap reconnect supaya buffer fresh
     ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='state')onStateData(msg.data);}catch(err){}};
     ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;stopWsPing();setTimeout(()=>{if(!wsConnected)connect();},5000);};
     ws.onerror=()=>ws.close();
@@ -1001,6 +1007,22 @@ function startWsPing(){
   },8000);
 }
 function stopWsPing(){if(_wsPingTimer){clearInterval(_wsPingTimer);_wsPingTimer=null;}}
+
+// FIX#OB2: visibilitychange — saat tab kembali aktif, reconnect jika WS mati + restart ping
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    // Tab kembali ke foreground
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.log('[v10] Tab visible, WS terputus — reconnect...');
+      if (ws) { try { ws.close(); } catch(e){} ws = null; }
+      wsConnected = false;
+      connect();
+    } else {
+      // WS masih open, restart ping timer aja (mungkin timer sempat freeze)
+      startWsPing();
+    }
+  }
+});
 
 function setConnState(state){
   const dot=document.getElementById('connDot');
