@@ -44,7 +44,7 @@ function sendToESP(cmdStr) {
 
 // Offline check — tandai offline kalau 5 detik tidak ada data
 setInterval(() => {
-  if (state.online && state.lastSeen && Date.now() - state.lastSeen > 5000) {
+  if (state.online && state.lastSeen && Date.now() - state.lastSeen > 10000) {  // FIX#S2: timeout 5s→10s
     state.online = false;
     broadcast({ type: 'state', data: state });
   }
@@ -88,6 +88,7 @@ wss.on('connection', (ws, req) => {
         state.kp = gF('kp') / 100;
         state.ki = gF('ki') / 1000;
         state.kd = gF('kd') / 1000;
+        state.lastSeen = Date.now();  // FIX#S1: update lastSeen saat PIDK diterima
         broadcast({ type: 'state', data: state });
       }
     });
