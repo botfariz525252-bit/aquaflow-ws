@@ -1,3 +1,14 @@
+//  *** VERSION v10.5.8 — FIX#P9: steady-state PWM floor, cegah pompa nyala-mati ***
+//
+//  FIX#P9 — PWM floor saat steady state: cegah hunting pompa nyala-mati
+//    - Bug: saat PV sudah dekat SP (steady state), output PID bisa turun ke 0
+//      karena partial integrator terlalu lemah kompensasi outflow
+//      Akibat: setPWM(0) → pompa mati → PV turun → PID nyalain lagi → PWM_MIN_RUN=50
+//      Pompa langsung kenceng (1% sudah lumayan kenceng) → PV overshoot → mati lagi → hunting
+//    - Fix: tambah PWM_MIN_STEADY=25 sebagai floor output saat pidSettledOnce=1
+//      Output PID tidak pernah 0 saat steady state → pompa selalu jalan pelan
+//      Hanya berlaku saat error kecil (|e|<5%), kalau error besar tetap bisa 0
+//      Pompa nyala terus tapi pelan → level smooth, tidak ada nyala-mati
 //  *** VERSION v10.5.7 — FIX#AB1: auto-bias estimation sebelum relay, bias optimal dari dPV ***
 //  *** VERSION v10.5.6 — FIX#RAM1-3: hemat RAM — shBuf 60→56, PSTR Serial format, F() LCD ***
 //  *** VERSION v10.5.5 — FIX#P7+P8: deadband 2.5→1.0, partial integrator di deadband ***
@@ -360,6 +371,7 @@ uint32_t tunDrainStartMs=0;
 #define KICKSTART_PWM       160
 #define KICKSTART_MS        700UL
 #define PWM_MIN_RUN         50    // FIX#P1: turunkan min PWM, pompa 5.5LPM tangki ~27L
+#define PWM_MIN_STEADY      25    // FIX#P9: floor PWM saat steady state (pompa tetap pelan, tidak mati)
 #define PWM_MAX_RUN         250
 #define ESP_INTERVAL        500UL
 #define MED_N               3
@@ -574,6 +586,9 @@ void setPWM(int pw){
   }
   int pwM=(int)map((long)pw,0,100,(long)PWM_MIN_RUN,(long)PWM_MAX_RUN);
   pwM=constrain(pwM,PWM_MIN_RUN,PWM_MAX_RUN);
+  // FIX#P9: kalau steady state (settledOnce), floor ke PWM_MIN_STEADY
+  // supaya pompa tidak mati total saat output kecil → cegah nyala-mati hunting
+  if(F.pidSettledOnce && pwM < PWM_MIN_STEADY) pwM = PWM_MIN_STEADY;
   pidLastPWM=(uint8_t)pwM;
   analogWrite(PIN_PUMP,pidLastPWM);
 }
@@ -623,6 +638,12 @@ void pidStep(float pv,float dt){
   int o=(int)oRaw;
   if(pidLastPWM>60&&pvRate<-0.03f&&fabs(pidSP-pv)>5.0f)
     o=ci(o+(int)roundf(-pvRate*20.0f),0,100);
+  // FIX#P9: steady state PWM floor — kalau sudah settled dan error kecil,
+  // jangan biarkan output=0. Map output minimal ke PWM_MIN_STEADY bukan mati.
+  // Ini mencegah siklus mati-nyala yang bikin pompa terasa hunting.
+  if(F.pidSettledOnce && fabs(e_raw)<5.0f && o<1){
+    o=1; // paksa minimal 1% → setPWM akan map ke PWM_MIN_STEADY via override di setPWM
+  }
   setPWM(o);
   pidPrevPV=pv;
 }
@@ -1409,4 +1430,5 @@ void loop(){
   eeFlush(now);
   if(now-tLCD>=300){tLCD=now;drawUI();}
 }
+
 
