@@ -1,4 +1,5 @@
 // ESP8266 - AquaFlow WebSocket Client
+// *** VERSION v9.7 — FIX#S6: heartbeat interval 1000→400ms, kurangi false offline
 // *** VERSION v9.6 — FIX#ESP3: validasi PV range sebelum broadcast ke WS ***
 // Hardware Serial (pin RX/TX ESP8266)
 // Connect ke Railway WebSocket server
@@ -239,13 +240,13 @@ void loop() {
     }
   }
 
-  // FIX#ESP2: kirim heartbeat tiap 1 detik kalau tidak ada data baru
-  // Cegah observer timeout (espOnline jadi false padahal ESP hidup)
-  if (!newData && (now - lastHB >= 1000)) {
+  // FIX#ESP2+S6: kirim heartbeat tiap 400ms — lebih sering, cegah false offline di observer
+  if (!newData && (now - lastHB >= 400)) {
     if (wsClient.isConnected()) {
       lastHB = now;
       sendHeartbeat();
     }
   }
 }
+
 
