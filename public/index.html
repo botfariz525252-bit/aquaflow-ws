@@ -391,10 +391,27 @@ let state={pv:0,sp:0,out:0,mode:'P',running:0,alarmHi:0,alarmLo:0,kp:0,ki:0,kd:0
 
 function connect(){
   ws=new WebSocket(WS_URL);
-  ws.onopen=()=>{clearTimeout(reconnTimer);};
-  ws.onmessage=(e)=>{const msg=JSON.parse(e.data);if(msg.type==='state'){state=msg.data;updateUI();}if(msg.type==='cmdlog'){renderCmdLog(msg.data);}};
-  ws.onclose=()=>{reconnTimer=setTimeout(connect,3000);};
-  ws.onerror=()=>ws.close();
+  ws.onopen=()=>{
+    clearTimeout(reconnTimer);
+    // FIX#IDX2: keepalive ping tiap 4s — Railway drop idle WS setelah ~12s
+    if(window._idxPingTimer)clearInterval(window._idxPingTimer);
+    window._idxPingTimer=setInterval(()=>{
+      if(ws&&ws.readyState===WebSocket.OPEN){try{ws.send(JSON.stringify({type:'ping'}));}catch(e){}}
+    },4000);
+  };
+  ws.onmessage=(e)=>{
+    try{
+      const msg=JSON.parse(e.data);
+      if(msg.type==='state'){state=msg.data;updateUI();}
+      if(msg.type==='cmdlog'){renderCmdLog(msg.data);}
+      // FIX#IDX1: ignore ping/unknown type — tidak crash handler
+    }catch(err){console.warn('[WS] parse error, skip frame:',err.message);}
+  };
+  ws.onclose=()=>{
+    if(window._idxPingTimer){clearInterval(window._idxPingTimer);window._idxPingTimer=null;}
+    reconnTimer=setTimeout(connect,3000); // FIX#IDX3: stop ping saat disconnect
+  };
+  ws.onerror=()=>{if(window._idxPingTimer){clearInterval(window._idxPingTimer);window._idxPingTimer=null;}ws.close();}; // FIX#IDX4
 }
 connect();
 
@@ -493,7 +510,8 @@ function updateUI(){
 function renderCmdLog(log){
   const el=document.getElementById('cmdLog');
   if(!log||log.length===0){el.innerHTML='<div style="color:var(--muted);font-size:10px;text-align:center;padding:16px">No commands yet</div>';return;}
-  el.innerHTML=[...log].reverse().map(e=>`<div class="cmd-entry"><span class="cmd-badge">SENT</span><span class="cmd-text">${e.cmd}</span><span class="cmd-ts">${e.ts}</span></div>`).join('');
+  // FIX#IDX5: batasi render max 20 entries
+  el.innerHTML=[...log].reverse().slice(0,20).map(e=>`<div class="cmd-entry"><span class="cmd-badge">SENT</span><span class="cmd-text">${e.cmd}</span><span class="cmd-ts">${e.ts}</span></div>`).join('');
 }
 updateUI();drawTrend();
 
@@ -674,3 +692,4 @@ function applyToController(){
 </script>
 </body>
 </html>
+
