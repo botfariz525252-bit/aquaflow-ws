@@ -43,6 +43,7 @@ char   mode = 'P';
 int    tunePhase = 0;  // Fix #28/#29: 0=off 1=fill 2=drain 3=relay 4=done 5=cancel
 bool   newData = false;
 uint32_t lastSend = 0;
+uint32_t lastHB   = 0;      // FIX#ESP2: heartbeat timer
 
 // ── FIX 1: LED non-blocking ────────────────────────────────────────────────
 uint32_t ledOffAt = 0;
@@ -106,27 +107,25 @@ bool isValidLine(const char* line) {
 
 // ── Kirim ke WebSocket ────────────────────────────────────────────────────
 void sendDataWS() {
-  char buf[200];  // Fix #29: headroom for tune=%d
+  // FIX#ESP2: gabung DATA+PIDK jadi 1 frame cegah race condition di browser/observer
+  char buf[220];
   snprintf(buf, sizeof(buf),
-    "DATA:pv=%.1f,sp=%.1f,out=%d,mode=%c,run=%d,ah=%d,al=%d,tune=%d",  // Fix #29
-    pv, sp, out, mode, running, alHi, alLo, tunePhase
+    "DATA:pv=%.1f,sp=%.1f,out=%d,mode=%c,run=%d,ah=%d,al=%d,tune=%d,kp=%d,ki=%d,kd=%d",
+    pv, sp, out, mode, running, alHi, alLo, tunePhase,
+    (int)(kp * 100), (int)(ki * 1000), (int)(kd * 1000)
   );
   wsClient.sendTXT(buf);
-
-  // Fix#57: cek isConnected sebelum kirim kedua — bisa disconnect antara dua sendTXT
-  if(wsClient.isConnected()) {
-    char buf2[80];
-    snprintf(buf2, sizeof(buf2),
-      "PIDK:kp=%d,ki=%d,kd=%d,en=11",
-      (int)(kp * 100), (int)(ki * 1000), (int)(kd * 1000)
-    );
-    wsClient.sendTXT(buf2);
-  }
-
-  ledFlash();  // FIX 1: non-blocking, TIDAK block WebSocket library
+  ledFlash();
 }
 
-// ── WebSocket event handler ───────────────────────────────────────────────
+void sendHeartbeat() {
+  // FIX#ESP2: heartbeat saat tidak ada data baru biar observer tidak timeout
+  char hb[32];
+  snprintf(hb, sizeof(hb), "HB:pv=%.1f", pv);
+  wsClient.sendTXT(hb);
+}
+
+
 void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
   switch (type) {
     case WStype_CONNECTED:
@@ -230,8 +229,19 @@ void loop() {
   if (newData && now - lastSend >= SEND_INTERVAL) {
     if (wsClient.isConnected()) {
       lastSend  = now;
+      lastHB    = now;   // FIX#ESP2: reset heartbeat timer saat data terkirim
       newData   = false;
       sendDataWS();
     }
   }
+
+  // FIX#ESP2: kirim heartbeat tiap 1 detik kalau tidak ada data baru
+  // Cegah observer timeout (espOnline jadi false padahal ESP hidup)
+  if (!newData && (now - lastHB >= 1000)) {
+    if (wsClient.isConnected()) {
+      lastHB = now;
+      sendHeartbeat();
+    }
+  }
 }
+
