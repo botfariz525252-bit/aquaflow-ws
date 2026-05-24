@@ -1,3 +1,13 @@
+//  *** VERSION v10.6.2 — FIX#P14: PWM_MIN_RUN 50→30, hysteresis anti-lep-lepan ***
+//
+//  FIX#P14 — Pompa lep-lepan (nyala-mati cepat) di sekitar SP
+//    - Bug: PWM_MIN_RUN=50 terlalu tinggi → 1% output sudah terlalu kenceng
+//      Pompa threshold fisik ternyata di PWM=30
+//    - Fix 1: PWM_MIN_RUN 50→30 (sesuai threshold fisik pompa)
+//    - Fix 2: PWM_MIN_STEADY 25→20 (floor lebih rendah, steady state lebih smooth)
+//    - Fix 3: Tambah hysteresis on/off — pompa baru nyala lagi kalau PV turun
+//      minimal 0.8% di bawah SP setelah sempat di atas SP (cegah lep-lepan)
+//
 //  *** VERSION v10.6.1 — FIX#P13: pompa tidak mati saat PV>SP (PWM floor salah kondisi) ***
 //
 //  FIX#P13 — Output pompa tidak benar-benar 0 saat PV sudah melewati SP
@@ -380,6 +390,8 @@ float pidSP=50,pidKp=5,pidKi=0.2f,pidKd=0;
 float pidKff=0.5f,prevSP=50;
 float pidInteg=0,pidPrevPV=0,dFiltered=0;
 float pvRate=0,pvPrev=0;
+bool  pumpHystLock=false;  // FIX#P14: hysteresis — true saat PV>SP, pompa dikunci mati
+                           // baru unlock kalau PV turun >= HYST_BAND di bawah SP
 float alarmHi=90,alarmLo=10;
 
 #define TUN_BIAS 50.0f
@@ -403,8 +415,9 @@ uint32_t tunDrainStartMs=0;
 
 #define KICKSTART_PWM       160
 #define KICKSTART_MS        700UL
-#define PWM_MIN_RUN         50    // FIX#P1: turunkan min PWM, pompa 5.5LPM tangki ~27L
-#define PWM_MIN_STEADY      25    // FIX#P9: floor PWM saat steady state (pompa tetap pelan, tidak mati)
+#define PWM_MIN_RUN         30    // FIX#P14: threshold fisik pompa = PWM 30
+#define PWM_MIN_STEADY      20    // FIX#P14: floor lebih rendah sesuai PWM_MIN_RUN baru
+#define HYST_BAND           0.8f  // FIX#P14: hysteresis band — pompa nyala lagi saat PV < SP-0.8%
 #define PWM_MAX_RUN         250
 #define ESP_INTERVAL        500UL
 #define MED_N               3
@@ -679,18 +692,23 @@ void pidStep(float pv,float dt){
   int o=(int)oRaw;
   if(pidLastPWM>60&&pvRate<-0.03f&&fabs(pidSP-pv)>5.0f)
     o=ci(o+(int)roundf(-pvRate*20.0f),0,100);
-  // FIX#P9 + FIX#P13: floor PWM hanya aktif saat PV < SP (e_raw > 0)
-  // Kalau PV sudah di atas SP (e_raw <= 0) → pompa HARUS bisa mati total
-  // Ini fix utama: pompa tidak boleh jalan saat PV sudah lewat SP
-  if(F.pidSettledOnce && e_raw > 0.0f && fabs(e_raw) < 5.0f && o < 1){
-    o = 1;  // paksa minimal 1% → setPWM map ke PWM_MIN_RUN (pompa jalan pelan kompensasi outflow)
+  // FIX#P9 + FIX#P13 + FIX#P14: hysteresis anti-lep-lepan + floor hanya saat PV<SP
+  // --- Hysteresis logic ---
+  if(e_raw <= 0.0f){
+    // PV >= SP: kunci pompa mati, set flag
+    pumpHystLock = true;
+    o = 0;
+  } else if(pumpHystLock){
+    // PV < SP tapi lock masih aktif — tunggu PV turun HYST_BAND dulu
+    if(e_raw >= HYST_BAND){
+      pumpHystLock = false;  // PV sudah turun cukup, bolehin pompa nyala lagi
+    } else {
+      o = 0;  // belum cukup turun, pompa masih dikunci mati
+    }
   }
-  // FIX#P13: apply PWM_MIN_STEADY di sini, bukan di setPWM, supaya ada konteks e_raw
-  // Kalau e_raw <= 0 (PV >= SP), o tetap 0 → setPWM(0) → pompa mati
-  if(o > 0 && F.pidSettledOnce && e_raw > 0.0f){
-    // Hitung pwm yang akan dihasilkan, kalau kurang dari STEADY, naikkan
-    int pwmCalc = (int)map((long)o, 0, 100, (long)PWM_MIN_RUN, (long)PWM_MAX_RUN);
-    if(pwmCalc < PWM_MIN_STEADY) o = 1;  // biarkan setPWM pakai PWM_MIN_RUN (lebih aman)
+  // --- Floor logic (hanya aktif kalau pompa boleh nyala) ---
+  if(!pumpHystLock && o < 1 && e_raw > 0.0f && F.pidSettledOnce){
+    o = 1;  // minimal 1% supaya pompa tidak mati total saat masih perlu kompensasi outflow
   }
   setPWM(o);
   pidPrevPV=pv;
@@ -704,7 +722,7 @@ void cancelTune(uint8_t reasonIdx){
   F.tunReasonIdx=reasonIdx;
   F.tunFilling=0; F.tunDraining=0; F.tunDirectRelay=0;
   F.tunBiasEst=0; tunBiasEstPhase=0;  // FIX#AB1: reset bias estimation state
-  pidInteg=0; tunSign=0; dFiltered=0;
+  pidInteg=0; tunSign=0; dFiltered=0; pumpHystLock=false;
   pidPrevPV=lastPV;
   // FIX#63: reset pvPrev & pvRate agar tidak spike saat PID resume
   pvPrev=lastPV; pvRate=0;
@@ -717,7 +735,7 @@ void startTune(){
   tunDrainStartMs=0;
   tunXcount=0; tunPVhi=-1e9f; tunPVlo=1e9f;
   tunPrevMs=0; tunLastMs=0; tunSign=0;
-  pidInteg=0; dFiltered=0;
+  pidInteg=0; dFiltered=0; pumpHystLock=false;
   pidLastPWM=0; F.kickActive=0;
   pidPrevPV=lastPV;
   // FIX#63: reset pvPrev & pvRate agar tidak stale saat pidStep pertama jalan
@@ -978,7 +996,7 @@ void readFromESP(){
         }
         ff=strstr(p,"mode=");
         if(ff){char m=*(ff+5);
-          if(m=='P'){amode=AM_PID;F.pidOn=1;pidLastPWM=0;F.kickActive=0;pidInteg=0;dFiltered=0;pvPrev=lastPV;pvRate=0;}
+          if(m=='P'){amode=AM_PID;F.pidOn=1;pidLastPWM=0;F.kickActive=0;pidInteg=0;dFiltered=0;pvPrev=lastPV;pvRate=0;pumpHystLock=false;}
           else if(m=='M'){amode=AM_MANUAL;F.pidOn=0;F.kickActive=0;}
         }
         ff=strstr(p,"pwm=");
