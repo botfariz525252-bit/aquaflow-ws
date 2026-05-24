@@ -67,6 +67,57 @@ De-tune 0.6x diterapkan di v10.5.4 karena outflow sistem bersifat sedang (40-60%
 
 ---
 
+## PID Deadband & Integrator (v10.5.5)
+
+### Masalah: PV drift ±2% dari SP — kadang kurang, kadang lebih
+
+#### Root Cause 1: Deadband terlalu lebar (2.5%)
+- Deadband 2.5% → PID nganggur selama PV dalam range ±2.5% dari SP
+- PV bisa settle di mana saja dalam range itu → bisa -2% atau +2% dari SP
+- **Fix#P7 (v10.5.5):** Deadband diperkecil dari 2.5% → **1.0%**
+
+#### Root Cause 2: Integrator freeze → outflow tidak terkompensasi
+- Saat PV dalam deadband, integrator di-freeze total (e=0)
+- Outflow terus berjalan → tidak ada yang mengkompensasi → PV perlahan drift turun
+- Kalau PV overshoot masuk deadband dari atas, decay 0.9999 terlalu lambat → PV nyangkut di atas SP
+- **Fix#P8 (v10.5.5):** Partial integrator di dalam deadband dengan gain 10%:
+  ```cpp
+  float e_db = constrain(e_raw, -1.0f, 1.0f);
+  pidInteg += (pidKi * 0.1f * e_db * dt);  // 10% gain, pakai e_raw bukan e=0
+  ```
+  Cukup untuk kompensasi outflow konstan, tidak cukup agresif untuk hunting.
+
+#### Behavior setelah fix
+| Kondisi | Sebelum v10.5.5 | Setelah v10.5.5 |
+|---------|----------------|----------------|
+| PV settle di deadband | Bisa ±2.5% dari SP | Maksimal ±1.0% dari SP |
+| Outflow saat deadband | Drift turun pelan | Terkompensasi partial integrator |
+| PV > SP di deadband | Decay 0.9999 (sangat lambat) | Partial integrator tarik turun |
+| Hunting | Tidak ada | Tidak ada (gain 10% cukup halus) |
+
+---
+
+## Observer Dashboard (v10 — aquaflow_observer_v10.html)
+
+### Masalah: Observer mati tiap beberapa detik + tab switch
+
+#### FIX#AT1 — Autotune shadow sim masih ZN Classic
+- Shadow sim di observer pakai formula `0.45*Ku` (ZN Classic)
+- Hasil rekomendasi Kp/Ki tidak konsisten dengan pkk.ino
+- **Fix:** Ganti ke Tyreus-Luyben + de-tune 0.6x: `Kp = 0.190*Ku`, `Ki = Kp/(2.2*Pu)`
+
+#### FIX#OB1 — Observer buffer stale setelah reconnect
+- `initObserver()` hanya dipanggil kalau `!plantId` → saat reconnect, buffer tidak di-reset
+- Shadow sim bisa desync setelah disconnect/reconnect
+- **Fix:** `initObserver()` dipanggil setiap `ws.onopen` tanpa kondisi
+
+#### FIX#OB2 — Observer mati saat pindah ke tab dashboard
+- Tidak ada `visibilitychange` handler → saat tab di-background, browser throttle `setInterval`
+- Ping timer freeze → Railway proxy timeout 12 detik → WS putus → observer mati
+- **Fix:** Tambah `visibilitychange` listener — reconnect jika WS putus, restart ping jika masih hidup
+
+---
+
 ## WebSocket Keepalive (Railway/Cloud Proxy)
 
 Railway dan cloud proxy lainnya memiliki **idle timeout ~10-12 detik** untuk koneksi WebSocket.
@@ -78,4 +129,16 @@ Kalau tidak ada WebSocket ping frame dalam waktu tersebut, proxy memutus koneksi
 **Fix di v10.5.3+ (FIX#S3):**
 - `server.js`: `client.ping()` ke semua client setiap 8 detik
 - `aquaflow_observer_v10.html`: `ws.send({type:'ping'})` dari browser setiap 8 detik
+
+---
+
+## Changelog
+
+| Versi | Fix | Deskripsi |
+|-------|-----|-----------|
+| v10.5.5 | FIX#P7, FIX#P8 | Deadband 2.5→1.0%, partial integrator 10% di deadband |
+| v10.5.4 | FIX#P6 | ZN Classic → Tyreus-Luyben + de-tune 0.6x |
+| v10.5.3 | FIX#S3 | WebSocket keepalive ping/pong |
+| v10.5.2 | FIX#P3, FIX#P4 | Deadband freeze, relayD fix |
+| v10 observer | FIX#AT1, FIX#OB1, FIX#OB2 | Shadow sim TL formula, observer reinit, visibilitychange |
 
