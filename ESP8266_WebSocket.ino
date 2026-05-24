@@ -1,6 +1,8 @@
 // ESP8266 - AquaFlow WebSocket Client
 // Ganti SoftwareSerial → Hardware Serial (pin RX/TX ESP)
 // Connect ke Railway WebSocket server
+//
+// FIX#ESP1 — forward tune= field ke WS: observer bisa lihat fase autotune (biasEst, fill, drain, relay)
 
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>  // Library: "WebSockets" by Markus Sattler
@@ -23,7 +25,7 @@ char rxBuf[RXBUF_SIZE];
 uint8_t rxIdx = 0;
 
 float pv=0, sp=0;
-int   out=0, running=0, alHi=0, alLo=0;
+int   out=0, running=0, alHi=0, alLo=0, tune=0;  // FIX#ESP1: tambah tune
 float kp=0, ki=0, kd=0;
 char  mode='P';
 bool  newData = false;
@@ -52,6 +54,7 @@ void parseFromUNO(const char* line) {
   alHi    = gI("ah=");
   alLo    = gI("al=");
   mode    = gC("mode=");
+  tune    = gI("tune=");  // FIX#ESP1: forward tune phase ke WS (0=idle,1=fill,2=drain,3=relay,4=done,5=cancel,6=biasEst)
   newData = true;
 }
 
@@ -69,8 +72,8 @@ void parsePIDK(const char* line) {
 void sendDataWS() {
   char buf[180];
   snprintf(buf, sizeof(buf),
-    "DATA:pv=%.1f,sp=%.1f,out=%d,mode=%c,run=%d,ah=%d,al=%d",
-    pv, sp, out, mode, running, alHi, alLo
+    "DATA:pv=%.1f,sp=%.1f,out=%d,mode=%c,run=%d,ah=%d,al=%d,tune=%d",  // FIX#ESP1: tambah tune
+    pv, sp, out, mode, running, alHi, alLo, tune
   );
   wsClient.sendTXT(buf);
 
