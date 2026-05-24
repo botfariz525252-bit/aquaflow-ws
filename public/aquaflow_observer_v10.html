@@ -650,9 +650,10 @@ class AquaFlowSim {
     this.integ=0;this.prevErr=0;this.dFilt=0;
     this.pvRateEma=0;
     this.running=true;
-    this.tunPhase='fill';this.tunT0=0;this.tunPeaks=[];this.tunValleys=[];
+    this.tunPhase='biasEst';this.tunT0=0;this.tunPeaks=[];this.tunValleys=[];  // FIX#OB5: mulai biasEst
+    this._biasEstPhase=1;this._biasEstT0=0;this._biasEstPV=0;this._dPV_up=0.5;this._dPV_down=0.5;
     this.tunLastCross=null;this.tunLastCrossT=0;this.tunHalfCycles=[];
-    this.tunBias=HW.TUN_BIAS;this.tunAmp=HW.TUN_AMP;
+    this.tunBias=HW.TUN_BIAS;this.tunAmp=HW.TUN_AMP;  // FIX#OB5: tunBias dinamis diupdate setelah estimasi
     this.tunCancel=false;
     this.tunedKp=null;this.tunedKi=null;this.tunedKd=null;
     this.tunedKu=null;this.tunedPu=null;
@@ -714,7 +715,36 @@ class AquaFlowSim {
     this.pwm=pctToPWM(u);
   }
   _doAutotune(pv,Ts){
-    const bias=HW.TUN_BIAS,amp=HW.TUN_AMP;
+    const amp=HW.TUN_AMP;
+    // FIX#OB5: fase biasEst — 5 detik pompa ON, 5 detik pompa OFF, hitung bias optimal
+    if(this.tunPhase==='biasEst'){
+      if(!this._biasEstPhase) this._biasEstPhase=1;
+      if(!this._biasEstT0) this._biasEstT0=this.t;
+      if(!this._biasEstPV) this._biasEstPV=pv;
+      const elapsed=this.t-this._biasEstT0;
+      if(this._biasEstPhase===1){
+        this.pwm=HW.PWM_MAX; this.out=100;
+        if(elapsed>=5){
+          const dPV=Math.max(pv-this._biasEstPV, 0.01);
+          this._dPV_up=dPV/elapsed;
+          this._biasEstPhase=2; this._biasEstT0=this.t; this._biasEstPV=pv;
+        }
+        return;
+      } else {
+        this.pwm=0; this.out=0;
+        if(elapsed>=5){
+          const dPV=Math.max(this._biasEstPV-pv, 0.01);
+          this._dPV_down=dPV/elapsed;
+          const total=this._dPV_up+this._dPV_down;
+          this.tunBias=Math.min(Math.max((this._dPV_down/total)*100+20, 30), 70); // FIX#OB5: bias dinamis
+          if(Math.abs(pv-this.SP)<=22){
+            this.tunPhase='relay'; this.tunT0=this.t;
+            this.tunLastCross=pv>=this.SP?'above':'below'; this.tunLastCrossT=this.t;
+          } else { this.tunPhase='fill'; }
+        }
+        return;
+      }
+    }
     if(this.tunPhase==='fill'){
       this.pwm=HW.PWM_MAX;this.out=100;
       if(pv>=this.SP*0.5){this.tunPhase='relay';this.tunT0=this.t;this.tunLastCross=pv>=this.SP?'above':'below';this.tunLastCrossT=this.t;}
@@ -722,6 +752,7 @@ class AquaFlowSim {
       return;
     }
     if(this.tunPhase==='relay'){
+      const bias=this.tunBias;  // FIX#OB5: pakai tunBias dinamis
       const above=pv>=(this.SP+HW.RELAY_BAND/2);
       const below=pv<=(this.SP-HW.RELAY_BAND/2);
       if(above){this.pwm=pctToPWM(bias-amp);this.out=pwmToDisplay(this.pwm);}
@@ -1068,7 +1099,8 @@ function onStateData(data){
     const dtSec=(wallTs-prev.wallTs)/1000;
     if(dtSec>0.05)pvRate=(pv-prev.pv)/dtSec;
   }
-  const rec={wallTs,t:observeT,pv,sp,out:outPct,mode,kp,ki,kd,pvRate,alarmHi,alarmLo};
+  const tune=data.tune||0;  // FIX#OB4: ambil tune phase dari server
+  const rec={wallTs,t:observeT,pv,sp,out:outPct,mode,kp,ki,kd,pvRate,alarmHi,alarmLo,tune};
   realTimeBuffer.push(rec);
   if(realTimeBuffer.length>MAX_BUFFER)realTimeBuffer.shift();
   plantId.update(observeT,pv,outPct,pvRate);
@@ -1288,6 +1320,46 @@ function updateShadowChart(){
 }
 
 function updateLCDFromReal(rec,conf,params){
+  // FIX#OB3: tampilkan fase autotune berdasarkan data.tune dari UNO
+  // tune: 0=idle, 1=fill, 2=drain, 3=relay, 4=done, 5=cancel, 6=biasEst
+  const tunePhase = rec.tune !== undefined ? rec.tune : 0;
+  if(tunePhase >= 1 && tunePhase <= 3 || tunePhase === 6){
+    const pvStr=rec.pv.toFixed(1).padStart(5);
+    const spStr=rec.sp.toFixed(1).padStart(5);
+    const phaseLabel = tunePhase===6 ? 'EST BIAS' :
+                       tunePhase===1 ? 'FILLING ' :
+                       tunePhase===2 ? 'DRAINING' : 'RELAY   ';
+    const modeStr = (rec.kd > 0.0001) ? 'PID' : 'PI';
+    setLCD(
+      `AUTO ${modeStr} ${phaseLabel}`,
+      `PV:${pvStr}% SP:${spStr}%`,
+      tunePhase===6 ? `ESTIMATING BIAS...  ` :
+      tunePhase===3 ? `OUT:${rec.out.toFixed(0).padStart(3)}% RELAY ACTIVE` :
+                      `${tunePhase===1?'FILLING':'DRAINING'} TO SP...  `,
+      `[observer mirror]   `
+    );
+    return;
+  }
+  if(tunePhase === 4){
+    const pvStr=rec.pv.toFixed(1).padStart(5);
+    setLCD(
+      `AUTO TUNE DONE!     `,
+      `Kp:${rec.kp.toFixed(3)} Ki:${rec.ki.toFixed(5)}`,
+      `PV:${pvStr}%              `,
+      `Conf:${conf.toFixed(0).padStart(2)}% ${espOnline?'ESP:ON ':'ESP:OFF'}`
+    );
+    return;
+  }
+  if(tunePhase === 5){
+    setLCD(
+      `AUTO TUNE CANCEL    `,
+      `Check sensor/level  `,
+      `Kp:${rec.kp.toFixed(3)} Ki:${rec.ki.toFixed(5)}`,
+      `Conf:${conf.toFixed(0).padStart(2)}% ${espOnline?'ESP:ON ':'ESP:OFF'}`
+    );
+    return;
+  }
+  // Normal mode
   const modeStr=rec.mode.toUpperCase().substring(0,6).padEnd(6);
   const pvStr=rec.pv.toFixed(1).padStart(5);
   const spStr=rec.sp.toFixed(1).padStart(5);
