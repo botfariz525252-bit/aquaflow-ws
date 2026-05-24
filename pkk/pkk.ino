@@ -1,4 +1,4 @@
-//  *** VERSION v10.5.4 — FIX: ZN overshoot → Tyreus-Luyben + de-tune 0.6x ***
+//  *** VERSION v10.5.5 — FIX#P7+P8: deadband 2.5→1.0, partial integrator di deadband ***
 //
 //  FIX#P6 — ZN formula: ganti ZN Classic → Tyreus-Luyben + de-tune 0.6x
 //    - Bug: ZN Classic (Kp=0.45*Ku PI, Kp=0.6*Ku PID) terlalu agresif untuk sistem
@@ -579,7 +579,7 @@ void setPWMManual(int pw){
 
 void pidStep(float pv,float dt){
   float e_raw=pidSP-pv;
-  bool inDeadband = (fabs(e_raw) < 2.5f);  // FIX#P2: perlebar deadband 1.5→2.5%
+  bool inDeadband = (fabs(e_raw) < 1.0f);  // FIX#P7: perkecil deadband 2.5→1.0% (deadband lebar bikin PV settle sembarang dalam ±2.5%)
   if(inDeadband && !F.pidSettledOnce) F.pidSettledOnce=1;
   float e = inDeadband ? 0.0f : e_raw;
   e=cf(e,-25,25);
@@ -597,14 +597,14 @@ void pidStep(float pv,float dt){
     pidInteg+=(pidKi*e*dt)+(ANTIWINDUP_KC*wErr*dt);
     pidInteg=cf(pidInteg,-100,100);
   } else {
-    // FIX#P5: split deadband behavior berdasarkan arah error
-    // e_raw>0 = PV<SP = pompa perlu kerja → FREEZE integrator (jangan turunkan!)
-    // e_raw<0 = PV>SP = pompa boleh sedikit turun → decay ultra-pelan 0.9999
-    if(e_raw < 0.0f){
-      pidInteg*=0.9999f;  // PV di atas SP: decay sangat pelan (hampir freeze)
-    }
-    // else: PV di bawah atau pas SP, freeze (tidak ada perubahan)
-    pidInteg=cf(pidInteg,-100,100);
+    // FIX#P8: deadband partial integrator — tetap koreksi pelan supaya outflow terkompensasi
+    // Sebelumnya: freeze total (e_raw>0) atau decay 0.9999 (e_raw<0)
+    // Masalah: integrator nggak bisa kompensasi outflow konstan → PV drift ±2% dari SP
+    // Fix: jalankan integrator dengan gain 10% di dalam deadband, pakai e_raw (bukan e=0)
+    // Ini cukup untuk hold level melawan outflow, tanpa bikin hunting
+    float e_db = cf(e_raw, -1.0f, 1.0f);  // clamp ke ±deadband
+    pidInteg += (pidKi * 0.1f * e_db * dt);  // partial integration, gain 10%
+    pidInteg = cf(pidInteg,-100,100);
   }
   float oRaw=cf(P+pidInteg+dFiltered+ff,0,100);
   float rr=(pv-pvPrev)/dt;
