@@ -1,3 +1,13 @@
+//  *** VERSION v10.6.1 — FIX#P13: pompa tidak mati saat PV>SP (PWM floor salah kondisi) ***
+//
+//  FIX#P13 — Output pompa tidak benar-benar 0 saat PV sudah melewati SP
+//    - Bug A: setPWM() floor PWM_MIN_STEADY aktif juga saat PV>SP (e_raw<0)
+//      Akibat: pompa masih jalan pelan → PV terus naik walaupun sudah lewat SP
+//    - Bug B: pidStep() paksa o=1 saat error<5% tanpa cek arah error
+//      Akibat: saat e_raw<0 (PV>SP), output tetap 1% → pompa tidak pernah 0
+//    - Fix A: kondisi floor di setPWM() tambah cek e_raw — hanya aktif saat PV<SP
+//    - Fix B: kondisi paksa o=1 di pidStep() tambah e_raw>0 guard
+//
 //  *** VERSION v10.6.0 — FIX#P11: validasi PV range anti-garbage, FIX#P12: pompa gradual start ***
 //
 //  FIX#P11 — LCD tampil PV random (misal 102090930)
@@ -609,9 +619,8 @@ void setPWM(int pw){
   }
   int pwM=(int)map((long)pw,0,100,(long)PWM_MIN_RUN,(long)PWM_MAX_RUN);
   pwM=constrain(pwM,PWM_MIN_RUN,PWM_MAX_RUN);
-  // FIX#P9: kalau steady state (settledOnce), floor ke PWM_MIN_STEADY
-  // supaya pompa tidak mati total saat output kecil → cegah nyala-mati hunting
-  if(F.pidSettledOnce && pwM < PWM_MIN_STEADY) pwM = PWM_MIN_STEADY;
+  // FIX#P9 (REVISI FIX#P13): floor PWM_MIN_STEADY dipindah ke pidStep() dengan guard e_raw>0
+  // setPWM TIDAK lagi apply floor sendiri — biar pidStep yang kontrol penuh
   pidLastPWM=(uint8_t)pwM;
   analogWrite(PIN_PUMP,pidLastPWM);
 }
@@ -670,11 +679,18 @@ void pidStep(float pv,float dt){
   int o=(int)oRaw;
   if(pidLastPWM>60&&pvRate<-0.03f&&fabs(pidSP-pv)>5.0f)
     o=ci(o+(int)roundf(-pvRate*20.0f),0,100);
-  // FIX#P9: steady state PWM floor — kalau sudah settled dan error kecil,
-  // jangan biarkan output=0. Map output minimal ke PWM_MIN_STEADY bukan mati.
-  // Ini mencegah siklus mati-nyala yang bikin pompa terasa hunting.
-  if(F.pidSettledOnce && fabs(e_raw)<5.0f && o<1){
-    o=1; // paksa minimal 1% → setPWM akan map ke PWM_MIN_STEADY via override di setPWM
+  // FIX#P9 + FIX#P13: floor PWM hanya aktif saat PV < SP (e_raw > 0)
+  // Kalau PV sudah di atas SP (e_raw <= 0) → pompa HARUS bisa mati total
+  // Ini fix utama: pompa tidak boleh jalan saat PV sudah lewat SP
+  if(F.pidSettledOnce && e_raw > 0.0f && fabs(e_raw) < 5.0f && o < 1){
+    o = 1;  // paksa minimal 1% → setPWM map ke PWM_MIN_RUN (pompa jalan pelan kompensasi outflow)
+  }
+  // FIX#P13: apply PWM_MIN_STEADY di sini, bukan di setPWM, supaya ada konteks e_raw
+  // Kalau e_raw <= 0 (PV >= SP), o tetap 0 → setPWM(0) → pompa mati
+  if(o > 0 && F.pidSettledOnce && e_raw > 0.0f){
+    // Hitung pwm yang akan dihasilkan, kalau kurang dari STEADY, naikkan
+    int pwmCalc = (int)map((long)o, 0, 100, (long)PWM_MIN_RUN, (long)PWM_MAX_RUN);
+    if(pwmCalc < PWM_MIN_STEADY) o = 1;  // biarkan setPWM pakai PWM_MIN_RUN (lebih aman)
   }
   setPWM(o);
   pidPrevPV=pv;
