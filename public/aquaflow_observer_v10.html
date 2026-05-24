@@ -981,14 +981,26 @@ function connect(){
   setConnState('connecting');
   try{
     ws=new WebSocket(url);
-    ws.onopen=()=>{wsConnected=true;setConnState('online');if(!plantId)initObserver();};
+    ws.onopen=()=>{wsConnected=true;setConnState('online');if(!plantId)initObserver();startWsPing();};
     ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='state')onStateData(msg.data);}catch(err){}};
-    ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;setTimeout(()=>{if(!wsConnected)connect();},5000);};
+    ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;stopWsPing();setTimeout(()=>{if(!wsConnected)connect();},5000);};
     ws.onerror=()=>ws.close();
   }catch(err){setConnState('offline');}
 }
 
-function disconnect(){if(ws){ws.close();ws=null;}wsConnected=false;setConnState('offline');}
+function disconnect(){if(ws){ws.close();ws=null;}wsConnected=false;setConnState('offline');stopWsPing();}
+
+// FIX#S3: browser-side keepalive — kirim ping JSON setiap 8s biar Railway tidak drop WS
+let _wsPingTimer=null;
+function startWsPing(){
+  stopWsPing();
+  _wsPingTimer=setInterval(()=>{
+    if(ws&&ws.readyState===WebSocket.OPEN){
+      try{ws.send(JSON.stringify({type:'ping'}));}catch(e){}
+    }
+  },8000);
+}
+function stopWsPing(){if(_wsPingTimer){clearInterval(_wsPingTimer);_wsPingTimer=null;}}
 
 function setConnState(state){
   const dot=document.getElementById('connDot');
