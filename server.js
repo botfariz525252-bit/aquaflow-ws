@@ -1,4 +1,4 @@
-// AquaFlow WS Server v10.5.3 — FIX#S3: WebSocket keepalive ping/pong
+// AquaFlow WS Server v10.5.4 — FIX#S4: handle DATA: dengan kp/ki/kd + HB: heartbeat
 const express = require('express');
 const { WebSocketServer, WebSocket } = require('ws');
 const http = require('http');
@@ -89,18 +89,34 @@ wss.on('connection', (ws, req) => {
         state.tune    = gI('tune');
         state.online  = true;
         state.lastSeen = Date.now();
+        // FIX#S4: ESP8266 sekarang kirim kp/ki/kd langsung di frame DATA:
+        // supaya tidak perlu 2 frame terpisah (cegah race condition di browser)
+        const kpRaw = p.match(/kp=([\d\-]+)/); if(kpRaw) state.kp = parseInt(kpRaw[1]) / 100;
+        const kiRaw = p.match(/ki=([\d\-]+)/); if(kiRaw) state.ki = parseInt(kiRaw[1]) / 1000;
+        const kdRaw = p.match(/kd=([\d\-]+)/); if(kdRaw) state.kd = parseInt(kdRaw[1]) / 1000;
 
         broadcast({ type: 'state', data: state });
       }
 
       if (line.startsWith('PIDK:')) {
+        // FIX#S4: PIDK standalone masih didukung untuk backward compat
         const p = line.slice(5);
         const gF = (k) => { const m = p.match(new RegExp(k + '=([\\d.\\-]+)')); return m ? parseFloat(m[1]) : 0; };
         state.kp = gF('kp') / 100;
         state.ki = gF('ki') / 1000;
         state.kd = gF('kd') / 1000;
-        state.lastSeen = Date.now();  // FIX#S1: update lastSeen saat PIDK diterima
+        state.lastSeen = Date.now();
         broadcast({ type: 'state', data: state });
+      }
+
+      // FIX#S4: handle HB: heartbeat — update lastSeen + online, jangan broadcast penuh
+      // Cukup kirim state ringan supaya observer tahu ESP masih hidup
+      if (line.startsWith('HB:')) {
+        state.lastSeen = Date.now();
+        if (!state.online) {
+          state.online = true;
+          broadcast({ type: 'state', data: state });
+        }
       }
     });
 
@@ -144,3 +160,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`AquaFlow WS Server running on port ${PORT}`);
 });
+
