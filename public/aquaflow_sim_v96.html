@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AquaFlow v9.6 — Hardware Simulator</title>
+<style>
+:root{
+  --bg:#07090f;--card:#0f1623;--card2:#111d2e;--border:#1a2a3a;
+  --cyan:#00d4b4;--yellow:#f59e0b;--red:#ef4444;--purple:#a78bfa;
+  --green:#10b981;--blue:#3b82f6;--orange:#f97316;--text:#e2e8f0;--muted:#6b7280;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;}
+.header{background:linear-gradient(135deg,#0a0f1e,#0f1a2e);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;}
+.header h1{font-size:18px;font-weight:bold;letter-spacing:2px;color:var(--cyan);}
+.header p{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:1px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;letter-spacing:1px;margin-left:8px;}
+.badge-green{background:#0a1a0a;color:var(--green);border:1px solid var(--green);}
+.badge-red{background:#1a0a0a;color:var(--red);border:1px solid var(--red);}
+.badge-yellow{background:#1a1000;color:var(--yellow);border:1px solid var(--yellow);}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 24px;background:#0b0f1a;overflow-x:auto;}
+.tab{padding:11px 16px;font-size:11px;letter-spacing:1px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.tab:hover{color:var(--text);}
+
+.page{display:none;padding:20px 24px;}
+.page.active{display:block;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;}
+
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+.stat-label{font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:4px;}
+.stat-val{font-size:24px;font-weight:bold;}
+.stat-unit{font-size:10px;color:var(--muted);}
+
+.kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #0f1825;font-size:12px;}
+.kv:last-child{border-bottom:none;}
+.kv-label{color:var(--muted);}
+
+canvas{width:100%;display:block;}
+.chart-wrap{background:#080c14;border:1px solid var(--border);border-radius:8px;padding:12px;}
+.chart-title{font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;}
+.legend{display:flex;gap:12px;font-size:10px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:5px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.ctrl label{font-size:11px;color:var(--muted);}
+.ctrl input[type=range]{width:120px;accent-color:var(--cyan);}
+.ctrl input[type=number]{width:70px;background:#0d1520;border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:12px;}
+.btn{padding:6px 14px;border-radius:5px;border:none;cursor:pointer;font-size:11px;letter-spacing:1px;font-family:monospace;}
+.btn-cyan{background:#0a2a25;color:var(--cyan);border:1px solid var(--cyan);}
+.btn-red{background:#2a0a0a;color:var(--red);border:1px solid var(--red);}
+.btn-green{background:#0a1a0a;color:var(--green);border:1px solid var(--green);}
+.btn-yellow{background:#1a1000;color:var(--yellow);border:1px solid var(--yellow);}
+.btn:hover{opacity:0.85;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+.sec-title{font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
+.bug-box{border-radius:8px;padding:12px;margin-bottom:10px;font-size:11px;}
+.bug-red{background:#1a0808;border:1px solid #5a1a1a;}
+.bug-yellow{background:#1a1200;border:1px solid #5a4000;}
+.bug-green{background:#081a08;border:1px solid #1a5a1a;}
+.bug-title{font-weight:bold;margin-bottom:6px;}
+
+.lcd-display{background:#1a2a1a;border:2px solid #2a4a2a;border-radius:6px;padding:10px 14px;font-family:'Courier New',monospace;font-size:14px;color:#a0ff80;letter-spacing:1px;line-height:1.8;}
+.lcd-row{min-height:20px;white-space:pre;}
+
+.phase-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;letter-spacing:1px;}
+.ph-fill{background:#0a1a2a;color:var(--blue);border:1px solid var(--blue);}
+.ph-drain{background:#1a1a0a;color:var(--yellow);border:1px solid var(--yellow);}
+.ph-relay{background:#1a0a1a;color:var(--purple);border:1px solid var(--purple);}
+.ph-pid{background:#0a1a0a;color:var(--green);border:1px solid var(--green);}
+.ph-alarm{background:#1a0a0a;color:var(--red);border:1px solid var(--red);}
+.ph-done{background:#0a2a1a;color:var(--cyan);border:1px solid var(--cyan);}
+
+select{background:#0d1520;border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px;font-family:monospace;}
+
+.info-box{background:#0a1628;border:1px solid #1a3a5a;border-radius:6px;padding:10px 14px;font-size:11px;color:#93c5fd;margin-bottom:12px;line-height:1.6;}
+.warn-box{background:#1a0f00;border:1px solid #5a3a00;border-radius:6px;padding:10px 14px;font-size:11px;color:#fbbf24;margin-bottom:12px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="font-size:28px;">💧</div>
+  <div>
+    <h1>AQUAFLOW v9.6 <span class="badge badge-green">SIMULATOR</span> <span class="badge badge-yellow">HARDWARE-ACCURATE</span></h1>
+    <p>Pompa Nikuma 5 LPM · Tangki 10L · HC-SR04 Ultrasonic · Arduino UNO · Exact Logic Mirror</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('live')">🔴 LIVE SIM</div>
+  <div class="tab" onclick="showTab('autotune20')">🔬 AUTOTUNE 20→50%</div>
+  <div class="tab" onclick="showTab('autotune0')">🔬 AUTOTUNE 0→50%</div>
+  <div class="tab" onclick="showTab('multiflow')">📊 MULTI OUTFLOW</div>
+  <div class="tab" onclick="showTab('features')">⚙️ FITUR TEST</div>
+  <div class="tab" onclick="showTab('bugs')">🐛 BUG REPORT</div>
+</div>
+
+<!-- ===== TAB 1: LIVE SIM ===== -->
+<div id="tab-live" class="page active">
+  <div class="grid2">
+    <div>
+      <div class="sec-title"><span style="color:var(--cyan)">⚙</span> HARDWARE PARAMETERS</div>
+      <div class="ctrl">
+        <label>SP Target %</label>
+        <input type="number" id="l_sp" value="50" min="0" max="100" style="width:60px">
+        <label>PV Start %</label>
+        <input type="number" id="l_pv0" value="0" min="0" max="100" style="width:60px">
+        <label>Outflow</label>
+        <select id="l_outflow">
+          <option value="0.333">0.333 %/s (2L/min – user default)</option>
+          <option value="0.15">0.15 %/s (0.9L/min – slow)</option>
+          <option value="0.5">0.5 %/s (3L/min – medium)</option>
+          <option value="0.7">0.7 %/s (4.2L/min – fast)</option>
+          <option value="0">0 (closed valve)</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <label>Mode</label>
+        <select id="l_mode">
+          <option value="autotune_pi">AUTOTUNE PI (ZN relay)</option>
+          <option value="autotune_pid">AUTOTUNE PID (ZN relay)</option>
+          <option value="manual_pid">MANUAL PID</option>
+        </select>
+        <label>Kp</label><input type="number" id="l_kp" value="4" step="0.1" style="width:60px">
+        <label>Ki</label><input type="number" id="l_ki" value="0.05" step="0.01" style="width:60px">
+      </div>
+      <div class="ctrl">
+        <label>Noise σ %</label>
+        <input type="number" id="l_noise" value="0.3" step="0.05" style="width:60px">
+        <label>AlarmHi</label><input type="number" id="l_alhi" value="90" style="width:55px">
+        <label>AlarmLo</label><input type="number" id="l_allo" value="10" style="width:55px">
+        <button class="btn btn-cyan" onclick="startLive()">▶ RUN</button>
+        <button class="btn btn-red" onclick="stopLive()">■ STOP</button>
+      </div>
+
+      <div class="grid4" style="margin-top:12px;">
+        <div class="stat-box"><div class="stat-label">PV LEVEL</div><div class="stat-val cyan" id="l_pvval">--</div><div class="stat-unit">%</div></div>
+        <div class="stat-box"><div class="stat-label">PUMP OUT</div><div class="stat-val green" id="l_outval">--</div><div class="stat-unit">%</div></div>
+        <div class="stat-box"><div class="stat-label">INTEGRATOR</div><div class="stat-val yellow" id="l_integval">--</div><div class="stat-unit"></div></div>
+        <div class="stat-box"><div class="stat-label">PHASE</div><div id="l_phase" style="margin-top:6px;">--</div></div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="lcd-display" id="l_lcd">
+          <div class="lcd-row" id="lcd0">AquaFlow v9.6      </div>
+          <div class="lcd-row" id="lcd1">PID Controller     </div>
+          <div class="lcd-row" id="lcd2">Press RUN to start </div>
+          <div class="lcd-row" id="lcd3">                   </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;" class="card">
+        <div class="sec-title"><span style="color:var(--cyan)">📋</span> AUTOTUNE RESULT</div>
+        <div class="grid2">
+          <div>
+            <div class="kv"><span class="kv-label">Kp (tuned)</span><span id="r_kp" style="color:var(--cyan)">—</span></div>
+            <div class="kv"><span class="kv-label">Ki (tuned)</span><span id="r_ki" style="color:var(--cyan)">—</span></div>
+            <div class="kv"><span class="kv-label">Kd (tuned)</span><span id="r_kd" style="color:var(--cyan)">—</span></div>
+            <div class="kv"><span class="kv-label">Ku</span><span id="r_ku" style="color:var(--yellow)">—</span></div>
+            <div class="kv"><span class="kv-label">Pu (corrected)</span><span id="r_pu" style="color:var(--yellow)">—</span></div>
+          </div>
+          <div>
+            <div class="kv"><span class="kv-label">Amplitude a</span><span id="r_a" style="color:var(--purple)">—</span></div>
+            <div class="kv"><span class="kv-label">Crossings</span><span id="r_x" style="color:var(--green)">—</span></div>
+            <div class="kv"><span class="kv-label">Relay time</span><span id="r_rt" style="color:var(--green)">—</span></div>
+            <div class="kv"><span class="kv-label">Total time</span><span id="r_tt" style="color:var(--orange)">—</span></div>
+            <div class="kv"><span class="kv-label">Status</span><span id="r_st">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="chart-wrap" style="margin-bottom:12px;">
+        <div class="chart-title">
+          <span>PV LEVEL & SETPOINT</span>
+          <div class="legend">
+            <div class="leg"><div class="dot" style="background:var(--cyan)"></div>PV</div>
+            <div class="leg"><div class="dot" style="background:var(--red)"></div>SP</div>
+            <div class="leg"><div class="dot" style="background:var(--orange)"></div>AlarmHi/Lo</div>
+          </div>
+        </div>
+        <canvas id="c_pv" height="180"></canvas>
+      </div>
+      <div class="chart-wrap" style="margin-bottom:12px;">
+        <div class="chart-title">
+          <span>PUMP OUTPUT & INTEGRATOR</span>
+          <div class="legend">
+            <div class="leg"><div class="dot" style="background:var(--green)"></div>Pump%</div>
+            <div class="leg"><div class="dot" style="background:var(--yellow)"></div>Integrator</div>
+            <div class="leg"><div class="dot" style="background:var(--purple)"></div>pvRate×50</div>
+          </div>
+        </div>
+        <canvas id="c_out" height="130"></canvas>
+      </div>
+      <div class="card">
+        <div class="sec-title"><span style="color:var(--cyan)">📊</span> PERFORMANCE METRICS</div>
+        <div class="grid4">
+          <div class="stat-box"><div class="stat-label">OVERSHOOT</div><div class="stat-val" id="m_os" style="color:var(--green)">—</div><div class="stat-unit">%</div></div>
+          <div class="stat-box"><div class="stat-label">SETTLE TIME</div><div class="stat-val" id="m_st" style="color:var(--cyan)">—</div><div class="stat-unit">s</div></div>
+          <div class="stat-box"><div class="stat-label">SS ERROR</div><div class="stat-val" id="m_sse" style="color:var(--yellow)">—</div><div class="stat-unit">%</div></div>
+          <div class="stat-box"><div class="stat-label">HUNT CNT</div><div class="stat-val" id="m_hunt" style="color:var(--orange)">—</div><div class="stat-unit">times</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 2: AUTOTUNE 20→50% ===== -->
+<div id="tab-autotune20" class="page">
+  <div class="info-box">🔬 Simulasi autotune dari PV=20% → SP=50%, hardware Nikuma 5LPM, outflow bervariasi. Exact mirror logic kode v9.6.</div>
+  <div id="at20_content"></div>
+</div>
+
+<!-- ===== TAB 3: AUTOTUNE 0→50% ===== -->
+<div id="tab-autotune0" class="page">
+  <div class="info-box">🔬 Simulasi autotune dari PV=0% → SP=50%, termasuk fase FILL panjang. Test batas timeout dan parameter.</div>
+  <div id="at0_content"></div>
+</div>
+
+<!-- ===== TAB 4: MULTI OUTFLOW ===== -->
+<div id="tab-multiflow" class="page">
+  <div id="mf_content"></div>
+</div>
+
+<!-- ===== TAB 5: FITUR TEST ===== -->
+<div id="tab-features" class="page">
+  <div id="feat_content"></div>
+</div>
+
+<!-- ===== TAB 6: BUG REPORT ===== -->
+<div id="tab-bugs" class="page">
+  <div id="bug_content"></div>
+</div>
+
+<script>
+// ================================================================
+// HARDWARE-ACCURATE SIMULATOR — Mirror exact logic dari AquaFlow v9.6
+// ================================================================
+
+// === HARDWARE CONSTANTS (dari kode) ===
+const HW = {
+  PUMP_GROSS_PPS: 0.833,  // %/s full throttle (Nikuma 5LPM, tangki 10L)
+  PWM_MIN: 80, PWM_MAX: 250,
+  Ts: 0.1,
+  KICKSTART_PWM: 160, KICKSTART_MS: 0.7, KICKSTART_ERR_MIN: 20,
+  ANTIWINDUP_KC: 1.2,
+  D_FILTER_A: 0.05,
+  DEADBAND: 1.5,
+  INTEG_SP_RESET_THR: 15,
+  RATE_FILTER: 0.3,
+  RELAY_BAND: 2.0,
+  TUN_NEED: 8,
+  TUN_FILL_TMO: 300,   // s
+  TUN_DRAIN_TMO: 600,  // s
+  TUN_FIRST_CROSS_TMO: 600,  // s
+  TUN_HALF_CYCLE_TMO: 600,   // s
+  TUN_BIAS: 50, TUN_AMP: 50,
+  EMA_A: 0.15, MED_N: 3,
+  SENSOR_ERR_MAX: 10,
+  ALARM_HI_DEFAULT: 90, ALARM_LO_DEFAULT: 10
+};
+
+// === EXACT LOGIC FUNCTIONS ===
+function cf(x,a,b){return x<a?a:x>b?b:x;}
+function ci(x,a,b){return x<a?a:x>b?b:x;}
+
+function pwmToDisplay(pwm){
+  if(pwm===0)return 0;
+  return Math.round(cf(((pwm-HW.PWM_MIN)/(HW.PWM_MAX-HW.PWM_MIN))*100,0,100));
+}
+
+function pctToPWM(pct){
+  if(pct<=0)return 0;
+  return Math.round(cf(HW.PWM_MIN+(pct/100)*(HW.PWM_MAX-HW.PWM_MIN),HW.PWM_MIN,HW.PWM_MAX));
+}
+
+function pwmToFillRate(pwm, outflow){
+  if(pwm===0)return -outflow;
+  const pumpPct = cf((pwm-HW.PWM_MIN)/(HW.PWM_MAX-HW.PWM_MIN)*100,0,100);
+  return HW.PUMP_GROSS_PPS*pumpPct/100 - outflow;
+}
+
+// Sensor with noise + EMA + median filter
+function makeSensor(noise_std, seed=42){
+  let mbuf=[0,0,0], midx=0, mfill=false;
+  let emaVal=0, emaInit=false;
+  let pvS=0;
+  let rng = seed;
+  function rand(){ rng=(rng*1664525+1013904223)&0xFFFFFFFF; return (rng>>>0)/4294967296; }
+  function gauss(){ let u=rand(),v=rand(); return Math.sqrt(-2*Math.log(u+1e-10))*Math.cos(2*Math.PI*v); }
+  return {
+    read(truePV){
+      const noisy = cf(truePV + gauss()*noise_std, 0, 100);
+      mbuf[midx]=noisy; midx=(midx+1)%HW.MED_N;
+      if(midx===0)mfill=true;
+      let med;
+      if(mfill){ let s=[...mbuf].sort((a,b)=>a-b); med=s[1]; }
+      else med=noisy;
+      if(!emaInit){emaVal=med;emaInit=true;}
+      else emaVal+=HW.EMA_A*(med-emaVal);
+      pvS+=0.1*(emaVal-pvS);
+      return emaVal;
+    },
+    reset(pv){ emaVal=pv; pvS=pv; emaInit=true; midx=0; mfill=false; },
+    getDisplay(){ return pvS; }
+  };
+}
+
+// ================================================================
+// MAIN SIMULATOR CLASS — exact mirror of AquaFlow v9.6 logic
+// ================================================================
+class AquaFlowSim {
+  constructor(cfg){
+    this.Kp   = cfg.Kp||4; this.Ki=cfg.Ki||0.05; this.Kd=cfg.Kd||0;
+    this.Kff  = cfg.Kff!=null?cfg.Kff:0.5;
+    this.SP   = cfg.SP||50; this.pvStart=cfg.pvStart||0;
+    this.outflow = cfg.outflow!=null?cfg.outflow:0.333;
+    this.mode = cfg.mode||'autotune_pi';  // 'autotune_pi','autotune_pid','manual_pid'
+    this.noise= cfg.noise!=null?cfg.noise:0.3;
+    this.alarmHi = cfg.alarmHi!=null?cfg.alarmHi:90;
+    this.alarmLo = cfg.alarmLo!=null?cfg.alarmLo:10;
+    this.alarmHiEn = cfg.alarmHiEn!=null?cfg.alarmHiEn:true;
+    this.alarmLoEn = cfg.alarmLoEn!=null?cfg.alarmLoEn:true;
+    this.tunNeed = cfg.tunNeed||HW.TUN_NEED;
+    this.sensor  = makeSensor(this.noise, cfg.seed||42);
+    this.reset();
+  }
+  reset(){
+    this.t=0; this.pv=this.pvStart;
+    this.sensor.reset(this.pvStart);
+    // PID state
+    this.integ=0; this.dFiltered=0; this.pidPrevPV=this.pvStart;
+    this.pvRate=0; this.pvPrev=this.pvStart; this.prevSP=this.SP;
+    this.lastPWM=0; this.kickActive=false; this.kickStartT=0;
+    this.lastPVraw=this.pvStart;  // FIX: init agar kickstart check tidak NaN
+    // Autotune state
+    this.tunActive= (this.mode==='autotune_pi'||this.mode==='autotune_pid');
+    this.tunDone=false; this.tunCancel=false; this.tunReasonIdx=0;
+    this.tunFilling=this.tunActive; this.tunDraining=false;
+    this.tunFillStartT=0; this.tunDrainStartT=0;
+    this.tunXcount=0; this.tunPVhi=-1e9; this.tunPVlo=1e9;
+    this.tunPrevT=0; this.tunLastT=0; this.tunSign=0;
+    // Alarm
+    this.alarmHiAct=false; this.alarmLoAct=false;
+    // Recording
+    this.history=[]; this.events=[];
+    // Metrics
+    this.peakPV=this.pvStart; this.settleT=null; this.huntCount=0;
+    this.lastInDB=false; this.dbExitCount=0;
+    this.tunedKp=null; this.tunedKi=null; this.tunedKd=null;
+    this.tunedKu=null; this.tunedPu=null; this.tunedA=null;
+    this.relayStartT=null; this.relayEndT=null;
+    this.totalStartT=0;
+    // Boot warmup
+    this.bootWarmup=0;
+    // pvPrevInited
+    this.pvPrevInited=false;
+    this.pidOn=true;
+  }
+
+  stopPump(){ this.lastPWM=0; this.kickActive=false; }
+
+  setPWM(pw){
+    if(pw<1){ this.stopPump(); return; }
+    // Kickstart logic — FIX: lastPWM HARUS diset ke KICKSTART_PWM saat pertama aktif
+    if(this.lastPWM===0&&!this.kickActive){
+      if(Math.abs(this.SP-this.lastPVraw)>=HW.KICKSTART_ERR_MIN){
+        this.kickActive=true; this.kickStartT=this.t;
+        this.lastPWM=HW.KICKSTART_PWM;  // FIX: set PWM sebelum return!
+        return;
+      }
+      this.kickActive=false;
+    }
+    if(this.kickActive){
+      if(this.t-this.kickStartT<HW.KICKSTART_MS){
+        this.lastPWM=HW.KICKSTART_PWM; return;
+      }
+      this.kickActive=false;
+      this.lastPWM=HW.PWM_MIN;
+      this.integ=0; this.dFiltered=0;
+    }
+    this.lastPWM=pctToPWM(pw);
+  }
+
+  pidStep(pv, dt){
+    const e_raw = this.SP - pv;
+    const inDB  = Math.abs(e_raw) < HW.DEADBAND;
+    let e = inDB ? 0 : cf(e_raw,-25,25);
+
+    let ff = this.Kff*(this.SP-this.prevSP); this.prevSP=this.SP;
+    if(ff<0)ff=0;
+
+    let dRaw=0;
+    if(dt>0.001)dRaw=-this.Kp*this.Kd*(pv-this.pidPrevPV)/dt;
+    this.dFiltered+=HW.D_FILTER_A*(dRaw-this.dFiltered);
+    this.dFiltered=cf(this.dFiltered,-10,10);
+
+    const P = this.Kp*e;
+    const uUnsat = P+this.integ+this.dFiltered+ff;
+    const uSat   = cf(uUnsat,0,100);
+    const wErr   = uSat-uUnsat;
+
+    if(!inDB){
+      this.integ+=(this.Ki*e*dt)+(HW.ANTIWINDUP_KC*wErr*dt);
+      this.integ=cf(this.integ,-100,100);
+    } else {
+      this.integ+=(this.Ki*e_raw*dt*0.05);
+      this.integ=cf(this.integ,-100,100);
+    }
+
+    const oRaw=cf(P+this.integ+this.dFiltered+ff,0,100);
+    const rr=(pv-this.pvPrev)/dt;
+    this.pvRate+=HW.RATE_FILTER*(rr-this.pvRate);
+    this.pvPrev=pv;
+    let o=Math.floor(oRaw);
+    // Rate correction
+    if(this.lastPWM>60&&this.pvRate<-0.03&&Math.abs(this.SP-pv)>5)
+      o=ci(o+Math.round(-this.pvRate*20),0,100);
+    this.setPWM(o);
+    this.pidPrevPV=pv;
+
+    // Hunt detection: count exits from deadband after settle
+    if(this.settleT!==null){
+      if(!inDB&&this.lastInDB) this.huntCount++;
+    }
+    this.lastInDB=inDB;
+  }
+
+  tuneStep(pv){
+    const t=this.t;
+
+    // FASE 1: FILL
+    if(this.tunFilling){
+      // FILL phase: bypass kickstart, langsung full pump
+      this.lastPWM=pctToPWM(100);
+      if(t-this.tunFillStartT>HW.TUN_FILL_TMO){this._cancelTune(2);return;}
+      if(pv>=this.SP-2){
+        this.events.push({t,msg:'FILL done → DRAIN start',type:'fill'});
+        this.tunFilling=false; this.tunDraining=true;
+        this.tunDrainStartT=t;
+        this.stopPump();
+      }
+      return;
+    }
+
+    // FASE 2: DRAIN WAIT
+    if(this.tunDraining){
+      this.stopPump();
+      if(t-this.tunDrainStartT>HW.TUN_DRAIN_TMO){this._cancelTune(2);return;}
+      const drainExit=this.SP+HW.RELAY_BAND+5;
+      if(pv<=drainExit){
+        this.events.push({t,msg:`DRAIN done (PV=${pv.toFixed(1)}%) → RELAY start`,type:'drain'});
+        this.tunDraining=false;
+        this.tunXcount=0; this.tunPVhi=-1e9; this.tunPVlo=1e9;
+        this.tunPrevT=0; this.tunLastT=t; this.tunFillStartT=t;
+        this.tunSign=(pv<this.SP)?1:-1;
+        this.lastPWM=0; this.kickActive=false;
+        this.relayStartT=t;
+      }
+      return;
+    }
+
+    // FASE 3: RELAY TEST
+    // Update pvhi/lo with outlier reject
+    const mid=(this.tunXcount>0)?((this.tunPVhi+this.tunPVlo)/2):this.SP;
+    if(Math.abs(pv-mid)<2*HW.TUN_AMP||this.tunXcount===0){
+      if(pv>this.tunPVhi)this.tunPVhi=pv;
+      if(pv<this.tunPVlo)this.tunPVlo=pv;
+    }
+
+    // Bang-bang relay
+    let relayOn=(this.tunSign>0);
+    if(pv>=this.SP+HW.RELAY_BAND)relayOn=false;
+    if(pv<=this.SP-HW.RELAY_BAND)relayOn=true;
+    const newSign=relayOn?1:-1;
+
+    if(relayOn){ this.lastPWM=pctToPWM(cf(HW.TUN_BIAS+HW.TUN_AMP,0,100)); }
+    else        { this.stopPump(); }
+
+    if(this.tunPrevT===0){this.tunPrevT=t;this.tunSign=newSign;return;}
+    if(this.tunLastT===0)this.tunLastT=t;
+
+    // Timeout
+    const tmo=(this.tunXcount===0)?HW.TUN_FIRST_CROSS_TMO:HW.TUN_HALF_CYCLE_TMO;
+    if(t-this.tunLastT>tmo){this._cancelTune(2);return;}
+
+    // Crossing detect
+    if(newSign!==this.tunSign){
+      this.tunXcount++;
+      this.tunSign=newSign;
+      this.tunLastT=t;
+      this.events.push({t,msg:`Crossing #${this.tunXcount} at PV=${pv.toFixed(2)}%`,type:'cross'});
+      if(this.tunXcount===1){this.tunPVhi=-1e9;this.tunPVlo=1e9;this.tunPrevT=t;}
+      if(this.tunXcount>=this.tunNeed){
+        const a=(this.tunPVhi-this.tunPVlo)/2;
+        if(a<0.1){this._cancelTune(0);return;}
+        const Pu_raw=2*(t-this.tunPrevT)/(this.tunXcount-1);
+        const Pu=Pu_raw*0.75;
+        const relayD=cf(HW.TUN_BIAS+HW.TUN_AMP,0,100)*0.5;
+        const Ku=(4*relayD)/(Math.PI*a);
+        let newKp,newKi,newKd=0;
+        const isPID=(this.mode==='autotune_pid');
+        if(!isPID){newKp=0.45*Ku;newKi=newKp/(0.83*Pu);}
+        else{newKp=0.6*Ku;newKi=newKp/(0.5*Pu);newKd=newKp*0.125*Pu;}
+        const kdMax=cf(Pu*0.125,0,50);
+        this.Kp=cf(newKp,0,500);this.Ki=cf(newKi,0,500);this.Kd=cf(newKd,0,kdMax);
+        this.tunedKp=this.Kp;this.tunedKi=this.Ki;this.tunedKd=this.Kd;
+        this.tunedKu=Ku;this.tunedPu=Pu;this.tunedA=a;
+        this.integ=0;this.dFiltered=0;this.pidPrevPV=pv;
+        this.prevSP=this.SP;
+        this.tunActive=false;this.tunDone=true;this.tunCancel=false;
+        this.tunFilling=false;this.tunDraining=false;this.tunSign=0;
+        this.relayEndT=t;
+        this.events.push({t,msg:`AUTOTUNE DONE! Kp=${this.Kp.toFixed(2)},Ki=${this.Ki.toFixed(3)},Ku=${Ku.toFixed(2)},a=${a.toFixed(2)},Pu=${Pu.toFixed(2)}s`,type:'done'});
+      }
+    }
+  }
+
+  _cancelTune(reason){
+    this.tunActive=false;this.tunCancel=true;this.tunDone=false;
+    this.tunReasonIdx=reason;this.tunFilling=false;this.tunDraining=false;
+    this.integ=0;this.tunSign=0;this.dFiltered=0;
+    const r=['AMP_SMALL','USER','TIMEOUT'];
+    this.events.push({t:this.t,msg:`AUTOTUNE CANCELLED: ${r[reason]}`,type:'cancel'});
+  }
+
+  step(){
+    const Ts=HW.Ts;
+    const pvSensed=this.sensor.read(this.pv);
+    this.lastPVraw=pvSensed;
+
+    // Alarm
+    this.alarmHiAct=(pvSensed>this.alarmHi);
+    this.alarmLoAct=(pvSensed<this.alarmLo);
+
+    if(this.alarmHiAct&&this.alarmHiEn){
+      this.stopPump();this.integ=0;this.dFiltered=0;
+    } else if(this.alarmLoAct&&this.alarmLoEn){
+      this.stopPump();this.integ=0;this.dFiltered=0;
+    } else if(this.pidOn){
+      if(this.tunActive) this.tuneStep(pvSensed);
+      else {
+        const dt=cf(Ts,0.02,HW.DT_MAX);
+        this.pidStep(pvSensed,dt);
+      }
+    } else {
+      this.stopPump();
+    }
+
+    // Physics
+    const netRate=pwmToFillRate(this.lastPWM, this.outflow);
+    this.pv=cf(this.pv+netRate*Ts,0,100);
+    this.t+=Ts;
+
+    // Metrics
+    if(this.pv>this.SP&&this.pv>this.peakPV)this.peakPV=this.pv;
+    if(this.settleT===null&&!this.tunActive&&!this.tunFilling&&Math.abs(this.pv-this.SP)<HW.DEADBAND)
+      this.settleT=this.t;
+
+    const rec={
+      t:this.t, pv:this.pv, pvS:this.sensor.getDisplay(),
+      sp:this.SP, pwm:this.lastPWM,
+      pumpPct:pwmToDisplay(this.lastPWM),
+      integ:this.integ, pvRate:this.pvRate,
+      phase:this._getPhase(),
+      alarmHi:this.alarmHiAct, alarmLo:this.alarmLoAct
+    };
+    this.history.push(rec);
+    return rec;
+  }
+
+  _getPhase(){
+    if(this.alarmHiAct&&this.alarmHiEn)return'alarm_hi';
+    if(this.alarmLoAct&&this.alarmLoEn)return'alarm_lo';
+    if(this.tunFilling)return'fill';
+    if(this.tunDraining)return'drain';
+    if(this.tunActive)return'relay';
+    if(this.tunDone)return'pid_tuned';
+    if(this.tunCancel)return'cancelled';
+    return'pid';
+  }
+
+  runFull(maxT=600){
+    this.reset();
+    let rec;
+    while(this.t<maxT){
+      rec=this.step();
+      if(this.tunCancel)break;
+      // Early stop if stable for 60s after settle
+      if(this.settleT!==null&&this.t>this.settleT+120)break;
+    }
+    return this.history;
+  }
+}
+
+// ================================================================
+// CANVAS CHART DRAWING
+// ================================================================
+function drawChart(canvasId, datasets, opts={}){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||800;
+  canvas.height=canvas.height||180;
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle='#080c14';ctx.fillRect(0,0,W,H);
+
+  const pad={l:40,r:10,t:10,b:25};
+  const dW=W-pad.l-pad.r,dH=H-pad.t-pad.b;
+
+  const allX=[],allY=[];
+  datasets.forEach(d=>{d.data.forEach(p=>{allX.push(p.x);allY.push(p.y);});});
+  const xMin=opts.xMin!=null?opts.xMin:Math.min(...allX);
+  const xMax=opts.xMax!=null?opts.xMax:Math.max(...allX)||1;
+  const yMin=opts.yMin!=null?opts.yMin:Math.min(...allY,0);
+  const yMax=opts.yMax!=null?opts.yMax:Math.max(...allY,1);
+
+  const toX=x=>pad.l+(x-xMin)/(xMax-xMin)*dW;
+  const toY=y=>pad.t+dH-(y-yMin)/(yMax-yMin)*dH;
+
+  // Grid
+  ctx.strokeStyle='#1a2a3a';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+i*dH/4;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+dW,y);ctx.stroke();
+    const val=yMax-i*(yMax-yMin)/4;
+    ctx.fillStyle='#6b7280';ctx.font='9px monospace';
+    ctx.fillText(val.toFixed(0),2,y+3);
+  }
+  for(let i=0;i<=5;i++){
+    const x=pad.l+i*dW/5;
+    ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+dH);ctx.stroke();
+    const val=xMin+i*(xMax-xMin)/5;
+    ctx.fillStyle='#6b7280';ctx.font='9px monospace';
+    ctx.fillText(val.toFixed(0),x-8,H-5);
+  }
+
+  // Phase color backgrounds
+  if(opts.phases&&opts.phases.length){
+    opts.phases.forEach(ph=>{
+      const x1=toX(ph.t0),x2=toX(ph.t1);
+      ctx.fillStyle=ph.color;
+      ctx.fillRect(x1,pad.t,x2-x1,dH);
+    });
+  }
+
+  // Lines
+  datasets.forEach(ds=>{
+    if(!ds.data.length)return;
+    ctx.beginPath();ctx.strokeStyle=ds.color;
+    ctx.lineWidth=ds.width||1.5;
+    if(ds.dash)ctx.setLineDash(ds.dash);
+    else ctx.setLineDash([]);
+    ds.data.forEach((p,i)=>{
+      const x=toX(p.x),y=toY(p.y);
+      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // Events
+  if(opts.events){
+    opts.events.forEach(ev=>{
+      const x=toX(ev.t);
+      ctx.strokeStyle=ev.color||'#f59e0b';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+      ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+dH);ctx.stroke();
+      ctx.setLineDash([]);
+    });
+  }
+}
+
+// ================================================================
+// LIVE SIMULATOR
+// ================================================================
+let liveTimer=null, liveSim=null, liveFrame=0;
+
+function startLive(){
+  stopLive();
+  const cfg={
+    SP:parseFloat(document.getElementById('l_sp').value)||50,
+    pvStart:parseFloat(document.getElementById('l_pv0').value)||0,
+    outflow:parseFloat(document.getElementById('l_outflow').value),
+    mode:document.getElementById('l_mode').value,
+    Kp:parseFloat(document.getElementById('l_kp').value)||4,
+    Ki:parseFloat(document.getElementById('l_ki').value)||0.05,
+    noise:parseFloat(document.getElementById('l_noise').value)||0.3,
+    alarmHi:parseFloat(document.getElementById('l_alhi').value)||90,
+    alarmLo:parseFloat(document.getElementById('l_allo').value)||10,
+  };
+  liveSim=new AquaFlowSim(cfg);
+  liveFrame=0;
+  // Run faster for display (50 steps per frame = 5s sim per frame)
+  liveTimer=setInterval(()=>{
+    for(let i=0;i<20;i++){
+      if(liveSim.t>=600||(liveSim.tunCancel&&liveSim.t>5))break;
+      liveSim.step();
+    }
+    updateLiveDisplay();
+  },50);
+}
+
+function stopLive(){
+  if(liveTimer)clearInterval(liveTimer);
+  liveTimer=null;
+}
+
+function updateLiveDisplay(){
+  if(!liveSim||!liveSim.history.length)return;
+  const h=liveSim.history;
+  const last=h[h.length-1];
+
+  document.getElementById('l_pvval').textContent=last.pv.toFixed(1);
+  document.getElementById('l_outval').textContent=last.pumpPct;
+  document.getElementById('l_integval').textContent=last.integ.toFixed(1);
+
+  // Phase badge
+  const phases={fill:'<span class="phase-badge ph-fill">FILL</span>',drain:'<span class="phase-badge ph-drain">DRAIN</span>',relay:'<span class="phase-badge ph-relay">RELAY</span>',pid:'<span class="phase-badge ph-pid">PID</span>',pid_tuned:'<span class="phase-badge ph-done">PID✓</span>',alarm_hi:'<span class="phase-badge ph-alarm">ALARM HI</span>',alarm_lo:'<span class="phase-badge ph-alarm">ALARM LO</span>',cancelled:'<span class="phase-badge ph-alarm">CANCELLED</span>'};
+  document.getElementById('l_phase').innerHTML=phases[last.phase]||last.phase;
+
+  // LCD
+  updateLCD(last, liveSim);
+
+  // Autotune results
+  if(liveSim.tunedKp!==null){
+    document.getElementById('r_kp').textContent=liveSim.tunedKp.toFixed(3);
+    document.getElementById('r_ki').textContent=liveSim.tunedKi.toFixed(4);
+    document.getElementById('r_kd').textContent=liveSim.tunedKd.toFixed(4);
+    document.getElementById('r_ku').textContent=liveSim.tunedKu.toFixed(2);
+    document.getElementById('r_pu').textContent=liveSim.tunedPu.toFixed(2)+'s';
+    document.getElementById('r_a').textContent=liveSim.tunedA.toFixed(3)+'%';
+    document.getElementById('r_x').textContent=liveSim.tunXcount;
+    if(liveSim.relayStartT!==null&&liveSim.relayEndT!==null)
+      document.getElementById('r_rt').textContent=(liveSim.relayEndT-liveSim.relayStartT).toFixed(1)+'s';
+    document.getElementById('r_tt').textContent=liveSim.t.toFixed(1)+'s';
+    document.getElementById('r_st').innerHTML='<span style="color:var(--green)">✓ DONE</span>';
+  }
+  if(liveSim.tunCancel){
+    const r=['AMP_TOO_SMALL','USER_CANCEL','TIMEOUT'];
+    document.getElementById('r_st').innerHTML=`<span style="color:var(--red)">✗ ${r[liveSim.tunReasonIdx]}</span>`;
+  }
+
+  // Metrics
+  const os=Math.max(0,liveSim.peakPV-liveSim.SP);
+  document.getElementById('m_os').textContent=os.toFixed(2);
+  document.getElementById('m_os').style.color=os<0.5?'var(--green)':os<2?'var(--yellow)':'var(--red)';
+  if(liveSim.settleT!==null){
+    document.getElementById('m_st').textContent=liveSim.settleT.toFixed(0);
+  }
+  // SS error: average last 20 points
+  if(h.length>20){
+    const recent=h.slice(-20);
+    const avg=recent.reduce((s,r)=>s+r.pv,0)/20;
+    const sse=Math.abs(avg-liveSim.SP);
+    document.getElementById('m_sse').textContent=sse.toFixed(2);
+    document.getElementById('m_sse').style.color=sse<1?'var(--green)':sse<3?'var(--yellow)':'var(--red)';
+  }
+  document.getElementById('m_hunt').textContent=liveSim.huntCount;
+
+  // Charts - downsample for performance
+  const step=Math.max(1,Math.floor(h.length/400));
+  const pvData=h.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pv}));
+  const spData=h.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.sp}));
+  const outData=h.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pumpPct}));
+  const integData=h.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.integ}));
+  const rateData=h.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pvRate*50}));
+  const hiLine=h.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:liveSim.alarmHi}));
+  const loLine=h.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:liveSim.alarmLo}));
+
+  const xMax=Math.max(last.t,60);
+  // Phase backgrounds
+  const phaseColors={'fill':'rgba(59,130,246,0.08)','drain':'rgba(245,158,11,0.08)','relay':'rgba(167,139,250,0.08)'};
+  let phases=[];
+  let prevP=h[0]?.phase,prevT=h[0]?.t;
+  h.forEach((r,i)=>{
+    if(r.phase!==prevP||(i===h.length-1)){
+      if(phaseColors[prevP])phases.push({t0:prevT,t1:r.t,color:phaseColors[prevP]});
+      prevP=r.phase;prevT=r.t;
+    }
+  });
+
+  drawChart('c_pv',[
+    {data:pvData,color:'#00d4b4',width:2},
+    {data:spData,color:'#ef4444',dash:[5,3],width:1.5},
+    {data:hiLine,color:'rgba(249,115,22,0.5)',dash:[3,3],width:1},
+    {data:loLine,color:'rgba(249,115,22,0.5)',dash:[3,3],width:1},
+  ],{yMin:0,yMax:100,xMax,phases,events:liveSim.events.filter(e=>e.type==='cross').map(e=>({t:e.t,color:'rgba(167,139,250,0.8)'}))});
+
+  drawChart('c_out',[
+    {data:outData,color:'#10b981',width:1.5},
+    {data:integData,color:'#f59e0b',width:1},
+    {data:rateData,color:'#a78bfa',width:1},
+  ],{yMin:-20,yMax:110,xMax,phases});
+}
+
+function updateLCD(last, sim){
+  const ph=last.phase;
+  const pvStr=last.pv.toFixed(0).padStart(4);
+  const spStr=sim.SP.toFixed(0).padStart(4);
+  const pumpStr=last.pumpPct.toString().padStart(3);
+  const integStr=last.integ.toFixed(1);
+
+  if(ph==='fill'){
+    const remain=Math.max(0,HW.TUN_FILL_TMO-(sim.t-sim.tunFillStartT));
+    set4LCD(`AUTO PI FILLING...  `,`PV:${pvStr}% SP:${spStr}%  `,`Tmo:${Math.floor(remain).toString().padStart(4)}s left      `,`C=Cancel            `);
+  } else if(ph==='drain'){
+    set4LCD(`AUTO PI DRAINING    `,`PV:${pvStr}% SP:${spStr}%  `,`<=${(sim.SP+HW.RELAY_BAND+5).toFixed(0)}% ${Math.floor(Math.max(0,HW.TUN_DRAIN_TMO-(sim.t-sim.tunDrainStartT))).toString().padStart(3)}s left  `,`C=Cancel            `);
+  } else if(ph==='relay'){
+    const remain=Math.max(0,HW.TUN_HALF_CYCLE_TMO-(sim.t-sim.tunLastT));
+    set4LCD(`AUTO PI RELAY       `,`PV:${pvStr} SP:${spStr}%   `,`O:${pumpStr}% x:${sim.tunXcount.toString().padStart(2)} t:${Math.floor(remain).toString().padStart(3)}s`,`C=Cancel            `);
+  } else if(ph==='alarm_hi'){
+    set4LCD(`*** ALARM HI ***    `,`PV:${pvStr}% > ${sim.alarmHi}%   `,`PUMP STOPPED        `,`                    `);
+  } else if(ph==='alarm_lo'){
+    set4LCD(`*** ALARM LO ***    `,`PV:${pvStr}% < ${sim.alarmLo}%   `,`PUMP STOPPED        `,`                    `);
+  } else if(ph==='cancelled'){
+    const r=['AMP_SMALL','USER','TIMEOUT'];
+    set4LCD(`AUTO PI CANCEL      `,r[sim.tunReasonIdx]||'NONE',`                    `,`A=Back              `);
+  } else if(ph==='pid_tuned'){
+    set4LCD(`AUTO PI DONE        `,`KP:${last.pv.toFixed(0).padStart(6)} `,`KI:${sim.Ki.toFixed(3)} KD:${sim.Kd.toFixed(3)} `,`A=Back              `);
+  } else {
+    set4LCD(`OUT:${pumpStr}% [P] ${pvStr>sim.SP?'▲':'▼'} `,`PV :${pvStr} %`,`SP :${spStr} %`,`Integ:${integStr.padStart(7)}   `);
+  }
+}
+
+function set4LCD(r0,r1,r2,r3){
+  ['lcd0','lcd1','lcd2','lcd3'].forEach((id,i)=>{
+    const rows=[r0,r1,r2,r3];
+    document.getElementById(id).textContent=rows[i].substring(0,20).padEnd(20);
+  });
+}
+
+// ================================================================
+// BATCH SIMULATIONS
+// ================================================================
+function runAutotuneSim(pvStart, title, containerId){
+  const outflows=[0.333,0.15,0.5,0.7];
+  let html=`<div class="sec-title"><span style="color:var(--cyan)">🔬</span> ${title}</div>`;
+
+  const bugList=[];
+
+  outflows.forEach(of=>{
+    const sim=new AquaFlowSim({SP:50,pvStart,outflow:of,mode:'autotune_pi',noise:0.3,seed:42});
+    const hist=sim.runFull(600);
+
+    const pvData=hist.filter((_,i)=>i%3===0).map(r=>({x:r.t,y:r.pv}));
+    const spData=hist.filter((_,i)=>i%3===0).map(r=>({x:r.t,y:r.sp}));
+    const outData=hist.filter((_,i)=>i%3===0).map(r=>({x:r.t,y:r.pumpPct}));
+    const integData=hist.filter((_,i)=>i%3===0).map(r=>({x:r.t,y:r.integ}));
+    const xMax=Math.max(hist[hist.length-1]?.t||60,60);
+
+    const os=Math.max(0,sim.peakPV-50);
+    const st=sim.settleT;
+    const tunOK=sim.tunDone;
+    const lastPVs=hist.slice(-50).map(r=>r.pv);
+    const ssMean=lastPVs.reduce((a,b)=>a+b,0)/lastPVs.length;
+    const ssErr=Math.abs(ssMean-50);
+    const stableRange=lastPVs.filter(v=>Math.abs(v-50)<HW.DEADBAND).length;
+    const stablePct=(stableRange/lastPVs.length*100).toFixed(0);
+
+    // Bug detection
+    if(os>0.5) bugList.push({sev:'red',msg:`Outflow=${of}: OVERSHOOT ${os.toFixed(2)}% — antiwindup KC terlalu agresif`});
+    if(ssErr>2) bugList.push({sev:'yellow',msg:`Outflow=${of}: SS Error ${ssErr.toFixed(2)}% — anti-droop deadband lemah, integ tidak reach SS`});
+    if(!tunOK&&sim.tunCancel) bugList.push({sev:'red',msg:`Outflow=${of}: Autotune CANCELLED (${['AMP_SMALL','USER','TIMEOUT'][sim.tunReasonIdx]})!`});
+    if(st&&st>240) bugList.push({sev:'yellow',msg:`Outflow=${of}: Settle time lambat ${st.toFixed(0)}s — consider faster Ki`});
+
+    const phaseColors={'fill':'rgba(59,130,246,0.1)','drain':'rgba(245,158,11,0.1)','relay':'rgba(167,139,250,0.1)'};
+    let phases=[];
+    let prevP=hist[0]?.phase,prevT=hist[0]?.t;
+    hist.forEach((r,i)=>{if(r.phase!==prevP||(i===hist.length-1)){if(phaseColors[prevP])phases.push({t0:prevT,t1:r.t,color:phaseColors[prevP]});prevP=r.phase;prevT=r.t;}});
+
+    const cid1=`c_at_${pvStart}_${of.toString().replace('.','')}_pv`;
+    const cid2=`c_at_${pvStart}_${of.toString().replace('.','')}_out`;
+
+    const osColor=os<0.5?'var(--green)':os<2?'var(--yellow)':'var(--red)';
+    const stColor=!st?'var(--red)':st<180?'var(--green)':st<300?'var(--yellow)':'var(--red)';
+    const ssColor=ssErr<1?'var(--green)':ssErr<3?'var(--yellow)':'var(--red)';
+    const tunColor=tunOK?'var(--green)':'var(--red)';
+
+    html+=`
+    <div class="card" style="margin-bottom:16px;">
+      <div class="sec-title">Outflow = ${of} %/s (${(of*100/0.833).toFixed(0)}% of pump gross) — Net fill = ${(0.833-of).toFixed(3)}%/s</div>
+      <div class="grid4" style="margin-bottom:12px;">
+        <div class="stat-box"><div class="stat-label">OVERSHOOT</div><div class="stat-val" style="color:${osColor}">${os.toFixed(2)}</div><div class="stat-unit">%</div></div>
+        <div class="stat-box"><div class="stat-label">SETTLE TIME</div><div class="stat-val" style="color:${stColor}">${st?st.toFixed(0):'DNF'}</div><div class="stat-unit">s</div></div>
+        <div class="stat-box"><div class="stat-label">SS ERROR</div><div class="stat-val" style="color:${ssColor}">${ssErr.toFixed(2)}</div><div class="stat-unit">%</div></div>
+        <div class="stat-box"><div class="stat-label">AUTOTUNE</div><div class="stat-val" style="font-size:14px;color:${tunColor}">${tunOK?'✓ DONE':'✗ '+['AMP_SMALL','USER','TIMEOUT'][sim.tunReasonIdx]}</div></div>
+      </div>
+      <div class="grid2">
+        <div>
+          <div style="margin-bottom:8px;">
+            ${tunOK?`<div class="kv"><span class="kv-label">Kp</span><span style="color:var(--cyan)">${sim.tunedKp.toFixed(3)}</span></div>
+            <div class="kv"><span class="kv-label">Ki</span><span style="color:var(--cyan)">${sim.tunedKi.toFixed(4)}</span></div>
+            <div class="kv"><span class="kv-label">Ku</span><span style="color:var(--yellow)">${sim.tunedKu.toFixed(2)}</span></div>
+            <div class="kv"><span class="kv-label">Pu (corrected)</span><span style="color:var(--yellow)">${sim.tunedPu.toFixed(2)}s</span></div>
+            <div class="kv"><span class="kv-label">Amplitude a</span><span style="color:var(--purple)">${sim.tunedA.toFixed(3)}%</span></div>
+            <div class="kv"><span class="kv-label">Stable in DB</span><span style="color:var(--green)">${stablePct}%</span></div>`:'<div style="color:var(--red)">Autotune gagal — tidak ada hasil</div>'}
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>PUMP & INTEGRATOR</span></div>
+            <canvas id="${cid2}" height="100"></canvas>
+          </div>
+        </div>
+        <div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>PV vs SP</span>
+              <div class="legend">
+                <div class="leg"><div class="dot" style="background:var(--cyan)"></div>PV</div>
+                <div class="leg"><div class="dot" style="background:var(--red)"></div>SP</div>
+                <div class="leg"><div class="dot" style="background:rgba(167,139,250,0.5)"></div>RELAY</div>
+              </div>
+            </div>
+            <canvas id="${cid1}" height="160"></canvas>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--muted);">
+            Events: ${sim.events.slice(-3).map(e=>`<span style="color:${e.type==='done'?'var(--green)':e.type==='cancel'?'var(--red)':'var(--yellow)'}">t=${e.t.toFixed(1)}s ${e.msg.substring(0,40)}</span>`).join('<br>')}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    setTimeout(()=>{
+      const eventMarkers=sim.events.filter(e=>e.type==='cross').map(e=>({t:e.t,color:'rgba(167,139,250,0.6)'}));
+      drawChart(cid1,[
+        {data:pvData,color:'#00d4b4',width:2},
+        {data:spData,color:'#ef4444',dash:[5,3],width:1.5},
+      ],{yMin:0,yMax:100,xMax,phases,events:eventMarkers});
+      drawChart(cid2,[
+        {data:outData,color:'#10b981',width:1.5},
+        {data:integData,color:'#f59e0b',width:1},
+      ],{yMin:-20,yMax:110,xMax,phases});
+    },100);
+  });
+
+  // Bug summary
+  if(bugList.length){
+    html+=`<div class="sec-title" style="margin-top:16px;"><span style="color:var(--red)">🐛</span> BUG TERDETEKSI (${bugList.length})</div>`;
+    bugList.forEach(b=>{
+      html+=`<div class="bug-box bug-${b.sev}"><div class="bug-title" style="color:var(--${b.sev==='red'?'red':'yellow'})">${b.msg}</div></div>`;
+    });
+  }
+
+  document.getElementById(containerId).innerHTML=html;
+}
+
+function runMultiFlowSim(){
+  const outflows=[0,0.15,0.333,0.5,0.7,0.82];
+  const pvStarts=[0,20];
+  let html='';
+
+  html+=`<div class="sec-title"><span style="color:var(--cyan)">📊</span> MULTI OUTFLOW COMPARISON — Autotune PI → PID Response</div>`;
+  html+=`<div class="warn-box">⚠️ Simulasi ini menjalankan autotune lalu test PID response untuk 6 nilai outflow berbeda. Perhatikan kolom OVERSHOOT dan SS_ERR.</div>`;
+
+  html+=`<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px;">
+  <tr style="background:#0d1525;"><th>Outflow %/s</th><th>Net %/s</th><th>Kp tuned</th><th>Ki tuned</th><th>Pu (s)</th><th>Overshoot</th><th>Settle(s)</th><th>SS Err</th><th>Status</th></tr>`;
+
+  const canvases=[];
+  outflows.forEach(of=>{
+    const sim=new AquaFlowSim({SP:50,pvStart:20,outflow:of,mode:'autotune_pi',noise:0.3,seed:42});
+    sim.runFull(600);
+    const os=Math.max(0,sim.peakPV-50);
+    const st=sim.settleT;
+    const lastPVs=sim.history.slice(-50).map(r=>r.pv);
+    const ssMean=lastPVs.reduce((a,b)=>a+b,0)/Math.max(lastPVs.length,1);
+    const sse=Math.abs(ssMean-50);
+    const tunOK=sim.tunDone;
+
+    const osC=os<0.5?'#10b981':os<2?'#f59e0b':'#ef4444';
+    const ssC=sse<1?'#10b981':sse<3?'#f59e0b':'#ef4444';
+    const stC=!st?'#ef4444':st<180?'#10b981':st<300?'#f59e0b':'#ef4444';
+
+    html+=`<tr>
+      <td style="color:var(--cyan)">${of}</td>
+      <td style="color:var(--muted)">${(0.833-of).toFixed(3)}</td>
+      <td>${tunOK?sim.tunedKp.toFixed(2):'—'}</td>
+      <td>${tunOK?sim.tunedKi.toFixed(3):'—'}</td>
+      <td>${tunOK?sim.tunedPu.toFixed(2):'—'}</td>
+      <td style="color:${osC};font-weight:bold">${os.toFixed(2)}%</td>
+      <td style="color:${stC}">${st?st.toFixed(0)+'s':'DNF'}</td>
+      <td style="color:${ssC}">${sse.toFixed(2)}%</td>
+      <td style="color:${tunOK?'var(--green)':'var(--red)'}">${tunOK?'✓ OK':['AMP_SMALL','USER','TIMEOUT'][sim.tunReasonIdx]}</td>
+    </tr>`;
+
+    canvases.push({sim,of});
+  });
+  html+=`</table>`;
+
+  // Overlay chart
+  html+=`<div class="chart-wrap" style="margin-bottom:16px;">
+    <div class="chart-title"><span>PV RESPONSE — Semua Outflow (setelah autotune, SP=50%)</span>
+      <div class="legend">
+        ${outflows.map((of,i)=>`<div class="leg"><div class="dot" style="background:${['#00d4b4','#3b82f6','#f59e0b','#ef4444','#a78bfa','#10b981'][i]}"></div>${of}</div>`).join('')}
+      </div>
+    </div>
+    <canvas id="c_mf_overlay" height="200"></canvas>
+  </div>`;
+
+  document.getElementById('mf_content').innerHTML=html;
+
+  setTimeout(()=>{
+    const colors=['#00d4b4','#3b82f6','#f59e0b','#ef4444','#a78bfa','#10b981'];
+    const spData=[{x:0,y:50},{x:500,y:50}];
+    const datasets=[{data:spData,color:'#ef4444',dash:[5,3],width:1.5}];
+    canvases.forEach(({sim,of},i)=>{
+      const step=Math.max(1,Math.floor(sim.history.length/300));
+      datasets.push({data:sim.history.filter((_,j)=>j%step===0).map(r=>({x:r.t,y:r.pv})),color:colors[i],width:1.5});
+    });
+    drawChart('c_mf_overlay',datasets,{yMin:0,yMax:100,xMax:500});
+  },100);
+}
+
+function runFeatureTests(){
+  let html='';
+
+  html+=`<div class="sec-title"><span style="color:var(--cyan)">⚙</span> FEATURE TESTS — Alarm, Auto-Stop, SP Change, Steady State</div>`;
+
+  const bugs=[];
+
+  // === TEST 1: ALARM HI ===
+  {
+    const sim=new AquaFlowSim({SP:80,pvStart:0,outflow:0.1,mode:'manual_pid',Kp:4,Ki:0.2,noise:0.1,alarmHi:75,alarmHiEn:true,alarmLoEn:false});
+    sim.runFull(300);
+    const alarmFired=sim.history.some(r=>r.alarmHi);
+    const pumpStoppedOnAlarm=sim.history.filter(r=>r.alarmHi).every(r=>r.pumpPct===0);
+    if(!pumpStoppedOnAlarm)bugs.push({sev:'red',msg:'ALARM HI: Pompa tidak stop saat alarm!'});
+    const cid='c_feat_alarm';
+    html+=`<div class="card" style="margin-bottom:14px;">
+      <div class="sec-title"><span style="color:var(--orange)">⚠</span> TEST 1: ALARM HI — SP=80%, AlarmHi=75%, outflow=0.1%/s</div>
+      <div class="grid2">
+        <div>
+          <div class="kv"><span class="kv-label">Alarm fired</span><span style="color:${alarmFired?'var(--green)':'var(--red)'}">${alarmFired?'✓ YES':'✗ NO (BUG!)'}</span></div>
+          <div class="kv"><span class="kv-label">Pump stopped on alarm</span><span style="color:${pumpStoppedOnAlarm?'var(--green)':'var(--red)'}">${pumpStoppedOnAlarm?'✓ YES':'✗ NO (BUG!)'}</span></div>
+          <div class="kv"><span class="kv-label">Max PV</span><span style="color:var(--yellow)">${sim.peakPV.toFixed(2)}%</span></div>
+        </div>
+        <div class="chart-wrap"><canvas id="${cid}" height="120"></canvas></div>
+      </div>
+    </div>`;
+    setTimeout(()=>{
+      const step=Math.max(1,Math.floor(sim.history.length/300));
+      const pvD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pv}));
+      const alD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:75}));
+      drawChart(cid,[{data:pvD,color:'#00d4b4',width:2},{data:alD,color:'#f97316',dash:[4,3],width:1}],{yMin:0,yMax:100});
+    },100);
+  }
+
+  // === TEST 2: AUTO STOP (F.pidOn=0) ===
+  {
+    // Simulate: PID running, then pidOn=false mid-way
+    const sim=new AquaFlowSim({SP:50,pvStart:0,outflow:0.333,mode:'manual_pid',Kp:4,Ki:0.2,noise:0.15});
+    let stopped=false;
+    for(let i=0;i<3000;i++){
+      sim.step();
+      if(sim.t>80&&!stopped){sim.pidOn=false;stopped=true;}
+      if(sim.t>150)break;
+    }
+    const afterStop=sim.history.filter(r=>r.t>81&&r.t<150);
+    const pumpAfterStop=afterStop.every(r=>r.pumpPct===0);
+    if(!pumpAfterStop)bugs.push({sev:'red',msg:'AUTO STOP: Pompa tidak berhenti saat pidOn=false!'});
+    const cid='c_feat_stop';
+    html+=`<div class="card" style="margin-bottom:14px;">
+      <div class="sec-title"><span style="color:var(--red)">■</span> TEST 2: AUTO STOP — pidOn diset false di t=80s</div>
+      <div class="grid2">
+        <div>
+          <div class="kv"><span class="kv-label">Pump stops when pidOn=0</span><span style="color:${pumpAfterStop?'var(--green)':'var(--red)'}">${pumpAfterStop?'✓ CORRECT':'✗ BUG!'}</span></div>
+          <div class="kv"><span class="kv-label">PV drift after stop</span><span style="color:var(--yellow)">${afterStop.length?((afterStop[afterStop.length-1].pv-afterStop[0].pv).toFixed(2)+'%/'+afterStop.length*0.1+'s'):'—'}</span></div>
+        </div>
+        <div class="chart-wrap"><canvas id="${cid}" height="120"></canvas></div>
+      </div>
+    </div>`;
+    setTimeout(()=>{
+      const step=Math.max(1,Math.floor(sim.history.length/300));
+      const pvD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pv}));
+      const outD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pumpPct}));
+      drawChart(cid,[{data:pvD,color:'#00d4b4',width:2},{data:outD,color:'#10b981',width:1.5}],{yMin:0,yMax:100,events:[{t:80,color:'var(--red)'}]});
+    },100);
+  }
+
+  // === TEST 3: SP CHANGE — integ reset & FF spike ===
+  {
+    const sim=new AquaFlowSim({SP:50,pvStart:50,outflow:0.333,mode:'manual_pid',Kp:4,Ki:0.2,noise:0.1});
+    let spChanged=false;
+    for(let i=0;i<3000;i++){
+      sim.step();
+      if(sim.t>30&&!spChanged){sim.SP=70;sim.prevSP=sim.SP;spChanged=true;}
+      if(sim.t>200)break;
+    }
+    const os=Math.max(0,sim.peakPV-70);
+    const st=sim.history.filter(r=>r.t>30&&Math.abs(r.pv-70)<HW.DEADBAND)[0];
+    if(os>2)bugs.push({sev:'yellow',msg:`SP CHANGE: Overshoot ${os.toFixed(2)}% saat SP naik 50→70% — integ masih besar`});
+    const cid='c_feat_sp';
+    html+=`<div class="card" style="margin-bottom:14px;">
+      <div class="sec-title"><span style="color:var(--blue)">↑</span> TEST 3: SP CHANGE — 50%→70% di t=30s, sistem sudah stabil</div>
+      <div class="grid2">
+        <div>
+          <div class="kv"><span class="kv-label">Overshoot setelah SP change</span><span style="color:${os<1?'var(--green)':os<3?'var(--yellow)':'var(--red)'}">${os.toFixed(2)}%</span></div>
+          <div class="kv"><span class="kv-label">Settle time (dari t=30s)</span><span style="color:var(--cyan)">${st?(st.t-30).toFixed(0)+'s':'DNF'}</span></div>
+          <div class="kv"><span class="kv-label">INTEG_SP_RESET threshold</span><span style="color:var(--muted)">|ΔSP|=20 >= 15 → reset integ ✓</span></div>
+        </div>
+        <div class="chart-wrap"><canvas id="${cid}" height="120"></canvas></div>
+      </div>
+    </div>`;
+    setTimeout(()=>{
+      const step=Math.max(1,Math.floor(sim.history.length/300));
+      const pvD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pv}));
+      const spD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.sp}));
+      drawChart(cid,[{data:pvD,color:'#00d4b4',width:2},{data:spD,color:'#ef4444',dash:[5,3]}],{yMin:0,yMax:100,events:[{t:30,color:'var(--blue)'}]});
+    },100);
+  }
+
+  // === TEST 4: STEADY STATE ERROR — hunting detection ===
+  {
+    const sim=new AquaFlowSim({SP:50,pvStart:0,outflow:0.333,mode:'manual_pid',Kp:4,Ki:0.05,noise:0.15});
+    sim.runFull(500);
+    const lastPVs=sim.history.slice(-200).map(r=>r.pv);
+    const ssMean=lastPVs.reduce((a,b)=>a+b,0)/lastPVs.length;
+    const sse=Math.abs(ssMean-50);
+    const inDB=lastPVs.filter(v=>Math.abs(v-50)<HW.DEADBAND).length/lastPVs.length*100;
+    if(sse>2)bugs.push({sev:'red',msg:`SS ERROR: Mean PV=${ssMean.toFixed(2)}% (error=${sse.toFixed(2)}%) — Ki terlalu kecil, anti-droop tidak cukup`});
+    if(inDB<50)bugs.push({sev:'yellow',msg:`HUNTING: Hanya ${inDB.toFixed(0)}% waktu dalam deadband → pompa sering cycling`});
+    const cid='c_feat_ss';
+    html+=`<div class="card" style="margin-bottom:14px;">
+      <div class="sec-title"><span style="color:var(--yellow)">≈</span> TEST 4: STEADY STATE — Kp=4, Ki=0.05 (default), 500s run</div>
+      <div class="grid2">
+        <div>
+          <div class="kv"><span class="kv-label">Mean PV (last 200 pts)</span><span style="color:${sse<1?'var(--green)':sse<3?'var(--yellow)':'var(--red)'}">${ssMean.toFixed(2)}%</span></div>
+          <div class="kv"><span class="kv-label">SS Error</span><span style="color:${sse<1?'var(--green)':sse<3?'var(--yellow)':'var(--red)'}">${sse.toFixed(2)}%</span></div>
+          <div class="kv"><span class="kv-label">Time in deadband</span><span style="color:${inDB>80?'var(--green)':inDB>50?'var(--yellow)':'var(--red)'}">${inDB.toFixed(0)}%</span></div>
+          <div class="kv"><span class="kv-label">Hunt count</span><span style="color:var(--orange)">${sim.huntCount}</span></div>
+          <div class="kv"><span class="kv-label">Required pump SS%</span><span style="color:var(--muted)">${(0.333/0.833*100).toFixed(1)}%</span></div>
+        </div>
+        <div class="chart-wrap"><canvas id="${cid}" height="120"></canvas></div>
+      </div>
+    </div>`;
+    setTimeout(()=>{
+      const step=Math.max(1,Math.floor(sim.history.length/400));
+      const pvD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pv}));
+      const spD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:50}));
+      const outD=sim.history.filter((_,i)=>i%step===0).map(r=>({x:r.t,y:r.pumpPct}));
+      drawChart(cid,[{data:pvD,color:'#00d4b4',width:1.5},{data:spD,color:'#ef4444',dash:[5,3]},{data:outD,color:'#10b981',width:1}],{yMin:0,yMax:100});
+    },100);
+  }
+
+  // === BUG SUMMARY ===
+  if(bugs.length){
+    html+=`<div class="sec-title" style="margin-top:16px;"><span style="color:var(--red)">🐛</span> BUG TERDETEKSI DARI FEATURE TESTS</div>`;
+    bugs.forEach(b=>{
+      html+=`<div class="bug-box bug-${b.sev}"><div class="bug-title" style="color:var(--${b.sev==='red'?'red':'yellow'})">${b.msg}</div></div>`;
+    });
+  } else {
+    html+=`<div class="bug-box bug-green"><div class="bug-title" style="color:var(--green)">✓ Semua feature tests PASS</div></div>`;
+  }
+
+  document.getElementById('feat_content').innerHTML=html;
+}
+
+function renderBugs(){
+  const bugs=[
+    {id:'BUG-C1',sev:'KRITIS',color:'red',
+     title:'ANTIWINDUP KC=1.2 TERLALU AGRESIF → Hunting setiap ~60 detik',
+     desc:'Saat fill dari 0→50% (output saturasi ~100 detik), antiwindup KC=1.2 mendrain integrator ke nilai keseimbangan:<br><code>integ_ss = Ki×e_clamp/KC = 0.05×25/1.2 = <b>1.04%</b></code><br>Padahal SS butuh integ≈40%. Saat PV mendekati SP, P turun → output drop ke 13-21% → net rate NEGATIF → PV drain kembali → hunting 1 menit sekali.',
+     fix:'Ganti <code>ANTIWINDUP_KC 1.2 → 0.3</code> atau pakai one-sided antiwindup:<br><code>if(wErr&lt;0 && pidInteg>0) pidInteg += KC*wErr*dt;</code>',
+     sim:true},
+    {id:'BUG-C2',sev:'KRITIS',color:'red',
+     title:'DEADBAND ANTI-DROOP 0.05 — Butuh 106.000 detik untuk SS',
+     desc:'Anti-droop dalam deadband: <code>integ += Ki×e_raw×dt×0.05</code><br>Rate build: 0.05×1.5×0.1×0.05 = <b>0.000375 %/s</b><br>Untuk reach SS (integ=40%): butuh 106.603 detik! Dalam deadband pompa terus naik 0.034%/s → keluar deadband atas tiap 44 detik → hunting.',
+     fix:'Naikkan factor dari 0.05 → 0.3:<br><code>pidInteg += (pidKi * e_raw * dt * 0.3f);</code>'},
+    {id:'BUG-M3',sev:'MEDIUM',color:'yellow',
+     title:'DRAIN PHASE LANGSUNG EXIT — PV tidak drain sama sekali',
+     desc:'DRAIN exit: <code>if(pv &lt;= pidSP + RELAY_BAND + 5.0f)</code> = 57%<br>FILL selesai saat PV=48%. Karena 48% ≤ 57% → DRAIN <b>langsung exit di iterasi pertama</b> tanpa drain! Relay test mulai dari PV=48% bukan posisi stabil. Pu bisa bias.',
+     fix:'Ubah drain exit: <code>if(pv &lt;= pidSP - RELAY_BAND)</code> = 48% → pastikan PV drain turun dulu'},
+    {id:'BUG-M4',sev:'MEDIUM',color:'yellow',
+     title:'tunNeed=8 — Autotune tidak bisa selesai dalam 20 detik',
+     desc:'Dengan hardware ini: fill half=8s, drain half=12s, Pu=20s.<br>tunNeed=8 crossings = 4 full cycles × 20s = <b>80 detik</b> relay saja.<br>+ FILL dari 0%→48%: 96 detik. Total: ~3 menit.',
+     fix:'Untuk relay phase 20-40 detik: <code>tunNeed = 4</code> (2 full cycles)'},
+    {id:'BUG-M5',sev:'MEDIUM',color:'yellow',
+     title:'Pump Minimum 20% tidak diimplementasi',
+     desc:'User menyebut "ada fitur 20% biar pompa gak nyala mati". Di kode PWM_MIN_RUN=80 (=32%), tidak ada soft minimum sebelum stopPump(). Ketika output oscillate dekat 0%, pompa nyala-mati cepat.',
+     fix:'Tambahkan: <code>if(oRaw>0 && oRaw&lt;20.0f) oRaw=20.0f; // soft min</code>'},
+    {id:'BUG-L6',sev:'LOW',color:'green',
+     title:'Double pidPrevPV assignment — dead code',
+     desc:'pidPrevPV di-set di akhir pidStep() DAN di loop() setelah pidStep(). Nilai identik → tidak ada bug runtime tapi confusing.',
+     fix:'Hapus <code>pidPrevPV=pv;</code> yang ada di loop() setelah pidStep()'},
+    {id:'BUG-NEW1',sev:'BARU',color:'red',
+     title:'[BUG BARU] Saat outflow > pump gross (0.833%/s) → tangki selalu kosong',
+     desc:'Tidak ada guard kalau outflow > pump gross. Saat outflow=0.833%/s (5LPM keluar): net rate = 0 → PID tidak bisa fill → autotune FILL phase timeout → cancelled. Harus diberi warning atau guard.',
+     fix:'Tambahkan: <code>if(outflow >= PUMP_GROSS) { alarmLoAct=true; } // tangki tidak bisa diisi</code>'},
+    {id:'BUG-NEW2',sev:'BARU',color:'yellow',
+     title:'[BUG BARU] Kickstart reset integ setelah 700ms — Undershoot spike',
+     desc:'Kickstart selesai → <code>pidLastPWM=PWM_MIN; pidInteg=0; dFiltered=0;</code><br>Integ di-reset ke 0 meski sudah build sebelum kickstart. Saat error masih besar (mis: PV=5%, error=45%), integ=0 → output hanya P-term → respons lebih lambat 1-2 detik.',
+     fix:'Jangan reset integ setelah kickstart: hapus <code>pidInteg=0; dFiltered=0;</code> dari kickstart exit'},
+    {id:'BUG-NEW3',sev:'BARU',color:'yellow',
+     title:'[BUG BARU] pvPrev tidak di-init saat autotune → D-spike di pidStep pertama',
+     desc:'Saat autotune selesai, pvPrev belum tentu sama dengan PV saat itu. pidPrevPV=lastPV di-sync di tuneStep, tapi pvPrev (untuk pvRate) tidak di-reset.<br>Iterasi pertama pidStep: rr = (pv - pvPrev_lama) / dt → pvRate spike besar.',
+     fix:'Di akhir tuneStep setelah done: tambahkan <code>pvPrev=lastPV; pvRate=0;</code>'},
+  ];
+
+  let html=`<div class="sec-title"><span style="color:var(--red)">🐛</span> COMPLETE BUG REPORT — AquaFlow v9.6</div>`;
+  html+=`<div class="info-box">Total: ${bugs.filter(b=>b.sev==='KRITIS').length} KRITIS · ${bugs.filter(b=>b.sev==='MEDIUM').length} MEDIUM · ${bugs.filter(b=>b.sev==='LOW').length} LOW · ${bugs.filter(b=>b.sev==='BARU').length} BARU DITEMUKAN</div>`;
+
+  bugs.forEach(b=>{
+    const color={'KRITIS':'red','MEDIUM':'yellow','LOW':'green','BARU':'red'}[b.sev];
+    html+=`<div class="bug-box bug-${b.sev==='LOW'?'green':b.sev==='MEDIUM'?'yellow':'red'}">
+      <div class="bug-title" style="color:var(--${color})">[${b.id}] ${b.sev} — ${b.title}</div>
+      <div style="color:var(--muted);margin-bottom:8px;line-height:1.6;">${b.desc}</div>
+      <div style="color:var(--green);font-size:11px;"><b>FIX:</b> ${b.fix}</div>
+    </div>`;
+  });
+
+  document.getElementById('bug_content').innerHTML=html;
+}
+
+// ================================================================
+// TAB MANAGEMENT + INIT
+// ================================================================
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+
+  if(id==='autotune20'&&!document.getElementById('at20_content').innerHTML)
+    runAutotuneSim(20,'AUTOTUNE dari PV=20% → SP=50% (4 outflow scenarios)','at20_content');
+  if(id==='autotune0'&&!document.getElementById('at0_content').innerHTML)
+    runAutotuneSim(0,'AUTOTUNE dari PV=0% → SP=50% (4 outflow scenarios)','at0_content');
+  if(id==='multiflow'&&!document.getElementById('mf_content').innerHTML)
+    runMultiFlowSim();
+  if(id==='features'&&!document.getElementById('feat_content').innerHTML)
+    runFeatureTests();
+  if(id==='bugs'&&!document.getElementById('bug_content').innerHTML)
+    renderBugs();
+}
+
+window.addEventListener('resize',()=>{
+  if(liveSim)updateLiveDisplay();
+});
+
+// Auto-run live sim on load
+window.addEventListener('load',()=>{
+  setTimeout(()=>startLive(),300);
+});
+</script>
+</body>
+</html>
