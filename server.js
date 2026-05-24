@@ -1,3 +1,4 @@
+// AquaFlow WS Server v10.5.3 — FIX#S3: WebSocket keepalive ping/pong
 const express = require('express');
 const { WebSocketServer, WebSocket } = require('ws');
 const http = require('http');
@@ -42,13 +43,23 @@ function sendToESP(cmdStr) {
   });
 }
 
-// Offline check — tandai offline kalau 5 detik tidak ada data
+// Offline check — tandai offline kalau 10 detik tidak ada data
 setInterval(() => {
   if (state.online && state.lastSeen && Date.now() - state.lastSeen > 10000) {  // FIX#S2: timeout 5s→10s
     state.online = false;
     broadcast({ type: 'state', data: state });
   }
 }, 1000);
+
+// FIX#S3: WebSocket keepalive — Railway/cloud proxy drop idle WS setelah ~12s
+// Kirim ping frame ke semua client (ESP + browser) setiap 8 detik
+setInterval(() => {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.ping();
+    }
+  });
+}, 8000);
 
 wss.on('connection', (ws, req) => {
   const url = req.url || '';
