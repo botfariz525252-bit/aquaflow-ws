@@ -45,21 +45,21 @@ function sendToESP(cmdStr) {
 
 // Offline check — tandai offline kalau 10 detik tidak ada data
 setInterval(() => {
-  if (state.online && state.lastSeen && Date.now() - state.lastSeen > 10000) {  // FIX#S2: timeout 5s→10s
+  if (state.online && state.lastSeen && Date.now() - state.lastSeen > 6000) {  // FIX#S6: timeout 10s→6s — kurangi false offline detection
     state.online = false;
     broadcast({ type: 'state', data: state });
   }
 }, 1000);
 
-// FIX#S3: WebSocket keepalive — Railway/cloud proxy drop idle WS setelah ~12s
-// Kirim ping frame ke semua client (ESP + browser) setiap 8 detik
+// FIX#S3+S6: WebSocket keepalive — Railway/cloud proxy drop idle WS setelah ~12s
+// FIX#S6: ping interval 8s→5s, lebih agresif lawan Railway proxy timeout
 setInterval(() => {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.ping();
     }
   });
-}, 8000);
+}, 5000);
 
 wss.on('connection', (ws, req) => {
   const url = req.url || '';
@@ -165,4 +165,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`AquaFlow WS Server running on port ${PORT}`);
 });
+
 
