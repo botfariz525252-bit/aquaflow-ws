@@ -1001,7 +1001,8 @@ class AnomalyDetector {
 
 let ws=null,wsConnected=false,espOnline=false;
 let realTimeBuffer=[];
-const MAX_BUFFER=3000;
+const MAX_BUFFER=600; // FIX#RAM1: 3000→600 kurangi RAM HP
+let _lastChartDraw=0,_lastShadowStep=0,_lastPredict=0; // FIX#THROT1: throttle timer
 let observeStartTime=null,observeT=0,lastDataTs=null,dataCount=0;
 let plantId=null,predictor=null,anomalyDet=null,anomalyCount=0,anomalyLogEl=null;
 let shadowSim=null,shadowBootstrapped=false,shadowHistory=[];
@@ -1024,7 +1025,7 @@ function connect(){
     ws=new WebSocket(url);
     ws.onopen=()=>{wsConnected=true;setConnState('online');initObserver();startWsPing();};  // FIX#OB1: reinit observer tiap reconnect supaya buffer fresh
     ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);if(msg.type==='state')onStateData(msg.data);}catch(err){}};
-    ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;stopWsPing();setTimeout(()=>{if(!wsConnected)connect();},5000);};
+    ws.onclose=()=>{wsConnected=false;espOnline=false;setConnState('offline');ws=null;stopWsPing();setTimeout(()=>{if(!wsConnected)connect();},2000); // FIX#RECONN1: 5s→2s};
     ws.onerror=()=>ws.close();
   }catch(err){setConnState('offline');}
 }
@@ -1039,7 +1040,7 @@ function startWsPing(){
     if(ws&&ws.readyState===WebSocket.OPEN){
       try{ws.send(JSON.stringify({type:'ping'}));}catch(e){}
     }
-  },8000);
+  },4000); // FIX#PING1: 8s→4s lawan Railway 12s timeout
 }
 function stopWsPing(){if(_wsPingTimer){clearInterval(_wsPingTimer);_wsPingTimer=null;}}
 
@@ -1092,7 +1093,8 @@ function onStateData(data){
   if(observeStartTime===null){observeStartTime=wallTs;observeT=0;}
   else observeT=(wallTs-observeStartTime)/1000;
   rateCountBuf.push(wallTs);
-  rateCountBuf=rateCountBuf.filter(t=>wallTs-t<5000);
+  // FIX#RAM5: splice instead of filter — hindari GC pressure tiap data masuk
+  while(rateCountBuf.length>0&&wallTs-rateCountBuf[0]>5000){rateCountBuf.shift();}
   lastDataTs=wallTs;dataCount++;
   const pv=data.pv,sp=data.sp,outPct=data.out||0,mode=data.mode||'?';
   const kp=data.kp||0,ki=data.ki||0,kd=data.kd||0;
@@ -1108,27 +1110,33 @@ function onStateData(data){
   realTimeBuffer.push(rec);
   if(realTimeBuffer.length>MAX_BUFFER)realTimeBuffer.shift();
   plantId.update(observeT,pv,outPct,pvRate);
-  stepShadowSim(rec);
+  // FIX#THROT2: throttle shadow sim max 1x/2detik — shadow sim loop 10x step = CPU berat
+  if(Date.now()-_lastShadowStep>=2000){_lastShadowStep=Date.now();stepShadowSim(rec);}
   const params=plantId.getParams();
   const conf=params.confidence;
   let predResult=[];
-  if(conf>=25)predResult=predictFromReal(observeT,pv,sp,kp,ki,kd,params,predHorizonSec);
+  // FIX#THROT3: throttle prediksi max 1x/2detik — kalkulasi berat di HP
+  if(conf>=25&&Date.now()-_lastPredict>=2000){_lastPredict=Date.now();predResult=predictFromReal(observeT,pv,sp,kp,ki,kd,params,predHorizonSec);}
   const simProxy=makeSimProxy(rec,params);
   const anom=anomalyDet.check(observeT,simProxy);
   if(anom)handleAnomaly(anom);
   const predNow=predResult.find(p=>Math.abs(p.t-(observeT+30))<1);
   if(dataLog.length===0||(wallTs-dataLog[dataLog.length-1]._wallTs)>=2000){
     dataLog.push({_wallTs:wallTs,ts:new Date(wallTs).toLocaleTimeString('id-ID'),t:observeT.toFixed(1),pv:pv.toFixed(2),sp:sp.toFixed(2),out:outPct.toFixed(1),mode,kp:kp.toFixed(3),ki:ki.toFixed(5),kd:kd.toFixed(5),pvRate:pvRate.toFixed(4),ofEst:params.outflowEst?(params.outflowEst*100).toFixed(3):'—',pred30:predNow?predNow.pv.toFixed(2):'—',conf:conf.toFixed(0),anomaly:anom?anom.id:''});
-    if(dataLog.length>5000)dataLog.shift();
+    if(dataLog.length>300)dataLog.shift(); // FIX#RAM2: 5000→300
     appendLogRow(dataLog[dataLog.length-1],dataLog.length);
+    // FIX#RAM4: batasi DOM log max 100 rows — 5000 DOM nodes bikin HP OOM
+    const logBody=document.getElementById('logBody');
+    if(logBody&&logBody.children.length>100){logBody.removeChild(logBody.firstChild);}
   }
   checkPredAccuracy(wallTs,pv);
   if(predResult.length>1)storePredCheckpoints(wallTs,predResult);
   updateStatsUI(rec,pvRate);
   updateObserverUI(params,conf);
   updatePredUI(predResult,conf);
-  updateMainChart(predResult);
-  updateShadowChart();
+  // FIX#THROT1: throttle chart redraw max 1x/detik — kurangi CPU HP
+  const _now=Date.now();
+  if(_now-_lastChartDraw>=1000){_lastChartDraw=_now;updateMainChart(predResult);updateShadowChart();}
   updateLCDFromReal(rec,conf,params);
   updateMetrics();
 }
@@ -1163,7 +1171,7 @@ function stepShadowSim(rec){
   shadowSim.SP=rec.sp;shadowSim.Kp=rec.kp;shadowSim.Ki=rec.ki;shadowSim.Kd=rec.kd;
   for(let i=0;i<10;i++)shadowSim.step();
   shadowHistory.push({t:rec.t,realPv:rec.pv,simPv:shadowSim.pv});
-  if(shadowHistory.length>600)shadowHistory.shift();
+  if(shadowHistory.length>200)shadowHistory.shift(); // FIX#RAM3: 600→200
 }
 
 function makeSimProxy(rec,params){return{pv:rec.pv,sp:rec.sp,out:rec.out,mode:rec.mode,kp:rec.kp,ki:rec.ki,kd:rec.kd};}
@@ -1730,4 +1738,5 @@ document.getElementById('safetyToggle').addEventListener('change',function(){
 </script>
 </body>
 </html>
+
 
