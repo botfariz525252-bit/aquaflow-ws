@@ -2,16 +2,19 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>AquaFlow v10 — PID Dashboard</title>
+<title>AquaFlow — IoT Water Level Control System</title>
 <style>
 :root{
-  --bg:#07090f;--card:#0f1623;--card2:#111d2e;--border:#1a2a3a;
-  --cyan:#00d4b4;--yellow:#f59e0b;--red:#ef4444;--purple:#a78bfa;
-  --green:#10b981;--blue:#3b82f6;--orange:#f97316;--text:#e2e8f0;--muted:#6b7280;
+  --bg:#05080f;--card:#0d1520;--card2:#101c2e;--border:#1e3048;
+  --cyan:#00e5c3;--yellow:#fbbf24;--red:#f87171;--purple:#c4b5fd;
+  --green:#34d399;--blue:#60a5fa;--orange:#fb923c;
+  --text:#f0f6ff;--muted:#94a3b8;--muted2:#64748b;
+  --glow-cyan:rgba(0,229,195,0.18);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;}
+body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;min-height:100vh;}
 
 /* ===== HEADER ===== */
 .header{background:linear-gradient(135deg,#070c1a,#0c1528);border-bottom:2px solid var(--cyan);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
@@ -19,19 +22,19 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .logo-icon{font-size:26px;}
 .logo-text{font-size:20px;font-weight:bold;letter-spacing:3px;text-shadow:0 0 16px rgba(0,212,180,0.5);}
 .logo-text span{color:var(--cyan);}
-.logo-sub{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:1px;}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.5px;font-weight:500;}
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.nav-btn{padding:6px 14px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:monospace;font-size:9px;letter-spacing:1px;text-decoration:none;cursor:pointer;transition:all 0.2s;}
+.nav-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;font-size:11px;letter-spacing:0.5px;text-decoration:none;cursor:pointer;transition:all 0.2s;font-weight:600;}
 .nav-btn:hover{border-color:var(--cyan);color:var(--cyan);}
 .nav-btn.observer{border-color:var(--blue);color:var(--blue);}
 .nav-btn.observer:hover{background:var(--blue);color:#000;}
 .status-wrap{display:flex;align-items:center;gap:8px;}
 .status-dot{width:10px;height:10px;border-radius:50%;background:var(--red);transition:all 0.3s;}
 .status-dot.online{background:var(--green);box-shadow:0 0 10px var(--green);}
-.status-text{font-size:11px;letter-spacing:1px;transition:color 0.3s;}
+.status-text{font-size:12px;letter-spacing:0.8px;transition:color 0.3s;font-weight:700;}
 .status-text.online{color:var(--green);}
 .status-text.offline{color:var(--red);}
-.clock{font-size:11px;color:var(--muted);padding:4px 10px;background:#0a0f1e;border-radius:4px;border:1px solid var(--border);}
+.clock{font-size:12px;color:var(--muted);padding:5px 12px;background:#080f1c;border-radius:5px;border:1px solid var(--border);font-weight:600;font-family:'Courier New',monospace;}
 
 /* ===== LAYOUT ===== */
 .main{padding:16px 20px;}
@@ -45,9 +48,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--cyan));}
 .metric-card:hover{box-shadow:0 0 20px rgba(0,212,180,0.06);}
 .metric-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.metric-label{font-size:9px;letter-spacing:2px;color:var(--muted);}
-.metric-unit{font-size:10px;color:var(--muted);}
-.metric-value{font-size:38px;font-weight:bold;margin-bottom:10px;transition:color 0.3s;}
+.metric-label{font-size:11px;letter-spacing:1px;color:var(--muted);font-weight:600;}
+.metric-unit{font-size:12px;color:var(--muted);font-weight:500;}
+.metric-value{font-size:42px;font-weight:800;margin-bottom:10px;transition:color 0.3s;letter-spacing:-1px;}
 .prog-wrap{position:relative;}
 .prog-bar{height:4px;background:#1a2a3a;border-radius:2px;overflow:hidden;}
 .prog-fill{height:100%;border-radius:2px;transition:width 0.4s ease;}
@@ -60,7 +63,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 /* ===== CARDS ===== */
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
 .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.card-title{font-size:9px;letter-spacing:2px;color:var(--muted);}
+.card-title{font-size:11px;letter-spacing:1.2px;color:var(--muted);font-weight:700;text-transform:uppercase;}
 
 /* ===== TREND CHART ===== */
 .trend-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -114,8 +117,8 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 
 /* ===== RELAY TUNER PANEL ===== */
 .relay-panel{background:var(--card);border:1px solid #1e3a5f;border-radius:12px;padding:22px;margin-bottom:14px;}
-.relay-title{font-size:11px;letter-spacing:3px;color:var(--purple);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-.relay-subtitle{font-size:9px;color:var(--muted);margin-bottom:16px;padding:6px 10px;background:#080c14;border-radius:5px;border-left:3px solid var(--purple);}
+.relay-title{font-size:13px;letter-spacing:2px;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:8px;font-weight:700;}
+.relay-subtitle{font-size:11px;color:var(--muted);margin-bottom:16px;padding:8px 12px;background:#08101c;border-radius:6px;border-left:3px solid var(--purple);line-height:1.6;}
 .relay-grid{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:10px;align-items:end;margin-bottom:14px;}
 .relay-field label{font-size:9px;color:var(--muted);letter-spacing:1px;display:block;margin-bottom:4px;}
 .relay-field input{width:100%;background:#0d1626;border:1px solid #1e3a5f;border-radius:6px;padding:8px 10px;color:var(--purple);font-family:inherit;font-size:12px;outline:none;transition:border-color 0.2s;}
@@ -133,7 +136,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .relay-stat-val.warn{color:var(--yellow);}
 .relay-stat-val.err{color:var(--red);}
 .relay-kpki{background:#0d1626;border-radius:8px;padding:10px 14px;}
-.relay-kpki-title{font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.relay-kpki-title{font-size:11px;color:var(--muted);letter-spacing:0.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px;font-weight:600;}
 .relay-pi-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:8px;letter-spacing:1px;background:#0a1a35;color:var(--blue);border:1px solid var(--blue);}
 .relay-kpki-vals{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
 .relay-kpki-item{text-align:center;}
@@ -143,7 +146,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .btn-apply:hover{background:var(--cyan);color:#000;}
 .btn-apply:disabled{opacity:0.3;cursor:not-allowed;}
 .relay-chart-wrap{background:#0d1626;border-radius:8px;padding:10px;}
-.relay-chart-title{font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+.relay-chart-title{font-size:11px;color:var(--muted);letter-spacing:0.8px;margin-bottom:8px;font-weight:600;}
 .relay-log{background:#0d1626;border-radius:8px;padding:10px 12px;max-height:110px;overflow-y:auto;font-size:10px;color:var(--muted);line-height:1.8;}
 .relay-log .ev-fill{color:#60a5fa;}
 .relay-log .ev-drain{color:#fdba74;}
@@ -177,7 +180,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="logo-icon">💧</div>
     <div>
       <div class="logo-text">AQUA<span>FLOW</span></div>
-      <div class="logo-sub">PID Water Level Controller v10 — Real-Time Dashboard</div>
+      <div class="logo-sub">Embedded PID · Cloud SCADA · Real-Time WebSocket Telemetry</div>
     </div>
   </div>
   <div class="header-right">
