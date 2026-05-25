@@ -104,6 +104,12 @@
 //    - FIX#96~98: ESP set Kp/Ki/Kd → save langsung
 //    - ROOT CAUSE FINAL: tidak ada lagi aksi user yang hanya eeMarkDirty tanpa flush
 //
+//  CAL#D — Fitur baru: toggle pompa kalibrasi pakai tombol D
+//    - Saat di layar S_CAL/S_CALV/S_CALU/S_CALD: tekan D = on/off pompa (PWM=200)
+//    - LCD menampilkan "PUMP:ON/OFF" dan hint "D=toggle"/"D=Pump"
+//    - Pompa otomatis MATI saat keluar kalibrasi (A=Back / finish)
+//    - Tujuan: naikkan level tangki saat kalibrasi LRV/URV tanpa keluar menu
+//
 //  FIX#92 — goBack() dari S_CALV: save sLRV saat back
 //    - Bug: user tekan B di S_CALV (update sLRV), lalu tekan A (back ke S_CAL)
 //      sLRV berubah tapi TIDAK disimpan ke EEPROM
@@ -331,6 +337,7 @@
 #define PIN_TRIG 3
 #define PIN_ECHO 2
 #define PIN_PUMP 9
+#define CAL_PUMP_PWM 200   // CAL#D2: PWM pompa saat kalibrasi manual (0-255, ~78%)
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -401,6 +408,7 @@ float pidKff=0.5f,prevSP=50;
 float pidInteg=0,pidPrevPV=0,dFiltered=0;
 float pvRate=0,pvPrev=0;
 bool  pumpHystLock=false;  // FIX#P14: hysteresis — true saat PV>SP, pompa dikunci mati
+bool  calPumpOn=false;     // CAL#D1: toggle pompa saat kalibrasi — D=on/off, full speed isi tangki
                            // baru unlock kalau PV turun >= HYST_BAND di bawah SP
 float alarmHi=90,alarmLo=10;
 
@@ -1090,7 +1098,11 @@ void commitEdit(){
 void goBack(){
   if(scr==S_EDIT){scr=eback;return;}
   if(scr==S_MENU){scr=S_STAT;cur=0;mscr=0;return;}
-  if(scr==S_MODE||scr==S_CAL||scr==S_UNIT||scr==S_ALARM||scr==S_IP){scr=S_MENU;cur=0;mscr=0;return;}
+  if(scr==S_MODE||scr==S_CAL||scr==S_UNIT||scr==S_ALARM||scr==S_IP){
+    // CAL#D7: matiin pompa kalibasi saat balik ke menu
+    if(scr==S_CAL && calPumpOn){calPumpOn=false;analogWrite(PIN_PUMP,0);}
+    scr=S_MENU;cur=0;mscr=0;return;
+  }
   if(scr==S_PSUB){scr=S_MODE;cur=0;return;}
   if(scr==S_ARUN){if(F.tunActive)cancelTune(1);scr=S_PSUB;cur=(tmode==TM_PI)?0:1;return;}
   if(scr==S_MTUN){scr=S_PSUB;cur=2;return;}
@@ -1099,6 +1111,8 @@ void goBack(){
     if(scr==S_CALU && F.urvSetDone){eeMarkDirty();eeForceFlush();}  // FIX#89(was#74): force save URV saat back
     if(scr==S_CALV){eeMarkDirty();eeForceFlush();}  // FIX#92: save sLRV saat back dari S_CALV
     if(scr==S_CALD){eeMarkDirty();eeForceFlush();}  // FIX#93: pastikan tersimpan saat keluar S_CALD
+    // CAL#D6: matiin pompa dan reset flag saat keluar kalibrasi
+    if(calPumpOn){calPumpOn=false;analogWrite(PIN_PUMP,0);}
     scr=S_CAL;return;
   }
   scr=S_STAT;cur=0;mscr=0;
@@ -1228,12 +1242,14 @@ void dCal(){
   dtostrf(sRAW,5,1,ta);
   LP_P(0,PSTR("SENSOR CALIB        "));
   snprintf_P(lb,21,PSTR("RAW:%s cm       "),ta);LP(1,lb);
-  LP_P(2,cur==0?PSTR(">SET LRV (0%)   "):PSTR(" SET LRV (0%)   "));
-  LP_P(3,cur==1?PSTR(">SET URV (100%) "):PSTR(" SET URV (100%) "));
+  // CAL#D8: baris 2 pilihan LRV/URV, baris 3 pump status + hint D
+  LP_P(2,cur==0?PSTR(">LRV(0%) URV(100%)"):PSTR(" LRV(0%)>URV(100%)"));
+  snprintf_P(lb,21,PSTR("PUMP:%-3s  D=toggle "),calPumpOn?"ON ":"OFF");LP(3,lb);
 }
 void dCalSub(bool isL){
   dtostrf(sRAW,5,1,ta);dtostrf(isL?sLRV:sURV,5,1,tb);
-  LP_P(0,isL?PSTR("SET LRV (0%)     "):PSTR("SET URV (100%)  "));
+  // CAL#D9: baris 0 = judul, baris 1 = RAW, baris 2 = LRV/URV + pump status, baris 3 = instruksi
+  snprintf_P(lb,21,PSTR("%-12s PMP:%-3s"),isL?"SET LRV(0%)":"SET URV(100%)",calPumpOn?"ON":"OFF");LP(0,lb);
   snprintf_P(lb,21,PSTR("RAW:%s cm       "),ta);LP(1,lb);
   snprintf_P(lb,21,PSTR("%s:%s cm       "),isL?"LRV":"URV",tb);LP(2,lb);
   if(!isL){
@@ -1241,10 +1257,10 @@ void dCalSub(bool isL){
     if(sLRV <= sURV+1.0f && F.urvSetDone){
       LP_P(3,PSTR("!LRV<=URV B=ReSet "));
     } else {
-      LP_P(3,F.urvSetDone ? PSTR("URV SET! #=Done A=Bk") : PSTR("ISI PENUH B=URV    "));  // FIX#88
+      LP_P(3,F.urvSetDone ? PSTR("B=URV #=Done D=Pump") : PSTR("ISI PENUH B=URV    "));  // CAL#D10
     }
   } else {
-    LP_P(3,PSTR("B=LRV #=Next A=Bk  "));  // FIX#87: instruksi lebih jelas
+    LP_P(3,PSTR("B=LRV #=Nxt D=Pump "));  // CAL#D11: tambah hint D
   }
 }
 void dCalD(){
@@ -1252,7 +1268,7 @@ void dCalD(){
   LP_P(0,PSTR("CALIBRATION OK!     "));
   snprintf_P(lb,21,PSTR("LRV: %s cm      "),ta);LP(1,lb);
   snprintf_P(lb,21,PSTR("URV: %s cm      "),tb);LP(2,lb);
-  LP_P(3,PSTR("A=Back to Menu      "));
+  snprintf_P(lb,21,PSTR("A=Menu D=Pump:%-3s "),calPumpOn?"ON":"OFF");LP(3,lb);  // CAL#D12
 }
 void dUnit(){
   LP_P(0,PSTR("SELECT UNIT:        "));
@@ -1345,6 +1361,16 @@ void processPWMHold(uint32_t now){
 }
 
 void handleKey(char k){
+  // CAL#D3: toggle pompa saat kalibrasi pakai tombol D
+  if(k=='D' && (scr==S_CAL||scr==S_CALV||scr==S_CALU||scr==S_CALD)){
+    calPumpOn=!calPumpOn;
+    if(calPumpOn){
+      analogWrite(PIN_PUMP, CAL_PUMP_PWM);  // CAL#D4: nyalain pompa full speed isi tangki
+    } else {
+      analogWrite(PIN_PUMP, 0);             // CAL#D5: matiin pompa
+    }
+    return;
+  }
   if(k=='D'&&scr==S_EDIT){
     uint8_t l=strlen(nbuf);
     if(!strchr(nbuf,'.')&&l<8){nbuf[l]='.';nbuf[l+1]=0;}
