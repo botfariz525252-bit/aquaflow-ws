@@ -1,3 +1,12 @@
+//  *** VERSION v10.6.9 — FIX#P22: clamp minimum Ki autotune ke 0.5, cegah steady-state error akibat Ki terlalu kecil ***
+//
+//  FIX#P22 — Autotune hasilkan Ki terlalu kecil (misal 0.07) → integrator lemah → tidak bisa kompensasi outflow gravitasi konstan
+//    - Symptom: setelah autotune, PV stuck 1-3% di bawah SP meski sistem sudah lama jalan
+//    - Root cause: Ki hasil Tyreus-Luyben formula terlalu kecil untuk sistem tangki asimetris
+//    - Fix: setelah autotune selesai, clamp Ki = max(newKi, 0.5)
+//    - 0.5 dipilih berdasarkan manual tuning stable: Ki=2.5 stabil, Ki=0.07 tidak stabil
+//      Ki=0.5 adalah nilai konservatif yang cukup untuk lawan outflow tanpa overshoot agresif
+//
 //  *** VERSION v10.6.8 — HAPUS fitur tombol D nyalain pompa saat kalibrasi sensor ***
 //
 //  Dihapus untuk hemat flash (Arduino hampir penuh 99.7%):
@@ -989,7 +998,7 @@ void tuneStep(float pv){
         newKd = newKp * Td * 0.6f;           // Kd de-tune 0.6x juga
       }
       float kdMax = cf(Pu * 0.125f, 0, 50.0f);
-      pidKp=cf(newKp,0,500); pidKi=cf(newKi,0,500); pidKd=cf(newKd,0,kdMax);
+      pidKp=cf(newKp,0,500); pidKi=cf(newKi>0.5f?newKi:0.5f,0,500); pidKd=cf(newKd,0,kdMax); // FIX#P22: clamp Ki minimum 0.5 — cegah Ki terlalu kecil tidak bisa lawan outflow gravitasi konstan
       pidInteg=0; dFiltered=0;
       pidPrevPV=lastPV;
       prevSP=pidSP;
