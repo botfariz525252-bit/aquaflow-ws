@@ -1,3 +1,55 @@
+//  *** VERSION v10.6.8 — HAPUS fitur tombol D nyalain pompa saat kalibrasi sensor ***
+//
+//  Dihapus untuk hemat flash (Arduino hampir penuh 99.7%):
+//    - Variabel calPumpOn, define CAL_PUMP_PWM
+//    - Blok handleKey D di S_CAL/S_CALV/S_CALU/S_CALD
+//    - Semua matiin pompa di goBack() terkait kalibrasi
+//    - Hint "D=toggle"/"D=Pump"/"PUMP:ON/OFF" dari semua layar kalibrasi
+//
+//  *** VERSION v10.6.7 — FIX#P21: threshold guard overshoot 3%→5%, cover hunting ±2-3% ***
+//
+//  FIX#P21 — Hunting ±2-3% di sekitar SP setelah autotune
+//    - Symptom: PV overshoot 2% di atas SP → output=0 → pompa mati → PV turun bebas
+//      → undershoot 3% → pompa nyala kencang → overshoot lagi → loop
+//    - Root cause: threshold guard FIX#P19 = 3%, tapi overshoot hanya 2% → tidak kena guard
+//    - Fix: naikkan threshold 3%→5% supaya overshoot 2% kena soft-landing (output=1%, bukan 0)
+//
+//  *** VERSION v10.6.6 — FIX#P20: antiwindup hanya arah atas, cegah integrator naik saat saturasi bawah ***
+//
+//  FIX#P20 — Output yo-yo: PV diatas SP → output 0 → turun cepat → naik cepat → overshoot lagi
+//    - Root cause: saat output saturasi BAWAH (uUnsat<0, uSat=0):
+//        wErr = uSat - uUnsat = 0 - (negatif) = POSITIF
+//        pidInteg += ANTIWINDUP_KC × wErr × dt → integrator NAIK
+//      Harusnya antiwindup cegah windup, malah sebaliknya saat saturasi bawah
+//    - Fix: antiwindup hanya aktif kalau wErr < 0 (saturasi atas saja)
+//      Saat saturasi bawah, integrator turun natural dari e negatif × Ki saja
+//    - Berlaku di luar deadband dan di dalam deadband
+//
+//  *** VERSION v10.6.5 — FIX#P19: anti hard-stop saat overshoot kecil → cegah kickstart loop ***
+//
+//  FIX#P19 — PV overshoot SP → output mati tiba-tiba → PV turun → kickstart → loop
+//    - Skenario: SP=15, PV mencapai SP → overshoot ke 17% → e_raw=-2 → P term negatif
+//      → output PID = 0 → setPWM(0) → pompa MATI (pidLastPWM=0)
+//      → outflow bikin PV turun ke 13% → error=2% → kickstart tidak aktif (err<20%)
+//      → tapi pidLastPWM=0 → pompa start dari dingin → output kecil → PWM floor → overshoot lagi
+//    - Fix: saat PV overshoot tapi hanya <3% di atas SP, clamp output ke 1% (bukan 0)
+//      Pompa jalan sangat pelan → PV turun alami → integrator decay menurunkan output sendiri
+//      Tidak ada hard stop → tidak ada kickstart → tidak ada loop
+//    - Kalau overshoot > 3% dari SP: pompa boleh mati total (overshoot parah, perlu hard cut)
+//
+//  *** VERSION v10.6.4 — FIX#P18: anti-kickstart-loop saat SP rendah (mis. SP=25) ***
+//
+//  FIX#P18 — Pompa loop kickstart → output mati → kickstart → loop saat SP=25
+//    - Symptom: SP=25, PV=12 → naik ke 17% → output mati → PV balik ke 12 → kickstart lagi → loop
+//    - Root cause A: KICKSTART_ERR_MIN=10% terlalu kecil → error 13% sudah trigger kickstart
+//      Fix A: naikkan KICKSTART_ERR_MIN 10→20% → kickstart hanya untuk cold start dari jauh
+//    - Root cause B: saat kickstart selesai, pidInteg di-reset ke 0
+//      Akibat: integrator meleleh → output drop → pompa mati → kickstart ulang
+//      Fix B: HAPUS reset pidInteg saat kickstart selesai (dFiltered tetap di-reset, aman)
+//    - Root cause C: floor o>=1 hanya aktif saat pidSettledOnce=1
+//      Akibat: sebelum settled, output bisa turun ke 0 → trigger kickstart saat pompa mid-run
+//      Fix C: floor o>=1 juga aktif saat pidLastPWM > 0 (pompa sudah running)
+//
 //  *** VERSION v10.6.3 — FIX#P15: setPWM() map 0-100% ke 0-255 dulu, baru floor ke MIN_RUN ***
 //
 //  FIX#P15 — 1% output PID langsung lompat ke PWM_MIN_RUN=30 (bukan PWM 2-3)
@@ -337,7 +389,6 @@
 #define PIN_TRIG 3
 #define PIN_ECHO 2
 #define PIN_PUMP 9
-#define CAL_PUMP_PWM 200   // CAL#D2: PWM pompa saat kalibrasi manual (0-255, ~78%)
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -408,7 +459,6 @@ float pidKff=0.5f,prevSP=50;
 float pidInteg=0,pidPrevPV=0,dFiltered=0;
 float pvRate=0,pvPrev=0;
 bool  pumpHystLock=false;  // FIX#P14: hysteresis — true saat PV>SP, pompa dikunci mati
-bool  calPumpOn=false;     // CAL#D1: toggle pompa saat kalibrasi — D=on/off, full speed isi tangki
                            // baru unlock kalau PV turun >= HYST_BAND di bawah SP
 float alarmHi=90,alarmLo=10;
 
@@ -439,7 +489,7 @@ uint32_t tunDrainStartMs=0;
 #define KICKSTART_MS        1000UL  // FIX#P16: 700→1000ms — kickstart lebih lama biar pompa punya momentum
 #define PWM_MIN_RUN         30    // FIX#P14: threshold fisik pompa = PWM 30
 #define PWM_MIN_STEADY      20    // FIX#P14: floor lebih rendah sesuai PWM_MIN_RUN baru
-#define HYST_BAND           0.8f  // FIX#P14: hysteresis band — pompa nyala lagi saat PV < SP-0.8%
+#define HYST_BAND           0.0f  // FIX#P16: HYST_BAND dinonaktifkan — zona mati sakelar dihapus
 #define PWM_MAX_RUN         250
 #define ESP_INTERVAL        500UL
 #define MED_N               3
@@ -448,7 +498,7 @@ uint32_t tunDrainStartMs=0;
 #define EE_MIN              5000UL   // FIX#67: was 60000UL, 5s cukup aman (UNO EEPROM ~100k writes)
 #define SENSOR_ERR_MAX      10
 #define ANTIWINDUP_KC       1.2f
-#define KICKSTART_ERR_MIN   10.0f   // FIX#P16: 20→10% — kickstart aktif di error lebih kecil, pompa tidak lambat start
+#define KICKSTART_ERR_MIN   20.0f   // FIX#P18: 10→20% — cegah kickstart loop saat SP rendah (mis. SP=25, PV=12 → error 13% terlalu dekat threshold)
 #define INTEG_SP_RESET_THR  15.0f
 #define D_FILTER_A          0.05f
 #define EE_MAGIC            0xB4     // FIX#91 v10.5: bump — paksa re-init, fix alarm EEPROM save definitif
@@ -635,31 +685,45 @@ void resetSensorFilter(){
 }
 
 void setPWM(int pw){
-  if(pw<1){
-    analogWrite(PIN_PUMP,0); pidLastPWM=0; F.kickActive=0; return;
+  // FIX#P17: Pompa HANYA mati total jika PID secara matematis meminta 0%
+  if(pw <= 0){
+    analogWrite(PIN_PUMP, 0);
+    pidLastPWM = 0;
+    F.kickActive = 0;
+    return;
   }
-  if(pidLastPWM==0&&!F.kickActive){
+  // Kickstart: hanya saat pompa benar-benar mati (lastPWM==0) dan error cukup besar
+  if(pidLastPWM == 0 && !F.kickActive){
     float errNow = fabs(pidSP - lastPV);
     if(errNow >= KICKSTART_ERR_MIN){
-      F.kickActive=1; kickStartMs=millis();
-      analogWrite(PIN_PUMP,KICKSTART_PWM); pidLastPWM=KICKSTART_PWM; return;
+      F.kickActive = 1;
+      kickStartMs = millis();
+      analogWrite(PIN_PUMP, KICKSTART_PWM);
+      pidLastPWM = KICKSTART_PWM;
+      return;
     }
-    F.kickActive=0;
+    F.kickActive = 0;
   }
   if(F.kickActive){
-    if(millis()-kickStartMs<KICKSTART_MS){
-      analogWrite(PIN_PUMP,KICKSTART_PWM); pidLastPWM=KICKSTART_PWM; return;
+    if(millis() - kickStartMs < KICKSTART_MS){
+      analogWrite(PIN_PUMP, KICKSTART_PWM);
+      pidLastPWM = KICKSTART_PWM;
+      return;
     }
-    F.kickActive=0; pidLastPWM=PWM_MIN_RUN;
-    pidInteg=0; dFiltered=0;
+    F.kickActive = 0;
+    pidLastPWM = PWM_MIN_RUN;
+    // FIX#P18: JANGAN reset pidInteg saat kickstart selesai
+    // Kalau integrator di-reset → output drop → pompa mati → kickstart loop
+    // dFiltered boleh di-reset (D term stale setelah kick)
+    dFiltered = 0;
   }
-  // FIX#P15: map 0-100% ke 0-255 proporsional dulu
-  // Baru kalau hasilnya > 0 tapi < PWM_MIN_RUN, clamp ke MIN_RUN (hindari stall)
-  int pwM=(int)map((long)pw,0L,100L,0L,255L);
+  // FIX#P17: Pemetaan presisi 0-100% ke 0-255
+  int pwM = (int)map((long)pw, 0L, 100L, 0L, 255L);
+  // Ganjal ke PWM_MIN_RUN agar pompa tidak stall di PWM terlalu rendah
   if(pwM > 0 && pwM < PWM_MIN_RUN) pwM = PWM_MIN_RUN;
-  pwM=constrain(pwM,0,PWM_MAX_RUN);
-  pidLastPWM=(uint8_t)pwM;
-  analogWrite(PIN_PUMP,pidLastPWM);
+  pwM = constrain(pwM, 0, PWM_MAX_RUN);
+  pidLastPWM = (uint8_t)pwM;
+  analogWrite(PIN_PUMP, pidLastPWM);
 }
 
 void setPWMManual(int pw){
@@ -691,22 +755,26 @@ void pidStep(float pv,float dt){
   float uSat=cf(uUnsat,0,100);
   float wErr=uSat-uUnsat;
   if(!inDeadband){
-    pidInteg+=(pidKi*e*dt)+(ANTIWINDUP_KC*wErr*dt);
-    pidInteg=cf(pidInteg,-100,100);
+    pidInteg += (pidKi * e * dt);
+    // FIX#P20: antiwindup hanya aktif saat saturasi ATAS (wErr < 0)
+    // Saat saturasi BAWAH (uUnsat<0, uSat=0): wErr = 0-uUnsat = POSITIF
+    // → antiwindup malah TAMBAH integrator → output naik → overshoot → output 0 → loop
+    if(wErr < 0.0f){
+      pidInteg += (ANTIWINDUP_KC * wErr * dt);
+    }
+    pidInteg = cf(pidInteg,-100,100);
   } else {
-    // FIX#P8+P10: deadband integrator — partial accumulation + antiwindup + decay arah atas
-    float e_db = cf(e_raw, -1.0f, 1.0f);  // clamp ke ±deadband
+    // FIX#P8+P10: deadband integrator
+    float e_db = cf(e_raw, -1.0f, 1.0f);
     if (e_raw > 0.0f) {
-      // PV di bawah SP: partial integrator 10% supaya bisa kompensasi outflow
       pidInteg += (pidKi * 0.1f * e_db * dt);
     } else {
-      // FIX#P10: PV sudah di atas SP (e_raw <= 0) → DECAY integrator pelan
-      // Ini rem integrator supaya tidak terus akumulasi ke atas
       pidInteg *= 0.999f;
     }
-    // FIX#P10: antiwindup tetap aktif di dalam deadband
-    // Kalau output saturasi, wErr akan negatif → tarik integrator turun
-    pidInteg += (ANTIWINDUP_KC * wErr * dt);
+    // FIX#P20: antiwindup di deadband juga hanya arah atas
+    if(wErr < 0.0f){
+      pidInteg += (ANTIWINDUP_KC * wErr * dt);
+    }
     pidInteg = cf(pidInteg,-100,100);
   }
   float oRaw=cf(P+pidInteg+dFiltered+ff,0,100);
@@ -716,24 +784,26 @@ void pidStep(float pv,float dt){
   int o=(int)oRaw;
   if(pidLastPWM>60&&pvRate<-0.03f&&fabs(pidSP-pv)>5.0f)
     o=ci(o+(int)roundf(-pvRate*20.0f),0,100);
-  // FIX#P9 + FIX#P13 + FIX#P14: hysteresis anti-lep-lepan + floor hanya saat PV<SP
-  // --- Hysteresis logic ---
-  if(e_raw <= 0.0f){
-    // PV >= SP: kunci pompa mati, set flag
-    pumpHystLock = true;
-    o = 0;
-  } else if(pumpHystLock){
-    // PV < SP tapi lock masih aktif — tunggu PV turun HYST_BAND dulu
-    if(e_raw >= HYST_BAND){
-      pumpHystLock = false;  // PV sudah turun cukup, bolehin pompa nyala lagi
-    } else {
-      o = 0;  // belum cukup turun, pompa masih dikunci mati
+  // Floor minimal 1% saat PV masih di bawah SP
+  if(e_raw > 0.0f && o < 1 && (F.pidSettledOnce || pidLastPWM > 0)){
+    o = 1;
+  }
+
+  // FIX#P19: Anti hard-stop saat overshoot kecil
+  // Skenario bug: PV=15(SP) → overshoot 17% → e_raw=-2 → P negatif → o=0 → pompa MATI tiba-tiba
+  // → PV turun ke 13% → kickstart → overshoot lagi → loop tak berujung
+  // Fix: saat PV overshoot tapi masih <3% di atas SP, clamp output ke 1% (bukan 0)
+  // Pompa tetap jalan sangat pelan → PV turun alami → integrator decay handle sisanya
+  // Kalau overshoot > 3% dari SP → boleh mati total (overshoot parah, perlu hard stop)
+  // FIX#P21: threshold turun 3%→5% — overshoot 2% harus kena guard ini
+  // Saat PV 1-5% di atas SP, output clamp ke 1% bukan 0
+  // Pompa tidak mati total → PV tidak turun bebas → tidak undershoot → tidak hunting
+  if(e_raw < 0.0f && F.pidSettledOnce && o <= 0){
+    if(fabs(e_raw) < 5.0f){
+      o = 1;
     }
   }
-  // --- Floor logic (hanya aktif kalau pompa boleh nyala) ---
-  if(!pumpHystLock && o < 1 && e_raw > 0.0f && F.pidSettledOnce){
-    o = 1;  // minimal 1% supaya pompa tidak mati total saat masih perlu kompensasi outflow
-  }
+
   setPWM(o);
   pidPrevPV=pv;
 }
@@ -1099,8 +1169,6 @@ void goBack(){
   if(scr==S_EDIT){scr=eback;return;}
   if(scr==S_MENU){scr=S_STAT;cur=0;mscr=0;return;}
   if(scr==S_MODE||scr==S_CAL||scr==S_UNIT||scr==S_ALARM||scr==S_IP){
-    // CAL#D7: matiin pompa kalibasi saat balik ke menu
-    if(scr==S_CAL && calPumpOn){calPumpOn=false;analogWrite(PIN_PUMP,0);}
     scr=S_MENU;cur=0;mscr=0;return;
   }
   if(scr==S_PSUB){scr=S_MODE;cur=0;return;}
@@ -1111,8 +1179,6 @@ void goBack(){
     if(scr==S_CALU && F.urvSetDone){eeMarkDirty();eeForceFlush();}  // FIX#89(was#74): force save URV saat back
     if(scr==S_CALV){eeMarkDirty();eeForceFlush();}  // FIX#92: save sLRV saat back dari S_CALV
     if(scr==S_CALD){eeMarkDirty();eeForceFlush();}  // FIX#93: pastikan tersimpan saat keluar S_CALD
-    // CAL#D6: matiin pompa dan reset flag saat keluar kalibrasi
-    if(calPumpOn){calPumpOn=false;analogWrite(PIN_PUMP,0);}
     scr=S_CAL;return;
   }
   scr=S_STAT;cur=0;mscr=0;
@@ -1244,12 +1310,12 @@ void dCal(){
   snprintf_P(lb,21,PSTR("RAW:%s cm       "),ta);LP(1,lb);
   // CAL#D8: baris 2 pilihan LRV/URV, baris 3 pump status + hint D
   LP_P(2,cur==0?PSTR(">LRV(0%) URV(100%)"):PSTR(" LRV(0%)>URV(100%)"));
-  snprintf_P(lb,21,PSTR("PUMP:%-3s  D=toggle "),calPumpOn?"ON ":"OFF");LP(3,lb);
+  LP_P(3,PSTR("B=Select  A=Back    "));
 }
 void dCalSub(bool isL){
   dtostrf(sRAW,5,1,ta);dtostrf(isL?sLRV:sURV,5,1,tb);
   // CAL#D9: baris 0 = judul, baris 1 = RAW, baris 2 = LRV/URV + pump status, baris 3 = instruksi
-  snprintf_P(lb,21,PSTR("%-12s PMP:%-3s"),isL?"SET LRV(0%)":"SET URV(100%)",calPumpOn?"ON":"OFF");LP(0,lb);
+  LP_P(0,isL?PSTR("SET LRV (0%)        "):PSTR("SET URV (100%)      "));
   snprintf_P(lb,21,PSTR("RAW:%s cm       "),ta);LP(1,lb);
   snprintf_P(lb,21,PSTR("%s:%s cm       "),isL?"LRV":"URV",tb);LP(2,lb);
   if(!isL){
@@ -1257,10 +1323,10 @@ void dCalSub(bool isL){
     if(sLRV <= sURV+1.0f && F.urvSetDone){
       LP_P(3,PSTR("!LRV<=URV B=ReSet "));
     } else {
-      LP_P(3,F.urvSetDone ? PSTR("B=URV #=Done D=Pump") : PSTR("ISI PENUH B=URV    "));  // CAL#D10
+      LP_P(3,F.urvSetDone ? PSTR("B=URV  #=Done       ") : PSTR("ISI PENUH B=URV    "));
     }
   } else {
-    LP_P(3,PSTR("B=LRV #=Nxt D=Pump "));  // CAL#D11: tambah hint D
+    LP_P(3,PSTR("B=LRV  #=Next       "));
   }
 }
 void dCalD(){
@@ -1268,7 +1334,7 @@ void dCalD(){
   LP_P(0,PSTR("CALIBRATION OK!     "));
   snprintf_P(lb,21,PSTR("LRV: %s cm      "),ta);LP(1,lb);
   snprintf_P(lb,21,PSTR("URV: %s cm      "),tb);LP(2,lb);
-  snprintf_P(lb,21,PSTR("A=Menu D=Pump:%-3s "),calPumpOn?"ON":"OFF");LP(3,lb);  // CAL#D12
+  LP_P(3,PSTR("A=Menu              "));
 }
 void dUnit(){
   LP_P(0,PSTR("SELECT UNIT:        "));
@@ -1361,16 +1427,6 @@ void processPWMHold(uint32_t now){
 }
 
 void handleKey(char k){
-  // CAL#D3: toggle pompa saat kalibrasi pakai tombol D
-  if(k=='D' && (scr==S_CAL||scr==S_CALV||scr==S_CALU||scr==S_CALD)){
-    calPumpOn=!calPumpOn;
-    if(calPumpOn){
-      analogWrite(PIN_PUMP, CAL_PUMP_PWM);  // CAL#D4: nyalain pompa full speed isi tangki
-    } else {
-      analogWrite(PIN_PUMP, 0);             // CAL#D5: matiin pompa
-    }
-    return;
-  }
   if(k=='D'&&scr==S_EDIT){
     uint8_t l=strlen(nbuf);
     if(!strchr(nbuf,'.')&&l<8){nbuf[l]='.';nbuf[l+1]=0;}
